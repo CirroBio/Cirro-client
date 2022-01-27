@@ -1,0 +1,7 @@
+click
+PyInquirer
+requests_aws4auth
+boto3
+gql
+requests-toolbelt
+requests
