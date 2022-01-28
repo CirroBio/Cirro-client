@@ -1,13 +1,10 @@
-import json
 from functools import lru_cache
 from pathlib import Path
 from typing import List
 
-from pubweb.dataset import Dataset
-
 
 @lru_cache
-def get_files_in_directory(directory):
+def get_files_in_directory(directory) -> List[str]:
     path = Path(directory)
 
     paths = []
@@ -31,18 +28,11 @@ def get_directory_stats(directory):
     }
 
 
-def save_manifest(dataset: Dataset, files: List[str], s3_client):
-    manifest = {
-        'name': dataset['name'],
-        'desc': dataset['desc'],
-        'process': dataset['process'],
-        'project': dataset['project'],
-        'files': [{'name': f} for f in files]
-    }
-    path = f'datasets/{dataset["id"]}/artifacts/manifest.json'
-    s3_client.put_object(
-        Bucket=f'z-{manifest["project"]}',
-        Key=path,
-        Body=json.dumps(manifest),
-        ContentType='application/json'
-    )
+def upload_directory(directory, s3_client, bucket, prefix):
+    files = get_files_in_directory(directory)
+    for file in files:
+        path = f'{prefix}/{file}'
+        print(f"Uploading {file}")
+        s3_client.upload_file(file,
+                              Bucket=bucket,
+                              Key=path)

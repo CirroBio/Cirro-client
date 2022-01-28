@@ -1,6 +1,7 @@
+from typing import TypedDict
+
 import boto3
 from boto3 import Session
-from botocore.client import BaseClient
 from requests.auth import AuthBase
 from requests_aws4auth import AWS4Auth
 
@@ -8,11 +9,15 @@ CLIENT_ID = '7ic2n55r9h4fj0qej5q9ikr2o1'
 SERVICE_NAME = 'appsync'
 
 
+class Creds(TypedDict):
+    AccessKeyId: str
+    Expiration: str
+    SecretAccessKey: str
+    SessionToken: str
+
+
 class AuthInfo:
     def get_request_auth(self) -> AuthBase:
-        pass
-
-    def get_client(self, client_name) -> BaseClient:
         pass
 
 
@@ -22,16 +27,9 @@ class CognitoAuthInfo(AuthInfo):
         self.password = password
 
     def get_request_auth(self) -> AuthBase:
-        return self.RequestAuth(self._get_access_token())
+        return self.RequestAuth(self._get_token()['AccessToken'])
 
-    def get_client(self, client_name):
-        creds = self._get_iam_creds()
-        return boto3.client(client_name,
-                            aws_access_key_id=creds['accessKey'],
-                            aws_secret_access_key=creds['secretKey'],
-                            aws_session_token=creds['sessionToken'])
-
-    def _get_access_token(self):
+    def _get_token(self):
         cognito = boto3.client('cognito-idp')
         resp = cognito.initiate_auth(
             ClientId=CLIENT_ID,
@@ -41,15 +39,8 @@ class CognitoAuthInfo(AuthInfo):
                 'PASSWORD': self.password
             }
         )
-        token = resp['AuthenticationResult']['AccessToken']
+        token = resp['AuthenticationResult']
         return token
-
-    def _get_iam_creds(self):
-        return {
-            'accessKey': '',
-            'secretKey': '',
-            'sessionToken': ''
-        }
 
     class RequestAuth(AuthBase):
         def __init__(self, token):
@@ -60,6 +51,7 @@ class CognitoAuthInfo(AuthInfo):
             return request
 
 
+# Not used
 class IamAuthInfo(AuthInfo):
     def __init__(self,
                  access_key=None,
@@ -79,12 +71,6 @@ class IamAuthInfo(AuthInfo):
             self.secret_key = secret_key
             self.session_token = session_token
             self.region = region
-
-    def get_client(self, client_name) -> BaseClient:
-        return boto3.client(client_name,
-                            aws_access_key_id=self.access_key,
-                            aws_secret_access_key=self.secret_key,
-                            aws_session_token=self.session_token)
 
     def get_request_auth(self) -> AuthBase:
         auth = AWS4Auth(self.access_key,

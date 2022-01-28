@@ -30,7 +30,7 @@ class DataClient:
         self.client = _build_client(auth_info, endpoint)
 
     @lru_cache
-    def get_projects_list(self):
+    def get_projects_list(self) -> List:
         query = gql('''
           query ListProjects(
             $filter: ModelProjectFilterInput
@@ -52,7 +52,7 @@ class DataClient:
         return _filter_deleted(resp['items'])
 
     @lru_cache
-    def get_ingest_processes(self):
+    def get_ingest_processes(self) -> List:
         query = gql('''
           query ListProcesses(
             $filter: ModelProcessFilterInput
@@ -69,5 +69,9 @@ class DataClient:
             }
           }
         ''')
-        resp = self.client.execute(query, variable_values={'filter': {'executor': {'eq': 'INGEST'}}})['listProcesses']
+        item_filter = {
+            'executor': {'eq': 'INGEST'},
+            '_deleted': {'eq': False}
+        }
+        resp = self.client.execute(query, variable_values={'filter': item_filter})['listProcesses']
         return _filter_deleted(resp['items'])
