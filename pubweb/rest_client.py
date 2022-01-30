@@ -1,12 +1,12 @@
 import requests
 from requests.auth import AuthBase
 
-PUB_WEB_ENDPOINT = 'https://2yi247yljl.execute-api.us-west-2.amazonaws.com/prd'
+from pubweb import config
 
 
 class RestClient:
-    def __init__(self, auth_info: AuthBase, endpoint=PUB_WEB_ENDPOINT):
-        self.endpoint = endpoint
+    def __init__(self, auth_info: AuthBase):
+        self.endpoint = config.rest_endpoint
         self.auth_info = auth_info
 
     def post(self, path, data=None):

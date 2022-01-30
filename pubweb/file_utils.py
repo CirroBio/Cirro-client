@@ -6,14 +6,15 @@ from typing import List
 @lru_cache
 def get_files_in_directory(directory) -> List[str]:
     path = Path(directory)
+    path_posix = str(path.as_posix())
 
     paths = []
 
     for file_path in path.rglob("*"):
         if file_path.is_dir():
             continue
-        str_file_path = str(file_path)
-        str_file_path = str_file_path.replace(f'{str(path)}/', "")
+        str_file_path = str(file_path.as_posix())
+        str_file_path = str_file_path.replace(f'{path_posix}/', "")
         paths.append(str_file_path)
 
     return paths
@@ -31,8 +32,7 @@ def get_directory_stats(directory):
 def upload_directory(directory, s3_client, bucket, prefix):
     files = get_files_in_directory(directory)
     for file in files:
-        path = f'{prefix}/{file}'
+        key = f'{prefix}/{file}'
+        local_path = str(Path(directory, file).as_posix())
         print(f"Uploading {file}")
-        s3_client.upload_file(file,
-                              Bucket=bucket,
-                              Key=path)
+        s3_client.upload_file(local_path, Bucket=bucket, Key=key)

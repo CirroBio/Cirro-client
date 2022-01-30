@@ -5,15 +5,18 @@ from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 from requests.auth import AuthBase
 
-PUB_WEB_ENDPOINT = 'https://22boctowkfbuzaidvbvwjxfnai.appsync-api.us-west-2.amazonaws.com/graphql'
-REGION = 'us-west-2'
-DELETED_FILTER = {
-    '_deleted': False
-}
+from pubweb import config
 
 
 def _filter_deleted(items: List) -> List:
     return list(filter(lambda item: not item.get('_deleted', False), items))
+
+
+def get_id_from_name(items, name_or_id) -> str:
+    matched_id = next((p for p in items if p['id'] == name_or_id), None)
+    if matched_id:
+        return matched_id
+    return next(p for p in items if p['name'] == name_or_id)['id']
 
 
 def _build_client(auth_info: AuthBase, endpoint: str):
@@ -26,8 +29,14 @@ def _build_client(auth_info: AuthBase, endpoint: str):
 
 
 class DataClient:
-    def __init__(self, auth_info: AuthBase, endpoint=PUB_WEB_ENDPOINT):
-        self.client = _build_client(auth_info, endpoint)
+    def __init__(self, auth_info: AuthBase):
+        self.client = _build_client(auth_info, config.data_endpoint)
+
+    def get_project_id(self, name_or_id):
+        return get_id_from_name(self.get_projects_list(), name_or_id)
+
+    def get_process_id(self, name_or_id):
+        return get_id_from_name(self.get_ingest_processes(), name_or_id)
 
     @lru_cache
     def get_projects_list(self) -> List:
@@ -70,8 +79,7 @@ class DataClient:
           }
         ''')
         item_filter = {
-            'executor': {'eq': 'INGEST'},
-            '_deleted': {'eq': False}
+            'executor': {'eq': 'INGEST'}
         }
         resp = self.client.execute(query, variable_values={'filter': item_filter})['listProcesses']
         return _filter_deleted(resp['items'])

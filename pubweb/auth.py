@@ -2,10 +2,12 @@ from typing import TypedDict
 
 import boto3
 from boto3 import Session
+from pycognito import AWSSRP
 from requests.auth import AuthBase
 from requests_aws4auth import AWS4Auth
 
-CLIENT_ID = '7ic2n55r9h4fj0qej5q9ikr2o1'
+from pubweb import config
+
 SERVICE_NAME = 'appsync'
 
 
@@ -31,16 +33,13 @@ class CognitoAuthInfo(AuthInfo):
 
     def _get_token(self):
         cognito = boto3.client('cognito-idp')
-        resp = cognito.initiate_auth(
-            ClientId=CLIENT_ID,
-            AuthFlow='USER_PASSWORD_AUTH',
-            AuthParameters={
-                'USERNAME': self.username,
-                'PASSWORD': self.password
-            }
-        )
-        token = resp['AuthenticationResult']
-        return token
+        aws = AWSSRP(username=self.username,
+                     password=self.password,
+                     pool_id=config.user_pool_id,
+                     client_id=config.app_id,
+                     client=cognito)
+        resp = aws.authenticate_user()
+        return resp['AuthenticationResult']
 
     class RequestAuth(AuthBase):
         def __init__(self, token):

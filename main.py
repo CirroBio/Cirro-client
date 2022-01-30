@@ -3,7 +3,7 @@ import click
 from pubweb import run_ingest
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.option('--data-directory',
               help='Directory you wish to upload')
 @click.option('--project',

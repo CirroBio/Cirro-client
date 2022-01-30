@@ -1,3 +1,4 @@
+import os
 import sys
 from pathlib import Path
 
@@ -5,7 +6,7 @@ from PyInquirer import prompt, Validator
 from prompt_toolkit.terminal.win32_output import NoConsoleScreenBufferError
 from prompt_toolkit.validation import ValidationError
 
-from pubweb.dataset.manifest import get_directory_stats
+from pubweb.file_utils import get_directory_stats
 
 
 class DataDirectoryValidator(Validator):
@@ -110,5 +111,20 @@ def gather_arguments(data_client, input_params):
         return input_params
     except NoConsoleScreenBufferError:
         pass
-    except KeyboardInterrupt:
-        print('closing')
+
+
+def gather_login():
+    answers = prompt([
+        {
+            'type': 'input',
+            'name': 'username',
+            'message': 'Username',
+            'default': os.environ.get('PW_USERNAME') or ''
+        },
+        {
+            'type': 'password',
+            'name': 'password',
+            'message': 'Password'
+        }
+    ])
+    return answers['username'], answers['password']

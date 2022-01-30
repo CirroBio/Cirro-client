@@ -16,6 +16,7 @@ class Dataset:
         self.upload_credentials: Optional[Creds] = None
 
     def create(self):
+        print(f"Creating dataset {self.data['name']}")
         create_response = self.client.post('dataset', self.data)
         create_response.raise_for_status()
         data: DatasetCreateResponse = create_response.json()
@@ -24,11 +25,11 @@ class Dataset:
         self.upload_credentials = data['credentials']
 
     def upload_directory(self, directory):
-        path = f'/datasets/{self.dataset_id}/data'
+        path = f'datasets/{self.dataset_id}/data'
         bucket = f'z-{self.data["project"]}'
         s3_client = boto3.client('s3',
-                                 access_key_id=self.upload_credentials['AccessKeyId'],
-                                 ws_secret_access_key=self.upload_credentials['secretKey'],
-                                 aws_session_token=self.upload_credentials['sessionToken'])
+                                 aws_access_key_id=self.upload_credentials['AccessKeyId'],
+                                 aws_secret_access_key=self.upload_credentials['SecretAccessKey'],
+                                 aws_session_token=self.upload_credentials['SessionToken'])
 
         upload_directory(directory, s3_client, bucket, path)
