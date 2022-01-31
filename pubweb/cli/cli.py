@@ -3,6 +3,15 @@ import click
 from pubweb.cli import run_ingest, run_download
 
 
+def check_required_args(args):
+    if args.get('interactive'):
+        return
+    if any(value is None for value in args.values()):
+        ctx = click.get_current_context()
+        click.echo(ctx.get_help())
+        ctx.exit()
+
+
 @click.group(help="PubWeb CLI - Tool for interacting with datasets")
 def run():
     pass
@@ -19,6 +28,7 @@ def run():
               help='Gather arguments interactively',
               is_flag=True, default=False)
 def download(**kwargs):
+    check_required_args(kwargs)
     run_download(kwargs, interactive=kwargs.get('interactive'))
 
 
@@ -38,6 +48,7 @@ def download(**kwargs):
               help='Gather arguments interactively',
               is_flag=True, default=False)
 def upload(**kwargs):
+    check_required_args(kwargs)
     run_ingest(kwargs, interactive=kwargs.get('interactive'))
 
 
