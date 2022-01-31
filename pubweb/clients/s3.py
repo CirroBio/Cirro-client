@@ -60,8 +60,7 @@ class S3Client:
             self._client.download_file(bucket, key, absolute_path, Callback=ProgressPercentage(progress))
 
     def get_file(self, bucket: str, key: str) -> str:
-        resp = self._client.get_object(Bucket=bucket,
-                                       Key=key)
+        resp = self._client.get_object(Bucket=bucket, Key=key)
         file_body = resp['Body']
         return file_body.read().decode('utf-8')
 

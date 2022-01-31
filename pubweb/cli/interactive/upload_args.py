@@ -1,11 +1,11 @@
 import sys
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
-from PyInquirer import prompt
 from prompt_toolkit.validation import Validator, ValidationError
 
 from pubweb.cli.interactive.common_args import ask_project
+from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
 from pubweb.cli.models import UploadArguments
 from pubweb.file_utils import get_directory_stats
 
@@ -29,13 +29,13 @@ def ask_data_directory(input_value):
         'default': input_value or ''
     }
 
-    answers = prompt(directory_prompt)
+    answers = prompt_wrapper(directory_prompt)
     return answers['data_directory']
 
 
 def confirm_data_directory(directory):
     stats = get_directory_stats(directory)
-    answers = prompt({
+    answers = prompt_wrapper({
         'type': 'confirm',
         'message': f'Please confirm that you wish to upload {stats["numberOfFiles"]} files ({stats["size"]})',
         'name': 'continue',
@@ -55,7 +55,7 @@ def ask_name(input_value):
         'default': input_value or ''
     }
 
-    answers = prompt(name_prompt)
+    answers = prompt_wrapper(name_prompt)
     return answers['name']
 
 
@@ -67,7 +67,7 @@ def ask_description(input_value):
         'default': input_value or ''
     }
 
-    answers = prompt(description_prompt)
+    answers = prompt_wrapper(description_prompt)
     return answers['description']
 
 
@@ -79,7 +79,7 @@ def ask_process(processes, input_value):
         'choices': [process['name'] for process in processes],
         'default': input_value or ''
     }
-    answers = prompt(process_prompt)
+    answers = prompt_wrapper(process_prompt)
     return answers['process']
 
 

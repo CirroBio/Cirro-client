@@ -1,4 +1,4 @@
-from PyInquirer import prompt
+from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
 
 
 def ask_project(projects, input_value):
@@ -9,5 +9,5 @@ def ask_project(projects, input_value):
         'choices': [project["name"] for project in projects],
         'default': input_value or ''
     }
-    answers = prompt(project_prompt)
+    answers = prompt_wrapper(project_prompt)
     return answers['project']

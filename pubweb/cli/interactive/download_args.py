@@ -1,8 +1,8 @@
+from pathlib import Path
 from typing import List
 
-from PyInquirer import prompt
-
 from pubweb.cli.interactive.common_args import ask_project
+from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
 from pubweb.cli.models import DownloadArguments
 
 
@@ -17,7 +17,7 @@ def ask_dataset(datasets, input_value):
         'choices': [f'{dataset["name"]} ({dataset["id"]})' for dataset in datasets],
         'default': input_value or ''
     }
-    answers = prompt(dataset_prompt)
+    answers = prompt_wrapper(dataset_prompt)
     choice = answers['dataset']
     return next(dataset for dataset in datasets if f'{dataset["name"]} ({dataset["id"]})' == choice)['id']
 
@@ -27,10 +27,10 @@ def ask_directory(input_value):
         'type': 'input',
         'name': 'directory',
         'message': 'Where would you like to download these files?',
-        'default': input_value or ''
+        'default': input_value or str(Path.cwd().as_posix())
     }
 
-    answers = prompt(directory_prompt)
+    answers = prompt_wrapper(directory_prompt)
     return answers['directory']
 
 

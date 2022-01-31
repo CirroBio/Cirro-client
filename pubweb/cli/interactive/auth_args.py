@@ -1,10 +1,10 @@
 import os
 
-from PyInquirer import prompt
+from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
 
 
 def gather_login():
-    answers = prompt([
+    answers = prompt_wrapper([
         {
             'type': 'input',
             'name': 'username',

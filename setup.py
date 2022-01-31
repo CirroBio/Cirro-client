@@ -7,7 +7,14 @@ entry_points = {
 }
 
 install_requires = [
-
+    "click>=8.0,<8.1",
+    "PyInquirer==1.0.3",
+    "prompt_toolkit==1.0.14",
+    "boto3>=1.20,<1.30",
+    "gql[requests]==3.0.0",
+    "requests==2.27.1",
+    "pycognito==2022.1.0",
+    "tqdm==4.62.3"
 ]
 
 setup(
@@ -18,6 +25,6 @@ setup(
     description='CLI tool for interacting with the PubWeb platform',
     packages=find_packages(),
     install_requires=install_requires,
-    url='https://github.com/FredHutch/PubWeb-cli',
+    url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points
 )
