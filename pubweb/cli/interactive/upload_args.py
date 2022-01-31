@@ -1,0 +1,99 @@
+import sys
+from pathlib import Path
+from typing import Dict, List
+
+from PyInquirer import prompt
+from prompt_toolkit.validation import Validator, ValidationError
+
+from pubweb.cli.interactive.common_args import ask_project
+from pubweb.cli.models import UploadArguments
+from pubweb.file_utils import get_directory_stats
+
+
+class DataDirectoryValidator(Validator):
+    def validate(self, document):
+        is_a_directory = Path(document.text).is_dir()
+        if not is_a_directory or len(document.text.strip()) == 0:
+            raise ValidationError(
+                message='Please enter a valid directory',
+                cursor_position=len(document.text)
+            )
+
+
+def ask_data_directory(input_value):
+    directory_prompt = {
+        'type': 'input',
+        'name': 'data_directory',
+        'message': 'Enter the full path of the data directory',
+        'validate': DataDirectoryValidator,
+        'default': input_value or ''
+    }
+
+    answers = prompt(directory_prompt)
+    return answers['data_directory']
+
+
+def confirm_data_directory(directory):
+    stats = get_directory_stats(directory)
+    answers = prompt({
+        'type': 'confirm',
+        'message': f'Please confirm that you wish to upload {stats["numberOfFiles"]} files ({stats["size"]})',
+        'name': 'continue',
+        'default': True
+    })
+
+    if not answers['continue']:
+        sys.exit(1)
+
+
+def ask_name(input_value):
+    name_prompt = {
+        'type': 'input',
+        'name': 'name',
+        'message': 'What is the name of this dataset?',
+        'validate': lambda val: len(val.strip()) > 0 or 'Please enter a name',
+        'default': input_value or ''
+    }
+
+    answers = prompt(name_prompt)
+    return answers['name']
+
+
+def ask_description(input_value):
+    description_prompt = {
+        'type': 'input',
+        'name': 'description',
+        'message': 'Enter a description of the dataset (optional)',
+        'default': input_value or ''
+    }
+
+    answers = prompt(description_prompt)
+    return answers['description']
+
+
+def ask_process(processes, input_value):
+    process_prompt = {
+        'type': 'list',
+        'name': 'process',
+        'message': 'What type of files?',
+        'choices': [process['name'] for process in processes],
+        'default': input_value or ''
+    }
+    answers = prompt(process_prompt)
+    return answers['process']
+
+
+def gather_upload_arguments(input_params: UploadArguments, projects: List, processes: List):
+    input_params['project'] = ask_project(projects, input_params.get('project'))
+
+    input_params['data_directory'] = ask_data_directory(input_params.get('data_directory'))
+    confirm_data_directory(input_params['data_directory'])
+
+    input_params['process'] = ask_process(processes, input_params.get('process'))
+
+    data_directory_name = Path(input_params['data_directory']).name
+    default_name = input_params.get('name') or data_directory_name
+    input_params['name'] = ask_name(default_name)
+    input_params['description'] = ask_description(input_params.get('description'))
+
+    return input_params

@@ -1,9 +1,10 @@
 import os
 
-from pubweb.cli.arguments import gather_arguments, gather_download_arguments, gather_login
-from pubweb.clients import create_clients
-from pubweb.dataset import Dataset
+from pubweb.cli.interactive import gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
+from pubweb.auth import UsernameAndPasswordAuth
+from pubweb.cli.models import UploadArguments, DownloadArguments
 from pubweb.file_utils import get_files_in_directory
+from pubweb import PubWeb
 
 
 def get_credentials(interactive):
@@ -17,40 +18,49 @@ def get_credentials(interactive):
     return username, password
 
 
-def run_ingest(input_params, interactive=False):
-    data_client, rest_client = create_clients(*get_credentials(interactive))
+def run_ingest(input_params: UploadArguments, interactive=False):
+    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials(interactive)))
 
     if interactive:
-        input_params = gather_arguments(data_client, input_params)
+        projects = pubweb.project.list()
+        processes = pubweb.process.list(process_type='INGEST')
+        input_params = gather_upload_arguments(input_params, projects, processes)
 
     directory = input_params['data_directory']
     files = get_files_in_directory(directory)
     if len(files) == 0:
         raise RuntimeWarning("No files to upload, exiting")
 
-    create_params = {
-        'project': data_client.get_project_id(input_params['project']),
-        'process': data_client.get_process_id(input_params['process']),
+    create_request = {
+        'project': pubweb.project.get_project_id(input_params['project']),
+        'process': pubweb.process.get_process_id(input_params['process']),
         'name': input_params['name'],
         'desc': input_params['description'],
         'files': [{'name': file_name} for file_name in files]
     }
 
-    dataset = Dataset(rest_client)
-    dataset.create(create_params)
-    dataset.upload_directory(directory)
+    create_resp = pubweb.dataset.create(create_request)
+    pubweb.dataset.upload_files(dataset_id=create_resp['datasetId'],
+                                project_id=create_request['project'],
+                                directory=directory)
 
 
-def run_download(input_params, interactive=False):
-    data_client, rest_client = create_clients(*get_credentials(interactive))
+def run_download(input_params: DownloadArguments, interactive=False):
+    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials(interactive)))
 
     if interactive:
-        input_params = gather_download_arguments(data_client, input_params)
+        projects = pubweb.project.list()
+        input_params = gather_download_arguments(input_params, projects)
+
+        input_params['project'] = pubweb.project.get_project_id(input_params['project'])
+        datasets = pubweb.dataset.find_by_project(input_params['project'])
+        input_params = gather_download_arguments_dataset(input_params, datasets)
 
     dataset_params = {
-        'project': data_client.get_project_id(input_params['project']),
+        'project': pubweb.project.get_project_id(input_params['project']),
         'dataset': input_params['dataset']
     }
 
-    dataset = Dataset(rest_client, dataset_params)
-    dataset.download_files(input_params['data_directory'])
+    pubweb.dataset.download_files(project_id=dataset_params['project'],
+                                  dataset_id=dataset_params['dataset'],
+                                  download_location=input_params['data_directory'])

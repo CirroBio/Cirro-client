@@ -1,6 +1,6 @@
 from typing import TypedDict, List
 
-from pubweb.clients.auth import Creds
+from pubweb.models.auth import Creds
 
 
 class DatasetCreateResponse(TypedDict):

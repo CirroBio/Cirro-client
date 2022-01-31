@@ -1,10 +1,9 @@
-import math
-from functools import lru_cache
 from pathlib import Path
 from typing import List
 
+from pubweb.clients import S3Client
 
-@lru_cache
+
 def get_files_in_directory(directory) -> List[str]:
     path = Path(directory)
     path_posix = str(path.as_posix())
@@ -29,35 +28,23 @@ def get_directory_stats(directory):
     }
 
 
-def convert_size(size):
-    if size == 0:
-        return '0B'
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size, 1024)))
-    p = math.pow(1024, i)
-    s = round(size/p, 2)
-    return '%.2f %s' % (s, size_name[i])
-
-
-def upload_directory(directory, s3_client, bucket, prefix):
+def upload_directory(directory: str, s3_client: S3Client, bucket: str, prefix: str):
     files = get_files_in_directory(directory)
     for file in files:
         key = f'{prefix}/{file}'
         local_path = Path(directory, file)
         local_path_normalized = str(local_path.as_posix())
-        file_size = local_path.stat().st_size
-        print(f'Uploading file {file} ({convert_size(file_size)})')
 
-        s3_client.upload_file(local_path_normalized,
-                              Bucket=bucket,
-                              Key=key)
+        s3_client.upload_file(local_path=local_path_normalized,
+                              bucket=bucket,
+                              key=key)
 
 
-def download_directory(directory, s3_client, bucket, prefix, files):
+def download_directory(directory: str, s3_client: S3Client, bucket: str, prefix: str, files: List[str]):
     for file in files:
         key = f'{prefix}/{file}'
         local_path = str(Path(directory, file).as_posix())
-        # head_resp = s3_client.head_object(Bucket=bucket, Key=key)
-        # file_size = head_resp['ContentLength']
-        print(f'Downloading file {file}')
-        s3_client.download_file(bucket, key, local_path)
+
+        s3_client.download_file(local_path=local_path,
+                                bucket=bucket,
+                                key=key)

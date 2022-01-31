@@ -6,3 +6,4 @@ gql
 requests-toolbelt
 requests
 pycognito
+tqdm
