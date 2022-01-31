@@ -13,9 +13,9 @@ def _filter_deleted(items: List) -> List:
 
 
 def get_id_from_name(items, name_or_id) -> str:
-    matched_id = next((p for p in items if p['id'] == name_or_id), None)
-    if matched_id:
-        return matched_id
+    matched = next((p for p in items if p['id'] == name_or_id), None)
+    if matched:
+        return matched['id']
     return next(p for p in items if p['name'] == name_or_id)['id']
 
 
@@ -58,6 +58,51 @@ class DataClient:
         ''')
 
         resp = self.client.execute(query)['listProjects']
+        return _filter_deleted(resp['items'])
+
+    @lru_cache
+    def get_datasets_list(self, project_id) -> List:
+        query = gql('''
+          query DatasetsByProject(
+            $project: ID!
+            $sortDirection: ModelSortDirection
+            $filter: ModelDatasetFilterInput
+            $limit: Int
+            $nextToken: String
+          ) {
+            datasetsByProject(
+              project: $project
+              sortDirection: $sortDirection
+              filter: $filter
+              limit: $limit
+              nextToken: $nextToken
+            ) {
+              items {
+                id
+                status
+                name
+                desc
+                sourceDatasets
+                infoJson
+                process
+                createdAt
+                updatedAt
+                _deleted
+              }
+              nextToken
+              startedAt
+            }
+          }
+        ''')
+        variables = {
+            'project': project_id,
+            'filter': {
+                'status': {
+                    'eq': 'COMPLETED'
+                }
+            }
+        }
+        resp = self.client.execute(query, variable_values=variables)['datasetsByProject']
         return _filter_deleted(resp['items'])
 
     @lru_cache

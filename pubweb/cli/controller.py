@@ -1,35 +1,32 @@
 import os
-import sys
 
-from pubweb.auth import CognitoAuthInfo
-from pubweb.cli.arguments import gather_arguments, gather_login
-from pubweb.data_client import DataClient
+from pubweb.cli.arguments import gather_arguments, gather_download_arguments, gather_login
+from pubweb.clients import create_clients
 from pubweb.dataset import Dataset
 from pubweb.file_utils import get_files_in_directory
-from pubweb.rest_client import RestClient
 
 
-def run_ingest(input_params, interactive=False):
+def get_credentials(interactive):
     username = os.environ.get('PW_USERNAME')
     password = os.environ.get('PW_PASSWORD')
     if not username or not password:
         if interactive:
             username, password = gather_login()
         else:
-            print('Please set the PW_USERNAME and PW_PASSWORD environment variables to log in')
-            sys.exit(1)
+            raise RuntimeWarning('Please set the PW_USERNAME and PW_PASSWORD environment variables to log in')
+    return username, password
 
-    auth_info = CognitoAuthInfo(username, password)
-    data_client = DataClient(auth_info.get_request_auth())
-    rest_client = RestClient(auth_info.get_request_auth())
+
+def run_ingest(input_params, interactive=False):
+    data_client, rest_client = create_clients(*get_credentials(interactive))
+
     if interactive:
         input_params = gather_arguments(data_client, input_params)
-    directory = input_params['data_directory']
 
+    directory = input_params['data_directory']
     files = get_files_in_directory(directory)
     if len(files) == 0:
-        print("No files to upload, exiting")
-        sys.exit(1)
+        raise RuntimeWarning("No files to upload, exiting")
 
     create_params = {
         'project': data_client.get_project_id(input_params['project']),
@@ -39,6 +36,21 @@ def run_ingest(input_params, interactive=False):
         'files': [{'name': file_name} for file_name in files]
     }
 
-    dataset = Dataset(create_params, rest_client)
-    dataset.create()
+    dataset = Dataset(rest_client)
+    dataset.create(create_params)
     dataset.upload_directory(directory)
+
+
+def run_download(input_params, interactive=False):
+    data_client, rest_client = create_clients(*get_credentials(interactive))
+
+    if interactive:
+        input_params = gather_download_arguments(data_client, input_params)
+
+    dataset_params = {
+        'project': data_client.get_project_id(input_params['project']),
+        'dataset': input_params['dataset']
+    }
+
+    dataset = Dataset(rest_client, dataset_params)
+    dataset.download_files(input_params['data_directory'])

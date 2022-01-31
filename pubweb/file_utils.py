@@ -1,3 +1,4 @@
+import math
 from functools import lru_cache
 from pathlib import Path
 from typing import List
@@ -21,18 +22,42 @@ def get_files_in_directory(directory) -> List[str]:
 
 
 def get_directory_stats(directory):
-    root_directory = Path(directory)
-    sizes = [f.stat().st_size for f in root_directory.glob('**/*') if f.is_file()]
+    sizes = [f.stat().st_size for f in Path(directory).glob('**/*') if f.is_file()]
     return {
         'size': f'{sum(sizes) / float(1 << 30):,.3f} GB',
         'numberOfFiles': len(sizes)
     }
 
 
+def convert_size(size):
+    if size == 0:
+        return '0B'
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size, 1024)))
+    p = math.pow(1024, i)
+    s = round(size/p, 2)
+    return '%.2f %s' % (s, size_name[i])
+
+
 def upload_directory(directory, s3_client, bucket, prefix):
     files = get_files_in_directory(directory)
     for file in files:
         key = f'{prefix}/{file}'
+        local_path = Path(directory, file)
+        local_path_normalized = str(local_path.as_posix())
+        file_size = local_path.stat().st_size
+        print(f'Uploading file {file} ({convert_size(file_size)})')
+
+        s3_client.upload_file(local_path_normalized,
+                              Bucket=bucket,
+                              Key=key)
+
+
+def download_directory(directory, s3_client, bucket, prefix, files):
+    for file in files:
+        key = f'{prefix}/{file}'
         local_path = str(Path(directory, file).as_posix())
-        print(f"Uploading {file}")
-        s3_client.upload_file(local_path, Bucket=bucket, Key=key)
+        # head_resp = s3_client.head_object(Bucket=bucket, Key=key)
+        # file_size = head_resp['ContentLength']
+        print(f'Downloading file {file}')
+        s3_client.download_file(bucket, key, local_path)

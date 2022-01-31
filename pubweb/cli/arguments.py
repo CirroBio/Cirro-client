@@ -1,11 +1,13 @@
 import os
 import sys
 from pathlib import Path
+from typing import Dict
 
 from PyInquirer import prompt, Validator
 from prompt_toolkit.terminal.win32_output import NoConsoleScreenBufferError
 from prompt_toolkit.validation import ValidationError
 
+from pubweb.clients.data import DataClient
 from pubweb.file_utils import get_directory_stats
 
 
@@ -29,6 +31,22 @@ def ask_project(projects, input_value):
     }
     answers = prompt(project_prompt)
     return answers['project']
+
+
+def ask_dataset(datasets, input_value):
+    if len(datasets) == 0:
+        raise RuntimeWarning("No datasets available")
+
+    dataset_prompt = {
+        'type': 'list',
+        'name': 'dataset',
+        'message': 'What dataset would you like to download?',
+        'choices': [f'{dataset["name"]} ({dataset["id"]})' for dataset in datasets],
+        'default': input_value or ''
+    }
+    answers = prompt(dataset_prompt)
+    choice = answers['dataset']
+    return next(dataset for dataset in datasets if f'{dataset["name"]} ({dataset["id"]})' == choice)['id']
 
 
 def ask_data_directory(input_value):
@@ -94,7 +112,7 @@ def ask_process(processes, input_value):
     return answers['process']
 
 
-def gather_arguments(data_client, input_params):
+def gather_arguments(data_client: DataClient, input_params: Dict):
     try:
         input_params['data_directory'] = ask_data_directory(input_params.get('data_directory'))
         confirm_data_directory(input_params['data_directory'])
@@ -105,8 +123,27 @@ def gather_arguments(data_client, input_params):
         projects = data_client.get_projects_list()
         input_params['project'] = ask_project(projects, input_params.get('project'))
 
-        input_params['name'] = ask_name(input_params.get('name'))
+        data_directory_name = Path(input_params['data_directory']).name
+        default_name = input_params.get('name') or data_directory_name
+        input_params['name'] = ask_name(default_name)
         input_params['description'] = ask_description(input_params.get('description'))
+
+        return input_params
+    except NoConsoleScreenBufferError:
+        pass
+
+
+def gather_download_arguments(data_client: DataClient, input_params: Dict):
+    try:
+
+        projects = data_client.get_projects_list()
+        input_params['project'] = ask_project(projects, input_params.get('project'))
+
+        input_params['project'] = data_client.get_project_id(input_params['project'])
+        datasets = data_client.get_datasets_list(input_params['project'])
+        input_params['dataset'] = ask_dataset(datasets, input_params.get('dataset'))
+
+        input_params['data_directory'] = ask_data_directory(input_params.get('data_directory'))
 
         return input_params
     except NoConsoleScreenBufferError:

@@ -1,6 +1,6 @@
 from typing import TypedDict, List
 
-from pubweb.auth import Creds
+from pubweb.clients.auth import Creds
 
 
 class DatasetCreateResponse(TypedDict):
@@ -8,7 +8,7 @@ class DatasetCreateResponse(TypedDict):
     credentials: Creds
 
 
-class DatasetInput(TypedDict):
+class CreateDatasetRequest(TypedDict):
     name: str
     desc: str
     process: str
