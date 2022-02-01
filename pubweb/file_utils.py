@@ -33,9 +33,8 @@ def upload_directory(directory: str, s3_client: S3Client, bucket: str, prefix: s
     for file in files:
         key = f'{prefix}/{file}'
         local_path = Path(directory, file)
-        local_path_normalized = str(local_path.as_posix())
 
-        s3_client.upload_file(local_path=local_path_normalized,
+        s3_client.upload_file(local_path=local_path,
                               bucket=bucket,
                               key=key)
 
@@ -43,7 +42,8 @@ def upload_directory(directory: str, s3_client: S3Client, bucket: str, prefix: s
 def download_directory(directory: str, s3_client: S3Client, bucket: str, prefix: str, files: List[str]):
     for file in files:
         key = f'{prefix}/{file}'
-        local_path = str(Path(directory, file).as_posix())
+        local_path = Path(directory, file)
+        local_path.parent.mkdir(parents=True, exist_ok=True)
 
         s3_client.download_file(local_path=local_path,
                                 bucket=bucket,
