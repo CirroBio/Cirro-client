@@ -6,10 +6,12 @@ entry_points = {
     ]
 }
 
+interactive_requires = [
+    "questionary==1.10.0"
+]
+
 install_requires = [
     "click>=8.0,<8.1",
-    "PyInquirer==1.0.3",
-    "prompt_toolkit==1.0.14",
     "boto3>=1.20,<1.30",
     "gql[requests]==3.0.0",
     "requests==2.27.1",
@@ -24,7 +26,10 @@ setup(
     author_email='viz@fredhutch.org',
     description='CLI tool for interacting with the PubWeb platform',
     packages=find_packages(),
-    install_requires=install_requires,
+    install_requires=install_requires+interactive_requires,
+    extras_require={
+        "no_interactive": install_requires
+    },
     url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points
 )

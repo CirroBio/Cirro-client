@@ -31,20 +31,25 @@ else:
     config = ProductionConfig()
 
 
+def get_config_path() -> Path:
+    config_location = os.environ.get('PW_CONFIG', PUBWEB_CONFIG_LOCATION)
+    return Path(config_location).expanduser()
+
+
 def save_config(auth_config: AuthConfig):
     ini_config = configparser.ConfigParser()
     ini_config['DEFAULT'] = auth_config.__dict__
-    config_location = os.environ.get('PW_CONFIG', PUBWEB_CONFIG_LOCATION)
-    config_path = Path(config_location).expanduser()
+    config_path = get_config_path()
     config_path.parent.mkdir(exist_ok=True)
     with config_path.open('w') as configfile:
         ini_config.write(configfile)
 
 
 def load_config() -> AuthConfig:
-    config_location = os.environ.get('PW_CONFIG', PUBWEB_CONFIG_LOCATION)
+    config_path = get_config_path()
+    if not config_path.exists():
+        raise RuntimeError('Please configure authentication by running pubweb-cli configure')
     ini_config = configparser.ConfigParser()
-    ini_config.read(config_location)
-
+    ini_config.read(str(config_path.absolute()))
     auth_config = ini_config['DEFAULT']
-    return AuthConfig(auth_config.get('username'), auth_config.get('password'))
+    return AuthConfig(auth_config['username'], auth_config['password'])

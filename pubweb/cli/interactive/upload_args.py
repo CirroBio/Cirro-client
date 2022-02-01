@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 from typing import List
 
+from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
 
 from pubweb.cli.interactive.common_args import ask_project
@@ -22,11 +23,13 @@ class DataDirectoryValidator(Validator):
 
 def ask_data_directory(input_value):
     directory_prompt = {
-        'type': 'input',
+        'type': 'path',
         'name': 'data_directory',
         'message': 'Enter the full path of the data directory',
         'validate': DataDirectoryValidator,
-        'default': input_value or ''
+        'default': input_value or '',
+        'complete_style': CompleteStyle.READLINE_LIKE,
+        'only_directories': True
     }
 
     answers = prompt_wrapper(directory_prompt)
@@ -72,12 +75,13 @@ def ask_description(input_value):
 
 
 def ask_process(processes, input_value):
+    process_names = [process['name'] for process in processes]
     process_prompt = {
         'type': 'list',
         'name': 'process',
         'message': 'What type of files?',
-        'choices': [process['name'] for process in processes],
-        'default': input_value or ''
+        'choices': process_names,
+        'default': input_value if input_value in process_names else None
     }
     answers = prompt_wrapper(process_prompt)
     return answers['process']

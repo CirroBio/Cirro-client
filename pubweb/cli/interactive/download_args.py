@@ -14,8 +14,7 @@ def ask_dataset(datasets, input_value):
         'type': 'list',
         'name': 'dataset',
         'message': 'What dataset would you like to download?',
-        'choices': [f'{dataset["name"]} ({dataset["id"]})' for dataset in datasets],
-        'default': input_value or ''
+        'choices': [f'{dataset["name"]} ({dataset["id"]})' for dataset in datasets]
     }
     answers = prompt_wrapper(dataset_prompt)
     choice = answers['dataset']
@@ -24,8 +23,9 @@ def ask_dataset(datasets, input_value):
 
 def ask_directory(input_value):
     directory_prompt = {
-        'type': 'input',
+        'type': 'path',
         'name': 'directory',
+        'only_directories': True,
         'message': 'Where would you like to download these files?',
         'default': input_value or str(Path.cwd().as_posix())
     }
