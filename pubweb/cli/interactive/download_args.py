@@ -27,7 +27,7 @@ def ask_directory(input_value):
         'name': 'directory',
         'only_directories': True,
         'message': 'Where would you like to download these files?',
-        'default': input_value or str(Path.cwd().as_posix())
+        'default': input_value or str(Path.cwd())
     }
 
     answers = prompt_wrapper(directory_prompt)
