@@ -1,6 +1,6 @@
 import click
 
-from pubweb.cli import run_ingest, run_download
+from pubweb.cli import run_ingest, run_download, run_configure
 
 
 def check_required_args(args):
@@ -50,6 +50,11 @@ def download(**kwargs):
 def upload(**kwargs):
     check_required_args(kwargs)
     run_ingest(kwargs, interactive=kwargs.get('interactive'))
+
+
+@run.command(help='Configure authentication')
+def configure():
+    run_configure()
 
 
 def main():

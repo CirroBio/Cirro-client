@@ -1,4 +1,14 @@
+import configparser
 import os
+from pathlib import Path
+
+PUBWEB_CONFIG_LOCATION = "~/.pubweb/config"
+
+
+class AuthConfig:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
 
 
 class DevelopmentConfig:
@@ -19,3 +29,22 @@ if os.environ.get('ENV', '').upper() == 'DEV':
     config = DevelopmentConfig()
 else:
     config = ProductionConfig()
+
+
+def save_config(auth_config: AuthConfig):
+    ini_config = configparser.ConfigParser()
+    ini_config['DEFAULT'] = auth_config.__dict__
+    config_location = os.environ.get('PW_CONFIG', PUBWEB_CONFIG_LOCATION)
+    config_path = Path(config_location).expanduser()
+    config_path.parent.mkdir(exist_ok=True)
+    with config_path.open('w') as configfile:
+        ini_config.write(configfile)
+
+
+def load_config() -> AuthConfig:
+    config_location = os.environ.get('PW_CONFIG', PUBWEB_CONFIG_LOCATION)
+    ini_config = configparser.ConfigParser()
+    ini_config.read(config_location)
+
+    auth_config = ini_config['DEFAULT']
+    return AuthConfig(auth_config.get('username'), auth_config.get('password'))

@@ -1,25 +1,18 @@
-import os
-
 from pubweb.cli.interactive import gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
 from pubweb.auth import UsernameAndPasswordAuth
 from pubweb.cli.models import UploadArguments, DownloadArguments
+from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb import PubWeb
 
 
-def get_credentials(interactive):
-    username = os.environ.get('PW_USERNAME')
-    password = os.environ.get('PW_PASSWORD')
-    if not username or not password:
-        if interactive:
-            username, password = gather_login()
-        else:
-            raise RuntimeWarning('Please set the PW_USERNAME and PW_PASSWORD environment variables to log in')
-    return username, password
+def get_credentials():
+    config = load_config()
+    return config.username, config.password
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials(interactive)))
+    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
 
     if interactive:
         projects = pubweb.project.list()
@@ -46,7 +39,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials(interactive)))
+    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
 
     if interactive:
         projects = pubweb.project.list()
@@ -64,3 +57,9 @@ def run_download(input_params: DownloadArguments, interactive=False):
     pubweb.dataset.download_files(project_id=dataset_params['project'],
                                   dataset_id=dataset_params['dataset'],
                                   download_location=input_params['data_directory'])
+
+
+def run_configure():
+    username, password = gather_login()
+    auth_config = AuthConfig(username, password)
+    save_config(auth_config)
