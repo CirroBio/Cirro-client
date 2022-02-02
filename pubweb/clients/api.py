@@ -3,7 +3,7 @@ from typing import Dict
 import requests
 from gql import Client
 from gql.transport.requests import RequestsHTTPTransport
-from graphql import DocumentNode, OperationDefinitionNode
+from graphql import DocumentNode
 
 from pubweb import config
 from pubweb.auth.base import AuthInfo

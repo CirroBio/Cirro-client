@@ -4,13 +4,19 @@ A Python 3.7+ library for the PubWeb platform.
 
 ## Installation
 
-You can install PubWeb using pip (coming soon)
+You can install PubWeb using pip
+
+`pip install pubweb`
+
+or by cloning the repo and running
 
 `python setup.py install`
 
 ## Usage
 
 ### CLI Usage
+
+Run `pubweb-cli configure` to configure your login credentials.
 
 Specify the `--interactive` flag to gather the command arguments interactively. 
 
