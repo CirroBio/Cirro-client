@@ -35,11 +35,11 @@ def ask_directory(input_value):
 
 
 def gather_download_arguments(input_params: DownloadArguments, projects: List):
-    input_params['data_directory'] = ask_directory(input_params.get('data_directory'))
     input_params['project'] = ask_project(projects, input_params.get('project'))
     return input_params
 
 
 def gather_download_arguments_dataset(input_params: DownloadArguments, datasets: List):
     input_params['dataset'] = ask_dataset(datasets, input_params.get('dataset'))
+    input_params['data_directory'] = ask_directory(input_params.get('data_directory'))
     return input_params
