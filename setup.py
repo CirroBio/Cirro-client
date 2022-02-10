@@ -20,6 +20,7 @@ setup(
     name='pubweb',
     version='0.1.0',
     author='Fred Hutch',
+    license='MIT',
     author_email='viz@fredhutch.org',
     description='CLI tool for interacting with the PubWeb platform',
     packages=find_packages(),
