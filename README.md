@@ -1,6 +1,6 @@
 # PubWeb Client
 
-A Python 3.7+ library for the PubWeb platform.
+A Python 3.8+ library for the PubWeb platform.
 
 ## Installation
 
