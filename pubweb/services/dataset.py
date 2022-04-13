@@ -82,12 +82,13 @@ class DatasetService(BaseService):
     def upload_files(self, project_id: str, dataset_id: str, directory: str):
         if not dataset_id:
             raise RuntimeError('Dataset has not been created')
-        variables = {
+        token_request = {
             'projectId': project_id,
             'datasetId': dataset_id,
             'accessType': 'DATASET',
             'operation': 'UPLOAD'
         }
+        variables = {'input': token_request}
         credentials_response = self._api_client.query(GET_FILE_ACCESS_TOKEN_QUERY,
                                                       variables=variables)
         credentials: Creds = credentials_response['getFileAccessToken']
@@ -98,12 +99,13 @@ class DatasetService(BaseService):
         upload_directory(directory, s3_client, get_bucket(project_id), path)
 
     def download_files(self, project_id: str, dataset_id: str, download_location: str):
-        variables = {
+        token_request = {
             'projectId': project_id,
             'datasetId': dataset_id,
             'accessType': 'DATASET',
             'operation': 'DOWNLOAD'
         }
+        variables = {'input': token_request}
         credentials_response = self._api_client.query(GET_FILE_ACCESS_TOKEN_QUERY,
                                                       variables=variables)
         credentials: Creds = credentials_response['getFileAccessToken']
