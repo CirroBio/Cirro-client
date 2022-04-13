@@ -1,5 +1,7 @@
 from typing import List
 
+from gql import gql
+
 
 def get_id_from_name(items, name_or_id) -> str:
     matched = next((p for p in items if p['id'] == name_or_id), None)
@@ -10,3 +12,15 @@ def get_id_from_name(items, name_or_id) -> str:
 
 def filter_deleted(items: List) -> List:
     return list(filter(lambda item: not item.get('_deleted', False), items))
+
+
+GET_FILE_ACCESS_TOKEN_QUERY = gql('''
+  query GetFileAccessToken($input: GetFileAccessTokenInput!) {
+    getFileAccessToken(input: $input) {
+      AccessKeyId
+      Expiration
+      SecretAccessKey
+      SessionToken
+    }
+  }
+''')
