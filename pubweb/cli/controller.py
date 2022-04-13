@@ -25,16 +25,16 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         raise RuntimeWarning("No files to upload, exiting")
 
     create_request = {
-        'project': pubweb.project.get_project_id(input_params['project']),
-        'process': pubweb.process.get_process_id(input_params['process']),
+        'projectId': pubweb.project.get_project_id(input_params['project']),
+        'processId': pubweb.process.get_process_id(input_params['process']),
         'name': input_params['name'],
-        'desc': input_params['description'],
-        'files': [{'name': file_name} for file_name in files]
+        'description': input_params['description'],
+        'files': files
     }
 
     create_resp = pubweb.dataset.create(create_request)
     pubweb.dataset.upload_files(dataset_id=create_resp['datasetId'],
-                                project_id=create_request['project'],
+                                project_id=create_request['projectId'],
                                 directory=directory)
 
 

@@ -4,10 +4,10 @@ from typing import List
 from gql import gql
 
 from pubweb.clients import S3Client
-from pubweb.clients.utils import filter_deleted
+from pubweb.clients.utils import filter_deleted, GET_FILE_ACCESS_TOKEN_QUERY
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
-from pubweb.models.dataset import CreateDatasetRequest, DatasetCreateResponse
+from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse
 from pubweb.services.base import BaseService
 from pubweb.services.project import get_bucket
 
@@ -64,21 +64,34 @@ class DatasetService(BaseService):
         resp = self._api_client.query(query, variables=variables)['datasetsByProject']
         return filter_deleted(resp['items'])
 
-    def create(self, create_request: CreateDatasetRequest) -> DatasetCreateResponse:
+    def create(self, create_request: CreateIngestDatasetInput) -> DatasetCreateResponse:
         print(f"Creating dataset {create_request['name']}")
-        create_response = self._api_client.post('dataset', create_request)
-        create_response.raise_for_status()
-        data: DatasetCreateResponse = create_response.json()
+        query = gql('''
+          mutation CreateIngestDataset($input: CreateIngestDatasetInput!) {
+            createIngestDataset(input: $input) {
+              datasetId
+              dataPath
+            }
+          }
+        ''')
+        variables = {'input': create_request}
+        data: DatasetCreateResponse = self._api_client.query(query, variables=variables)['createIngestDataset']
         print(f"Dataset ID: {data['datasetId']}")
         return data
 
     def upload_files(self, project_id: str, dataset_id: str, directory: str):
         if not dataset_id:
             raise RuntimeError('Dataset has not been created')
-        credentials_response = self._api_client.get('dataset/fileUploadToken',
-                                                    {'projectId': project_id, 'datasetId': dataset_id})
-        credentials_response.raise_for_status()
-        credentials: Creds = credentials_response.json()
+        token_request = {
+            'projectId': project_id,
+            'datasetId': dataset_id,
+            'accessType': 'DATASET',
+            'operation': 'UPLOAD'
+        }
+        variables = {'input': token_request}
+        credentials_response = self._api_client.query(GET_FILE_ACCESS_TOKEN_QUERY,
+                                                      variables=variables)
+        credentials: Creds = credentials_response['getFileAccessToken']
 
         s3_client = S3Client(credentials)
 
@@ -86,10 +99,16 @@ class DatasetService(BaseService):
         upload_directory(directory, s3_client, get_bucket(project_id), path)
 
     def download_files(self, project_id: str, dataset_id: str, download_location: str):
-        credentials_response = self._api_client.get('project/fileAccessToken',
-                                                    {'projectId': project_id})
-        credentials_response.raise_for_status()
-        credentials: Creds = credentials_response.json()
+        token_request = {
+            'projectId': project_id,
+            'datasetId': dataset_id,
+            'accessType': 'DATASET',
+            'operation': 'DOWNLOAD'
+        }
+        variables = {'input': token_request}
+        credentials_response = self._api_client.query(GET_FILE_ACCESS_TOKEN_QUERY,
+                                                      variables=variables)
+        credentials: Creds = credentials_response['getFileAccessToken']
 
         s3_client = S3Client(credentials)
 

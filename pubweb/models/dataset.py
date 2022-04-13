@@ -1,16 +1,14 @@
 from typing import TypedDict, List
 
-from pubweb.models.auth import Creds
-
 
 class DatasetCreateResponse(TypedDict):
     datasetId: str
-    credentials: Creds
+    dataPath: str
 
 
-class CreateDatasetRequest(TypedDict):
+class CreateIngestDatasetInput(TypedDict):
     name: str
-    desc: str
-    process: str
-    project: str
-    files: List
+    description: str
+    processId: str
+    projectId: str
+    files: List[str]

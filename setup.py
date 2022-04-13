@@ -1,4 +1,8 @@
 from setuptools import setup, find_packages
+from pathlib import Path
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
 
 entry_points = {
     'console_scripts': [
@@ -18,7 +22,7 @@ install_requires = [
 
 setup(
     name='pubweb',
-    version='0.1.0',
+    version='0.1.1',
     author='Fred Hutch',
     license='MIT',
     author_email='viz@fredhutch.org',
@@ -26,5 +30,6 @@ setup(
     packages=find_packages(),
     install_requires=install_requires,
     url='https://github.com/FredHutch/PubWeb-client',
-    entry_points=entry_points
+    entry_points=entry_points,
+    # long_description=long_description
 )
