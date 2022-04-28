@@ -73,8 +73,9 @@ from pubweb.auth import UsernameAndPasswordAuth
 
 client = PubWeb(auth_info=UsernameAndPasswordAuth("<username>", "<password>"))
 
+project_id = '<project_id>'
 dataset_create_request = {
-    'project': '<project_id>',
+    'project': project_id,
     'process': 'sequencing-run',
     'name': 'Test dataset',
     'desc': '',
@@ -83,6 +84,13 @@ dataset_create_request = {
     ]
 }
 
-client.dataset.create(dataset_create_request)
+create_response = client.dataset.create(dataset_create_request)
 
+upload_location = '/fh/fast/test'
+
+client.dataset.upload_files(
+    project_id=project_id,
+    dataset_id=create_response['datasetId'],
+    directory=upload_location
+)
 ```
