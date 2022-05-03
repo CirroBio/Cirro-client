@@ -69,18 +69,19 @@ Options:
 ```python
 from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth
+from pubweb.models.dataset import CreateIngestDatasetInput
 
 
 client = PubWeb(auth_info=UsernameAndPasswordAuth("<username>", "<password>"))
 
 project_id = '<project_id>'
-dataset_create_request = {
-    'project': project_id,
-    'process': 'sequencing-run',
+dataset_create_request: CreateIngestDatasetInput = {
+    'projectId': project_id,
+    'processId': 'sequencing-run',
     'name': 'Test dataset',
-    'desc': '',
+    'description': '',
     'files': [
-        {'name': 'image.jpg'}
+        'image.jpg'
     ]
 }
 
