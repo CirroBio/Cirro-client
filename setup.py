@@ -22,7 +22,7 @@ install_requires = [
 
 setup(
     name='pubweb',
-    version='0.1.1',
+    version='0.1.2',
     author='Fred Hutch',
     license='MIT',
     author_email='viz@fredhutch.org',

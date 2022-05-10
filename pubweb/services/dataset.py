@@ -102,7 +102,7 @@ class DatasetService(BaseService):
         token_request = {
             'projectId': project_id,
             'datasetId': dataset_id,
-            'accessType': 'DATASET',
+            'accessType': 'PROJECT',
             'operation': 'DOWNLOAD'
         }
         variables = {'input': token_request}
