@@ -4,17 +4,23 @@ from typing import List
 from pubweb.cli.interactive.common_args import ask_project
 from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
 from pubweb.cli.models import DownloadArguments
+from pubweb.utils import parse_json_date, format_date
 
 
 def ask_dataset(datasets, input_value):
     if len(datasets) == 0:
         raise RuntimeWarning("No datasets available")
-
+    sorted_datasets = sorted(datasets, key=lambda d: parse_json_date(d["createdAt"]), reverse=True)
     dataset_prompt = {
-        'type': 'list',
+        'type': 'autocomplete',
         'name': 'dataset',
-        'message': 'What dataset would you like to download?',
-        'choices': [f'{dataset["name"]} ({dataset["id"]})' for dataset in datasets]
+        'message': 'What dataset would you like to download? (Press Tab to see all options)',
+        'choices': [f'{dataset["name"]} - {dataset["id"]}' for dataset in sorted_datasets],
+        'meta_information': {
+            f'{dataset["name"]} - {dataset["id"]}': f'{format_date(dataset["createdAt"])}'
+            for dataset in datasets
+        },
+        'ignore_case': True
     }
     answers = prompt_wrapper(dataset_prompt)
     choice = answers['dataset']
