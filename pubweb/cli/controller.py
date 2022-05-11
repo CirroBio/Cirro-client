@@ -35,7 +35,8 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     create_resp = pubweb.dataset.create(create_request)
     pubweb.dataset.upload_files(dataset_id=create_resp['datasetId'],
                                 project_id=create_request['projectId'],
-                                directory=directory)
+                                directory=directory,
+                                files=files)
 
 
 def run_download(input_params: DownloadArguments, interactive=False):

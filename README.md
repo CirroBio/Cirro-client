@@ -87,11 +87,12 @@ dataset_create_request: CreateIngestDatasetInput = {
 
 create_response = client.dataset.create(dataset_create_request)
 
-upload_location = '/fh/fast/test'
+directory_to_upload = '/fh/fast/test'
 
 client.dataset.upload_files(
     project_id=project_id,
     dataset_id=create_response['datasetId'],
-    directory=upload_location
+    directory=directory_to_upload,
+    files=dataset_create_request['files']
 )
 ```

@@ -79,7 +79,7 @@ class DatasetService(BaseService):
         print(f"Dataset ID: {data['datasetId']}")
         return data
 
-    def upload_files(self, project_id: str, dataset_id: str, directory: str):
+    def upload_files(self, project_id: str, dataset_id: str, directory: str, files: List[str]):
         if not dataset_id:
             raise RuntimeError('Dataset has not been created')
         token_request = {
@@ -96,7 +96,7 @@ class DatasetService(BaseService):
         s3_client = S3Client(credentials)
 
         path = f'datasets/{dataset_id}/data'
-        upload_directory(directory, s3_client, get_bucket(project_id), path)
+        upload_directory(directory, files, s3_client, get_bucket(project_id), path)
 
     def download_files(self, project_id: str, dataset_id: str, download_location: str):
         token_request = {
