@@ -96,3 +96,12 @@ client.dataset.upload_files(
     files=dataset_create_request['files']
 )
 ```
+
+### Development
+
+Building
+
+```
+python setup.py bdist_wheel
+twine upload dist/*
+```

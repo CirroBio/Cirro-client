@@ -24,7 +24,7 @@ def ask_dataset(datasets, input_value):
     }
     answers = prompt_wrapper(dataset_prompt)
     choice = answers['dataset']
-    return next(dataset for dataset in datasets if f'{dataset["name"]} ({dataset["id"]})' == choice)['id']
+    return next(dataset for dataset in datasets if f'{dataset["name"]} - {dataset["id"]}' == choice)['id']
 
 
 def ask_directory(input_value):
