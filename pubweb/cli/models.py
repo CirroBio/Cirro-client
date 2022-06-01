@@ -15,3 +15,8 @@ class UploadArguments(TypedDict):
     process: str
     data_directory: str
     interactive: bool
+
+
+class ListArguments(TypedDict):
+    project: str
+    interactive: bool

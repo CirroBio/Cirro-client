@@ -34,6 +34,19 @@ $ pubweb-cli upload --interactive
 ```
 
 
+#### Listing datasets:
+```bash
+Usage: pubweb-cli list_datasets [OPTIONS]
+
+  List available datasets
+
+Options:
+  --project TEXT         ID of the project
+  --interactive          Gather arguments interactively
+  --help                 Show this message and exit.
+```
+
+
 #### Downloading a dataset:
 ```bash
 Usage: pubweb-cli download [OPTIONS]
