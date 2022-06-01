@@ -1,6 +1,6 @@
 import click
 
-from pubweb.cli import run_ingest, run_download, run_configure
+from pubweb.cli import run_ingest, run_download, run_configure, run_list_datasets
 
 
 def check_required_args(args):
@@ -15,6 +15,17 @@ def check_required_args(args):
 @click.group(help="PubWeb CLI - Tool for interacting with datasets")
 def run():
     pass
+
+
+@run.command(help='List datasets', no_args_is_help=True)
+@click.option('--project',
+              help='Name or ID of the project')
+@click.option('--interactive',
+              help='Gather arguments interactively',
+              is_flag=True, default=False)
+def list_datasets(**kwargs):
+    check_required_args(kwargs)
+    run_list_datasets(kwargs, interactive=kwargs.get('interactive'))
 
 
 @run.command(help='Download dataset files', no_args_is_help=True)

@@ -1,8 +1,9 @@
-from pubweb.cli.interactive import gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
+from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
 from pubweb.auth import UsernameAndPasswordAuth
-from pubweb.cli.models import UploadArguments, DownloadArguments
+from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
+from pubweb.utils import parse_json_date, format_date
 from pubweb import PubWeb
 
 
@@ -10,6 +11,28 @@ def get_credentials():
     config = load_config()
     return config.username, config.password
 
+
+def run_list_datasets(input_params: ListArguments, interactive=False):
+    """List the datasets available in a particular project."""
+
+    # Instantiate the PubWeb client
+    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
+
+    # If the user provided the --interactive flag
+    if interactive:
+
+        # Get the list of projects available to the user
+        projects = pubweb.project.list()
+
+        # Prompt the user for the project
+        input_params = gather_list_arguments(input_params, projects)
+
+    # List the datasets available in that project
+    datasets = pubweb.dataset.find_by_project(input_params['project'])
+
+    sorted_datasets = sorted(datasets, key=lambda d: parse_json_date(d["createdAt"]), reverse=True)
+    print("\n\n".join([f'Name: {dataset["name"]}\nDesc: {dataset["desc"]}\nGUID: ({dataset["id"]})' for dataset in sorted_datasets]))
+    
 
 def run_ingest(input_params: UploadArguments, interactive=False):
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
