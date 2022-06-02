@@ -1,3 +1,4 @@
+from boto3.exceptions import S3UploadFailedError
 from pathlib import Path
 from typing import List
 
@@ -28,14 +29,37 @@ def get_directory_stats(directory):
     }
 
 
-def upload_directory(directory: str, files: List[str], s3_client: S3Client, bucket: str, prefix: str):
+def upload_directory(directory: str, files: List[str], s3_client: S3Client, bucket: str, prefix: str, max_retries:int=10):
     for file in files:
         key = f'{prefix}/{file}'
         local_path = Path(directory, file)
 
-        s3_client.upload_file(local_path=local_path,
-                              bucket=bucket,
-                              key=key)
+        # Set a flag when upload succeeds
+        success = False
+
+        # Retry up to max_retries times
+        for retry in range(max_retries):
+            # Try the upload
+            try:
+                s3_client.upload_file(
+                    local_path=local_path,
+                    bucket=bucket,
+                    key=key
+                )
+
+                # If it succeeds, set the flag
+                success = True
+
+            # Catch the upload error
+            except S3UploadFailedError as e:
+
+                # Report the error
+                print(f"Encountered error:\n{str(e)}\nRetrying ({max_retries - (retry + 1)} attempts remaining)")
+
+            # If the upload succeeded
+            if success:
+                # No need to retry
+                break
 
 
 def download_directory(directory: str, s3_client: S3Client, bucket: str, prefix: str, files: List[str]):
