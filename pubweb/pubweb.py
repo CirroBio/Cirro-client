@@ -1,6 +1,6 @@
 from pubweb.auth import AuthInfo
 from pubweb.clients import ApiClient
-from pubweb.services import DatasetService, ProcessService, ProjectService
+from pubweb.services import DatasetService, ProcessService, ProjectService, WorkflowService
 
 
 class PubWeb:
@@ -9,6 +9,7 @@ class PubWeb:
         self._dataset_service = DatasetService(self._api_client)
         self._project_service = ProjectService(self._api_client)
         self._process_service = ProcessService(self._api_client)
+        self._workflow_service = WorkflowService(self._api_client)
 
     @property
     def dataset(self):
@@ -21,3 +22,7 @@ class PubWeb:
     @property
     def process(self):
         return self._process_service
+
+    @property
+    def workflow(self):
+        return self._workflow_service

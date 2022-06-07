@@ -1,6 +1,6 @@
 import click
 
-from pubweb.cli import run_ingest, run_download, run_configure, run_list_datasets
+from pubweb.cli import run_ingest, run_download, run_configure, run_list_datasets, run_configure_workflow
 
 
 def check_required_args(args):
@@ -61,6 +61,11 @@ def download(**kwargs):
 def upload(**kwargs):
     check_required_args(kwargs)
     run_ingest(kwargs, interactive=kwargs.get('interactive'))
+
+
+@run.command(help='Configure a workflow to run in the Data Portal')
+def configure_workflow():
+    run_configure_workflow()
 
 
 @run.command(help='Configure authentication')

@@ -17,7 +17,8 @@ install_requires = [
     "gql[requests]==3.0.0",
     "requests==2.27.1",
     "pycognito==2022.1.0",
-    "tqdm==4.62.3"
+    "tqdm==4.62.3",
+    "pygithub>=1.55"
 ]
 
 setup(

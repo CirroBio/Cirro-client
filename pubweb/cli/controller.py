@@ -83,6 +83,13 @@ def run_download(input_params: DownloadArguments, interactive=False):
                                   download_location=input_params['data_directory'])
 
 
+def run_configure_workflow():
+    """Configure a workflow to be run in the Data Portal as a process."""
+
+    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
+    pubweb.workflow.configure()
+
+
 def run_configure():
     username, password = gather_login()
     auth_config = AuthConfig(username, password)
