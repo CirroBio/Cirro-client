@@ -31,12 +31,11 @@ def gather_repo_arguments():
     """Get the GitHub organization, repo, and version/tag
     Return the result as a dict"""
 
+    # Get the organization
     org = prompt_organization_name()
-    if org is None or len(org) < 1:
-        return {'org': '',
-                'repo': '',
-                'repo_version': ''}
-    repo = prompt_repo_name(org=org)
+
+    # Get the repository
+    repo = prompt_repo_name(org)
     repo_version = prompt_repo_version(repo_name=f"{org}/{repo}")
 
     return {'org': org,
@@ -104,15 +103,26 @@ def gather_blank_process_arguments():
 
 def prompt_organization_name():
     """Get the name of the organization to import (e.g. 'nf-core')"""
+
+    # Prompt for the GitHub organization
     answers = prompt_wrapper([
         {
             'type': 'input',
             'name': 'org',
-            'message': 'Which GitHub org/user to pull workflows from? Leave empty if not using a repo',
+            'message': 'Which GitHub organization is the workflow located within?',
             'default': 'nf-core'
         }
     ])
-    return answers['org']
+
+    # If none was provided
+    if len(answers["org"]) == 0:
+
+        # Ask again
+        print("The GitHub organization must be specified")
+        return prompt_organization_name()
+
+    else:
+        return answers['org']
 
 
 def prompt_repo_name(org):
@@ -126,7 +136,7 @@ def prompt_repo_name(org):
     repo_prompt = {
         'type': 'list',
         'name': 'repo',
-        'message': 'Which workflow/repo to use?',
+        'message': 'Which repository contains the workflow of interest?',
         'choices': repo_list,
         'default': None
     }
@@ -137,25 +147,52 @@ def prompt_repo_name(org):
 def prompt_repo_version(repo_name):
     """Parse the local repository and ask the user which tag/version to use."""
     g = Github()
+
+    # Get the repository object
     repo = g.get_repo(repo_name)
-    version_list = [x for x in repo.get_releases()]
-    pretty_version_list = [f"{x.tag_name} ({x.title})" for x in version_list]
-    
-    version_prompt = {
+
+    # The version will be specified with either a branch or a release
+    version_type = prompt_wrapper({
         'type': 'list',
-        'name': 'version',
-        'message': f"Which version of {repo_name} do you want to use?",
-        'choices': pretty_version_list,
+        'name': 'version_type',
+        'message': 'Should the workflow version be specified by branch or release tag?',
+        'choices': ['branch', 'release'],
         'default': None
-    }
-    answers = prompt_wrapper(version_prompt)
-    print(answers['version'])
-    version = [x for x in version_list if f"{x.tag_name} ({x.title})" == answers['version']][0]
-    print(f"{version.tag_name} -> {version.url}")
-    return {'tag': version.tag_name,
-            'id': version.id,
-            'url': version.url,
-            'title': version.title}
+    })['version_type']
+
+    # If the user decided to select the version type by branch
+    if version_type == 'release':
+
+        # Get the releases which are available
+        version_list = [x for x in repo.get_releases()]
+        pretty_version_list = [f"{x.tag_name} ({x.title})" for x in version_list]
+        
+        version_prompt = {
+            'type': 'list',
+            'name': 'version',
+            'message': f"Which version of {repo_name} do you want to use?",
+            'choices': pretty_version_list,
+            'default': None
+        }
+        answers = prompt_wrapper(version_prompt)
+        print(answers['version'])
+        version = [x for x in version_list if f"{x.tag_name} ({x.title})" == answers['version']][0]
+        return version.tag_name
+
+    else:
+
+        assert version_type == "branch"
+
+        # Get the branches which are available
+        selected_branch = prompt_wrapper({
+            'type': 'list',
+            'name': 'branch',
+            'message': f"Which branch of {repo_name} do you want to use?",
+            'choices': [branch.name for branch in repo.get_branches()],
+            'default': None
+        })['branch']
+
+        return selected_branch
 
 
 def prompt_param_fields_from_nf(parsed_schema):

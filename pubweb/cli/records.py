@@ -37,31 +37,37 @@ def convert_question(question):
     return to_return
 
 
-def convert_group_questions(group_questions, snippets):
-    field_structure = snippets.get('group').copy()
-    field_name = group_questions['group_name']
-    field_structure['title'] = field_name
-    field_structure['properties'] = {}
+def convert_group_questions(group_questions):
+
+    # Set up the basic field structure
+    field_structure = {
+        "title": group_questions['group_name'],
+        "type": "object",
+        "properties": {}
+    }
+
+    # Populate the questions recursively
     for group_q in group_questions['questions']:
         structure_to_add = {}
         if group_q.get('group_name') is not None:
             structure_name = group_q.get('short_group_name')
-            structure_to_add = convert_group_questions(group_q, snippets)
+            structure_to_add = convert_group_questions(group_q)
         else:
             structure_name = group_q['name']
             structure_to_add = convert_question(group_q)
         field_structure['properties'][structure_name] = structure_to_add
+
     return field_structure
 
 
-def generate_form_parameters(input_params, snippets):
+def generate_form_parameters(input_params):
     to_return = {}
 
     for field in input_params['process']['fields']:
         field_structure = {}
         if field.get('group_name') is not None:
             # not a group
-            field_structure = convert_group_questions(field, snippets)
+            field_structure = convert_group_questions(field)
             #field_structure = snippets.get('group')
             #field_name = field['group_name']
             #field_structure['title'] = field_name
@@ -75,27 +81,35 @@ def generate_form_parameters(input_params, snippets):
     return to_return
 
 
-def write_compute_config(input_params, output_dir, working_dir):
-    """Write the process-compute.config"""
-    # first, get the template config
-    template_loc = os.path.join(working_dir, 'process-compute.config')
-    target_loc = os.path.join(output_dir, 'process-compute.config')
-    shutil.copy(template_loc, target_loc)
+def write_compute_config(input_params, output_dir):
+    """Write the process-compute.config template which can be further modified by the user."""
+
+    with open(os.path.join(output_dir, 'process-compute.config'), 'w') as handle:
+        handle.write("""profiles {
+    standard {
+        process {
+            executor = 'awsbatch'
+            errorStrategy = 'retry'
+            maxRetries = 2
+        }
+    }
+}
+""")
 
 
-def write_dynamo(input_params, output_dir, working_dir):
+def write_dynamo(input_params, output_dir):
     """Write the process-dynamo.json"""
-    template_loc = os.path.join(working_dir, 'process-dynamo.json')
+
+    print(input_params)
+
+    # # Populate the information expected by dynamo for this process
+    # dynamo = dict(
+    #     id=,
+    #     name=input_params['process']['description']['name'].replace(' ', '_')
+    # )
+
     target_loc = os.path.join(output_dir, 'process-dynamo.json')
 
-    workflow_name = input_params['process']['description']['name']
-    workflow_name.replace(' ', '_')
-
-    with open(template_loc, 'r') as f:
-        raw_record = f.read()
-
-    # use string replacement to fix up the proper location
-    raw_record = raw_record.replace('<RESOURCES_BUCKET>', input_params['resources_bucket'])
     raw_record = raw_record.replace('{REPO}', input_params['repo']['repo'])
     raw_record = raw_record.replace('{WORKFLOW}', utils.get_short_name(workflow_name))
     raw_record = raw_record.replace('{VERSION}', input_params['process']['description']['version'])
@@ -112,17 +126,21 @@ def write_dynamo(input_params, output_dir, working_dir):
         f.write(json.dumps(record))
 
 
-def write_form(input_params, output_dir, working_dir):
+def write_form(input_params, output_dir):
     """Write the process-form.json."""
-    template_loc = os.path.join(working_dir, 'process-form.json')
-    template_pieces_loc = os.path.join(working_dir, 'process-form-pieces.json')
+
     target_loc = os.path.join(output_dir, 'process-form.json')
 
-    with open(template_pieces_loc, 'r') as f:
-        snippets = json.loads(f.read())
-
-    with open(template_loc, 'r') as f:
-        record = json.loads(f.read())
+    # Set up the template record
+    record = {
+        "ui": {},
+        "form": {
+            "title": "",
+            "type": "object",
+            "required": [],
+            "properties": {}
+        }
+    }
 
     # Find the list of required fields
     required_fields = []
@@ -135,13 +153,13 @@ def write_form(input_params, output_dir, working_dir):
     record['form']['title'] = input_params['process']['description']['name']
     record['form']['required'] = required_fields
 
-    record['form']['properties'] = generate_form_parameters(input_params, snippets)
+    record['form']['properties'] = generate_form_parameters(input_params)
 
     with open(target_loc, 'w') as f:
         f.write(json.dumps(record))
 
 
-def write_input(input_params, output_dir, working_dir):
+def write_input(input_params, output_dir):
     """Write the process-input.json."""
     template_loc = os.path.join(working_dir, 'process-input.json')
     target_loc = os.path.join(output_dir, 'process-input.json')
@@ -169,17 +187,17 @@ def write_input(input_params, output_dir, working_dir):
         f.write(json.dumps(record))
 
 
-def write_output(input_params, output_dir, working_dir):
+def write_output(input_params, output_dir):
     """Write the process-output.json."""
     template_loc = os.path.join(working_dir, 'process-output.json')
     target_loc = os.path.join(output_dir, 'process-output.json')
     shutil.copy(template_loc, target_loc)
 
 
-def write_process_config(input_params, output_dir, working_dir):
+def write_process_config(input_params, output_dir):
     """Write out all of the process configuration assets."""
-    write_compute_config(input_params, output_dir, working_dir)
-    write_dynamo(input_params, output_dir, working_dir)
-    write_form(input_params, output_dir, working_dir)
-    write_input(input_params, output_dir, working_dir)
-    write_output(input_params, output_dir, working_dir)
+    write_compute_config(input_params, output_dir)
+    write_dynamo(input_params, output_dir)
+    write_form(input_params, output_dir)
+    write_input(input_params, output_dir)
+    write_output(input_params, output_dir)
