@@ -87,7 +87,7 @@ def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
-    pubweb.workflow.configure()
+    pubweb.configure_workflow()
 
 
 def run_configure():
