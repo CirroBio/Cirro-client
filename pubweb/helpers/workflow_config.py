@@ -1,4 +1,8 @@
 import json
+import shutil
+import tarfile
+
+import requests
 from github import Github
 import os
 import questionary
@@ -80,17 +84,6 @@ class WorkflowConfig:
             output=dict()
         )
 
-        # The compute configuration is boilerplate at this point
-        self.compute_config = """profiles {
-    standard {
-        process {
-            executor = 'awsbatch'
-            errorStrategy = 'retry'
-            maxRetries = 2
-        }
-    }
-}
-"""
 
     def configure(self):
         """Main method for getting user input, parsing the repo, and creating process docs."""
@@ -118,14 +111,11 @@ class WorkflowConfig:
     def save_local(self):
         """Write out the workflow configuration as a collection of files."""
 
-        # Get the folder to use for outputs
-        output_folder = self._get_output_folder()
-
         # Save each of the items in the process configuration
         for k, v in self.process_config.items():
 
             # Use the dictionary key to drive the file name
-            output_fp = f"process-{k}.json"
+            output_fp = os.path.join(self.output_folder, f"process-{k}.json")
             print(f"Writing out to {output_fp}")
 
             # Open the file
@@ -135,7 +125,7 @@ class WorkflowConfig:
                 json.dump(v, handle, indent=4)
 
         # Write the compute configuration
-        output_fp = os.path.join(output_folder, "process-compute.config")
+        output_fp = os.path.join(self.output_folder, "process-compute.config")
 
         with open(output_fp, "w") as handle:
             handle.write(self.compute_config)
@@ -144,23 +134,88 @@ class WorkflowConfig:
 
         print(f"Done writing all process configuration items to {output_fp}")
 
-    def _get_output_folder(self):
-        """Get the output folder """
+    def _get_resources_repo(self):
+        """Get the location of the folder within the pubweb resources repository to write to."""
 
-        output_folder = ask(
+        # Get the base directory of the repository
+        repo_folder = self._get_repo_folder()
+
+        # Build the subdirectory for the process
+        subdirectory = ask(
+            "text",
+            "What subdirectory within the process/ folder which should be used to save the outputs? (e.g. hutch/fastqc/1.0)"
+        )
+
+        resources_folder = os.path.join(repo_folder, "process", subdirectory)
+
+        # If the folder already exists
+        while os.path.exists(resources_folder):
+
+            if ask(
+                "select",
+                "That folder already exists, would you like to overwrite any existing files or select a new folder?",
+                choices=[f"Use {resources_folder}", "Select another"]
+            ) == "Select another":
+
+                # Build the subdirectory for the process
+                subdirectory = ask(
+                    "text",
+                    "What subdirectory within the process/ folder which should be used to save the outputs? (e.g. hutch/fastqc/1.0)"
+                )
+                resources_folder = os.path.join(repo_folder, "process", subdirectory)
+
+            else:
+                break
+
+        # Create the folder if it does not exist
+        if not os.path.exists(resources_folder):
+            os.makedirs(resources_folder)
+
+        # Return the full path to the folder, as well as the relative path within the repository
+        return resources_folder, subdirectory.strip("/")
+
+    def _get_preprocess_script(self):
+        """Ask if the user wants to add a preprocessing script."""
+
+        if ask(
+            "select",
+            "Would you like to use a preprocessing script?",
+            choices=["Yes", "No"]
+        ) == "Yes":
+
+            script_path = ask(
+                "path",
+                "What script should be used?",
+                default="./"
+            )
+
+            while not os.path.exists(script_path):
+
+                script_path = ask(
+                    "path",
+                    f"Path cannot be found ({script_path}) - please select another",
+                    default=script_path
+                )
+
+            return script_path
+
+    def _get_repo_folder(self):
+        """Get the base location of the pubweb resources repository."""
+
+        repo_folder = ask(
             "path",
-            "What folder should be used to write the workflow configuration?",
+            "What folder contains a local copy of the PubWeb resources repository?",
             default="./",
             only_directories=True
         )
 
         # If the path does not exist
-        if not os.path.exists(output_folder):
+        if not os.path.exists(repo_folder):
 
             # Ask if it should be created
             resp = ask(
                 "select",
-                f"The path does not exist: {output_folder}\nWould you like to create it, or pick another folder?",
+                f"The path does not exist: {repo_folder}\nWould you like to create it, or pick another folder?",
                 choices=[
                     "Create the folder",
                     "Select another"
@@ -168,20 +223,26 @@ class WorkflowConfig:
             )
 
             if resp == "Create the folder":
-                os.makedirs(output_folder)
-                return output_folder
+                os.makedirs(repo_folder)
+                return repo_folder
 
             else:
-                return self._get_output_folder()
+                return self._get_repo_folder()
 
         else:
-            return output_folder
+            return repo_folder
 
     def _configure_repository(self):
         """Configure the workflow repository."""
 
         # Set up the boilerplate elements of the dynamo record
         self._add_dynamo_boilerplate()
+
+        # Get the name of the process
+        self.process_config["dynamo"]["name"] = ask(
+            "text",
+            "What name should be displayed for this workflow?"
+        )
 
         # Get the organization
         org = ask(
@@ -238,6 +299,39 @@ class WorkflowConfig:
             )
         ]
 
+        # Get the folder which should be used to write the outputs,
+        # as well as the path relative to the repository
+        self.output_folder, self.repo_prefix = self._get_resources_repo()
+
+        # Ask if the user wants to add a preprocessing script
+        preprocess_py = self._get_preprocess_script()
+
+        # If they did want to include one
+        if preprocess_py is not None:
+
+            # Copy it to the output folder
+            shutil.copyfile(
+                preprocess_py, 
+                os.path.join(self.output_folder, preprocess_py.split("/")[-1])
+            )
+
+            # Add it to the dynamo record
+            self.process_config["dynamo"]["preProcessScript"] = f"{self.repo_prefix}/{preprocess_py.split('/')[-1]}"
+
+        # Use the relative path within the repository to set up the relative
+        # paths in the dynamo record
+        self.process_config["dynamo"]["computeDefaults"] = [
+            {
+                "executor": "NEXTFLOW",
+                "json": f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-compute.config",
+                "name": "Default"
+            }
+        ]
+
+        self.process_config["dynamo"]["paramMapJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-input.config"
+        self.process_config["dynamo"]["formJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-form.config"
+        self.process_config["dynamo"]["webOptimizationJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-output.config"
+
     def _add_dynamo_boilerplate(self):
         """Add the elements of the dynamo record which do not vary by user entry."""
 
@@ -280,7 +374,7 @@ class WorkflowConfig:
             'default': None
         })['version_type']
 
-        # If the user decided to select the version type by branch
+        # If the user decided to select the version type by release (tag)
         if version_type == 'release':
 
             # Get the releases which are available
@@ -297,6 +391,13 @@ class WorkflowConfig:
             answers = prompt_wrapper(version_prompt)
 
             version = [x for x in version_list if f"{x.tag_name} ({x.title})" == answers['version']][0]
+
+            # Set the URL of the tag
+            self.process_config["dynamo"]["documentationUrl"] = f"https://github.com/{org}/{repo_name}/releases/tag/{version.tag_name}"
+
+            # Set the URL of the tarball
+            self.tarball_url = f"https://github.com/{org}/{repo_name}/archive/refs/tags/{version.tag_name}.tar.gz"
+
             return version.tag_name
 
         else:
@@ -304,7 +405,7 @@ class WorkflowConfig:
             assert version_type == "branch"
 
             # Select from the branches which are available
-            return prompt_wrapper({
+            branch = prompt_wrapper({
                 'type': 'list',
                 'name': 'branch',
                 'message': f"Which branch of {org}/{repo_name} do you want to use?",
@@ -312,15 +413,175 @@ class WorkflowConfig:
                 'default': None
             })['branch']
 
+            # Set the URL of the branch
+            self.process_config["dynamo"]["documentationUrl"] = f"https://github.com/{org}/{repo_name}/tree/{branch}"
+
+            # Set the URL of the tarball
+            self.tarball_url = f"https://github.com/{org}/{repo_name}/archive/refs/heads/{branch}.tar.gz"
+
+            return branch
+
     def _configure_compute(self):
         """Configure the compute configuration."""
-
-        pass
+        
+        # The compute configuration is boilerplate at this point
+        self.compute_config = """profiles {
+    standard {
+        process {
+            executor = 'awsbatch'
+            errorStrategy = 'retry'
+            maxRetries = 2
+        }
+    }
+}
+"""
 
     def _configure_form(self):
         """Configure the form."""
 
-        pass
+        # Download the repository tarball and return the local filename
+        repo_tarball = self._get_repo_tarball()
+
+        # Try to parse a nextflow_schema.json file, if present
+        self.nf_schema = self.get_nextflow_schema(repo_tarball)
+
+        # If a nextflow_schema.json is present
+        if self.nf_schema is not None:
+
+            # Set the description from the schema
+            self.process_config["dynamo"]["desc"] = self.nf_schema["description"]
+
+            # Make sure that the schema has the expected top-level entries
+            for k in ["title", "definitions"]:
+                assert k in self.nf_schema, f"Did not find '{k}' in the nextflow schema as expected"
+
+            # Get all of the process-related parameters, based on the nextflow schema
+            self.process_config["form"] = dict(
+                ui=dict(),
+                # In addition to modifying the schema contents, we will
+                # also ask the user if they want to include or exclude each option
+                form=self._convert_nf_schema(self.nf_schema)
+            )
+            
+        # Otherwise
+        else:
+
+            # Get the description of the process
+            self.process_config["dynamo"]["desc"] = ask(
+                "text",
+                "What is the description of this workflow?"
+            )
+
+            # Get all of the process-related parameters, based just on user input
+            self.process_config["form"] = dict(
+                ui=dict(),
+                form=self._prompt_user_inputs()
+            )
+
+    def _get_repo_tarball(self):
+
+        """Clone a local copy of the repository which will be imported/parsed."""
+        file_name = os.path.basename(self.tarball_url)
+        print(f"Downloading {file_name} from {self.tarball_url}")
+        
+        r = requests.get(self.tarball_url, allow_redirects=True)
+        with open(file_name, 'w+b') as f:
+            f.write(r.content)
+        return file_name
+        
+    def get_nextflow_schema(self, repo_tarball):
+        """If a nextflow_schema.json is present, parse it and prompt the user for any modifications."""
+
+        with tarfile.open(repo_tarball, 'r') as archive:
+            archive_list = archive.getmembers()
+            nextflow_schema_list = [x for x in archive_list if x.name.find('nextflow_schema.json') >= 0]
+            if len(nextflow_schema_list) > 0:
+                nextflow_schema_file = nextflow_schema_list[0].name
+                archive.extract(nextflow_schema_file, path='tmp')
+                local_nf_schema_file = f"tmp/{nextflow_schema_file}"
+                with open(local_nf_schema_file, 'r') as f:
+                    nf_schema = json.loads(f.read())
+                    return nf_schema
+            else:
+                print(f"No nextflow_schema.json file found, switching to DIY mode")
+                return None
+
+    def _convert_nf_schema(self, obj, param_root="$.params.dataset.paramJson"):
+        """
+        Given a nextflow schema object, parse it and 
+        run the user through prompts to determine which fields to expose
+        """
+
+        # Remove any unwanted keys
+        for k in ["$schema", "$id", "fa_icon", "mimetype", "allOf", "schema"]:
+            if k in obj:
+                del obj[k]
+
+        # Convert the 'definitions' from the Nextflow schema to 'properties' of the form
+        if "definitions" in obj:
+            obj["properties"] = obj["definitions"]
+            del obj["definitions"]
+
+        # The object should have a "type"
+        assert "type" in obj, f"Expected 'type':\n({json.dumps(obj, indent=4)})"
+
+        # If this is an object
+        if obj["type"] == "object":
+
+            # It must have "properties"
+            assert "properties" in obj, f"Expected 'properties' when type='object':\n({json.dumps(obj, indent=4)})"
+
+            # Give the user the option to remove items from that list
+
+            # First ask the user which options should be kept
+            option_list = [
+                f"{k}\n{v.get('description')}"
+                for k, v in obj["properties"].items()
+            ]
+            to_keep = ask(
+                "checkbox",
+                "Please select the items to display to the user\n<space> to select/deselect, <enter> when done",
+                choices=option_list
+            )
+
+            # Remove the description from the list of 
+            to_keep = [i.split("\n")[0] for i in to_keep]
+
+            # Subset the defs to only keep the selected options
+            obj["properties"] = {
+                k: obj["properties"][k]
+                for k in to_keep
+            }
+
+            # If there is a "required" field at the top level
+            if "required" in obj:
+
+                # Only keep the required items which were selected
+                obj["required"] = [i for i in obj["required"] if i in to_keep]
+
+            # Now convert each of those objects in a recursive way
+            obj["properties"] = {
+                k: self._convert_nf_schema(v, param_root=f"{param_root}.{k}")
+                for k, v in obj["properties"].items()
+            }
+
+            # For each of those elements
+            for k, v in obj["properties"].items():
+
+                # Skip any other objects
+                if v["type"] == "object":
+                    continue
+
+                # Any other type needs to be added to the inputs
+
+                # Make sure that this parameter name doesn't collide with anything else
+                assert k not in self.process_config["input"], f"Error, found two elements in the form named {k}"
+
+                # Add it to the inputs
+                self.process_config["input"][k] = f"{param_root}.{k}"
+
+        # Return the object
+        return obj
 
     def _configure_inputs(self):
         """Configure any additional inputs."""
