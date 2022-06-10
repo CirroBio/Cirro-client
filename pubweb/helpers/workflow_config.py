@@ -593,7 +593,7 @@ class WorkflowConfig:
             self._add_fixed_param_input()
 
             while ask("confirm", "Would you like to add another?"):
-                
+
                 self._add_fixed_param_input()
 
     def _add_fixed_param_input(self):
@@ -610,5 +610,111 @@ class WorkflowConfig:
     def _configure_outputs(self):
         """Configure any additional outputs."""
 
-        pass
+        # Set up the blank output object
+        self.process_config["output"] = dict(commands=[])
 
+        if ask(
+            "confirm",
+            "Does this workflow produce output files which should be indexed for visualization?"
+        ):
+
+            self._add_single_output()
+
+            while ask("confirm", "Would you like to add another?"):
+
+                self._add_single_output()
+
+        # Add the commands to index all of the files which were output
+        self.process_config["output"]["commands"].extend([
+            {
+                "command": "hot.Manifest",
+                "params": {}
+            },
+            {
+                "command": "save.ManifestJson",
+                "params": {
+                    "files": [
+                    {
+                        "glob": "$dataDirectory/**/*.*"
+                    }
+                    ],
+                    "tables": [],
+                    "jsons": [],
+                    "lists": [],
+                    "tensors": [],
+                    "version": "2"
+                }
+            }
+        ])
+
+    def _add_single_output(self):
+        """Configure a single output file."""
+
+        # Get the path of the output file(s) relative to the output directory
+        source = ask(
+            "text", 
+            "\n     ".join([
+                "What is the location of the output files(s) within the workflow output directory?",
+                "Multiple files with the same format can be included using wildcard (*) characters."
+            ])
+        )
+
+        # Get the value used to separate columns
+        sep = ask(
+            "text", 
+            "\n     ".join([
+                "What is the character used to separate columns?",
+                "e.g. ',' for CSV, '\t' for TSV"
+            ])
+        )
+
+        name = ask("text", "Short name for output file(s)")
+        desc = ask("text", "Longer description for output file(s)")
+        url = ask("text", "Optional website documenting file contents")
+
+        # Build the list of columns
+        columns = []
+
+        print("")
+
+        while len(columns) == 0 or ask("confirm", "Are there additional columns to add?"):
+
+            columns.append(dict(
+                col=ask("text", "Column header (value in the first line of the file)"),
+                name=ask("text", "Column name (to be displayed to the user)"),
+                desc=ask("text", "Column description (to be displayed to the user)")
+            ))
+
+        # Let the user confirm
+        if ask(
+            "confirm", 
+            "\n     ".join([
+                "File configuration:",
+                f"Path: {source}",
+                f"Sep: {sep}",
+                f"Name: {name}",
+                f"Description: {desc}",
+                f"Reference URL: {url}",
+                f"Columns:"
+            ] + [
+                f"    {col['col'] - col['name'] - col['desc']}"
+                for col in columns
+            ] + [
+                "Is all of the information above correct?"
+            ])
+        ):
+
+            self.process_config["output"]["commands"].append(
+                dict(
+                    command="Hot.Dsv",
+                    params=dict(
+                        url=url,
+                        source=source,
+                        sep=sep,
+                        header=True,
+                        name=name,
+                        desc=desc,
+                        cols=columns
+                    )
+                )
+            )
