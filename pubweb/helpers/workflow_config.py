@@ -84,7 +84,6 @@ class WorkflowConfig:
             output=dict()
         )
 
-
     def configure(self):
         """Main method for getting user input, parsing the repo, and creating process docs."""
 
@@ -316,7 +315,7 @@ class WorkflowConfig:
             )
 
             # Add it to the dynamo record
-            self.process_config["dynamo"]["preProcessScript"] = f"{self.repo_prefix}/{preprocess_py.split('/')[-1]}"
+            self.process_config["dynamo"]["preProcessScript"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/{preprocess_py.split('/')[-1]}"
 
         # Use the relative path within the repository to set up the relative
         # paths in the dynamo record
@@ -535,7 +534,7 @@ class WorkflowConfig:
 
             # First ask the user which options should be kept
             option_list = [
-                f"{k}\n{v.get('description')}"
+                f"{k}\n     {v.get('description')}"
                 for k, v in obj["properties"].items()
             ]
             to_keep = ask(
@@ -586,7 +585,27 @@ class WorkflowConfig:
     def _configure_inputs(self):
         """Configure any additional inputs."""
 
-        pass
+        if ask(
+            "confirm",
+            "Would you like to add any fixed parameter values?\n     These values will not change based on user input."
+        ):
+
+            self._add_fixed_param_input()
+
+            while ask("confirm", "Would you like to add another?"):
+                
+                self._add_fixed_param_input()
+
+    def _add_fixed_param_input(self):
+        """Allow the user to add a single key-value entry to the params."""
+
+        # Get a key-value pair
+        param_key = ask("text", "Parameter key:")
+        param_value = ask("text", "Parameter value:")
+
+        # Let the user confirm their entry
+        if ask("confirm", f"Confirm: {param_key} = {param_value}"):
+            self.process_config["input"][param_key] = param_value
 
     def _configure_outputs(self):
         """Configure any additional outputs."""
