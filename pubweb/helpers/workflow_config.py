@@ -64,6 +64,10 @@ def ask(fname, msg, validate_type=None, output_f=None, **kwargs) -> str:
     # Otherwise
     return resp
 
+def ask_yes_no(msg):
+
+    return ask("select", msg, choices=["Yes", "No"]) == "Yes"
+
 
 class WorkflowConfig:
 
@@ -176,11 +180,7 @@ class WorkflowConfig:
     def _get_preprocess_script(self):
         """Ask if the user wants to add a preprocessing script."""
 
-        if ask(
-            "select",
-            "Would you like to use a preprocessing script?",
-            choices=["Yes", "No"]
-        ) == "Yes":
+        if ask_yes_no("Would you like to use a preprocessing script?"):
 
             script_path = ask(
                 "path",
@@ -272,7 +272,7 @@ class WorkflowConfig:
         privacy = prompt_wrapper(dict(
             type="list",
             message="Is the GitHub repository public or private?",
-            choices=["Private", "Public"],
+            choices=["Public", "Private"],
             default="Public",
             name="privacy"
         ))["privacy"]
@@ -285,16 +285,20 @@ class WorkflowConfig:
             version=version
         )
 
+        # Get a list of the processes which are available
+        process_choices = [
+            f"{process['name']}\n     {process['desc']}\n     {process['id']}"
+            for process in self.client.process.list()
+        ]
+        process_choices.sort()
+
         # Add any child processes that may exist
         self.process_config["dynamo"]["childProcessIds"] = [
             p.split("\n")[-1].strip(" ")
             for p in ask(
                 "checkbox",
                 "Select any processes which can be run on the outputs of this workflow",
-                choices=[
-                    f"{process['name']}\n     {process['desc']}\n     {process['id']}"
-                    for process in self.client.process.list(process_type='NEXTFLOW')
-                ]
+                choices=process_choices
             )
         ]
 
@@ -502,7 +506,7 @@ class WorkflowConfig:
                     nf_schema = json.loads(f.read())
                     return nf_schema
             else:
-                print(f"No nextflow_schema.json file found, switching to DIY mode")
+                print(f"No nextflow_schema.json file found, please specify any required inputs")
                 return None
 
     def _convert_nf_schema(self, obj, param_root="$.params.dataset.paramJson"):
@@ -582,12 +586,243 @@ class WorkflowConfig:
         # Return the object
         return obj
 
+    def _prompt_user_inputs(self):
+        """Prompt for user inputs which should be included in the form."""
+
+        # Make a dict with the properties which should be rendered in the form
+        # Each parameter will fall inside a section with its own title
+        properties = dict()
+
+        print("The form which is presented to the user is broken into sections, each with its own heading")
+
+        while len(properties) == 0 or ask("confirm", "Would you like to add another section of parameters?"):
+
+            # Get the contents of this section
+            section_key, section_contents = self._prompt_user_input_section()
+
+            # Add those contents to the form
+            properties[section_key] = section_contents
+
+        return properties
+
+    def _prompt_user_input_section(self):
+        """Ask the user for all of the parameters which are found in a single section of the input form."""
+
+        section_title = ask("text", "What is the title of this section?")
+
+        # Format the section key based on the title
+        section_key = section_title.lower().replace(" ", "_").replace("-", "_")
+
+        # Build a dict of the individual form entries
+        properties = dict()
+
+        # Keep track of which inputs are required
+        required = []
+
+        for input_key, input_val, input_required in self._yield_form_input_single(section_key):
+
+            properties[input_key] = input_val
+            if input_required:
+                required.append(input_key)
+
+        # Return the fully formulated section
+        section_contents = dict(
+            type="object",
+            title=section_title,
+            required=required,
+            properties=properties
+        )
+        return section_key, section_contents
+
+    def _yield_form_input_single(self, section_key):
+        """Allow the user to add as many form inputs as they require."""
+
+        initial = True
+
+        while initial or ask("confirm", "Would you like to add another parameter to this section?"):
+            initial = False
+
+            yield self._prompt_form_input_single(section_key)
+
+    def _prompt_form_input_single(self, section_key):
+        """Prompt the user for a single element in the form."""
+
+        # Prompt for the parameter key
+        kw = ask("text", "Parameter key used in workflow")
+
+        # There should be no collision between keys
+        while len(kw) == 0 or kw in self.process_config["input"]:
+            kw = ask("text", f"Parameter key is not valid or has already been used, please select another")
+
+        elem = dict()
+        elem["title"] = ask("text", "Parameter title")
+        elem["description"] = ask("text", "Parameter description")
+        required = ask_yes_no("Is this parameter required?")
+
+        # Get the type of input
+        prompt_type = ask(
+            "select",
+            "What type of input should the user provide?",
+            choices=[
+                "Text entry",
+                "Choose from list",
+                "Boolean",
+                "Number",
+                "File from the input dataset",
+                "File from a project reference",
+                "List of iGenomes references",
+            ]
+        )
+
+        if prompt_type == "Text entry":
+            elem["type"] = "string"
+            if ask_yes_no("Does this input have a default value?"):
+                elem["default"] = ask("text", "Default value: ")
+
+        elif prompt_type == "Choose from list":
+            print("Please set up the options which the user can choose between")
+            print("Note that you can customize the value displayed to the user")
+            elem["type"] = "string"
+            elem["enum"] = []
+            elem["enumNames"] = []
+
+            while len(elem["enum"]) == 0 or ask_yes_no("Would you like to add another option?"):
+
+                val = ask("text", "Value:")
+                name = ask("text", "Display:", default=val)
+
+                elem["enum"].append(val)
+                elem["enumNames"].append(name)
+
+        elif prompt_type == "Boolean":
+            elem["type"] = "boolean"
+            if ask_yes_no("Does this input have a default value?"):
+                elem["default"] = ask("select", "Default value:", choices=["True", "False"]) == "True"
+
+        elif prompt_type == "Number":
+            if ask_yes_no("Does this input have a default value?"):
+                if ask("select", "Integer or float?", choices=["Integer", "Float"]) == "Integer":
+                    elem["default"] = int(ask("text", "Default value:", validate_type=int))
+                    elem["type"] = "integer"
+                else:
+                    elem["default"] = float(ask("text", "Default value:", validate_type=float))
+                    elem["type"] = "number"
+
+        elif prompt_type == "List of iGenomes references":
+            elem["type"] = "string"
+            elem["enum"] = [
+                "TAIR10",
+                "EB2",
+                "UMD3.1",
+                "bosTau8",
+                "WBcel235",
+                "ce10",
+                "CanFam3.1",
+                "canFam3",
+                "GRCz10",
+                "danRer10",
+                "BDGP6",
+                "dm6",
+                "EquCab2",
+                "equCab2",
+                "EB1",
+                "Galgal4",
+                "Gm01",
+                "GRCh37",
+                "GRCh38",
+                "hg18",
+                "hg19",
+                "hg38",
+                "Mmul 1",
+                "GRCm38",
+                "mm10",
+                "IRGSP-1.0",
+                "CHIMP2.1.4",
+                "panTro4",
+                "Rnor 5.0",
+                "Rnor 6.0",
+                "rn6",
+                "R64-1-1",
+                "sacCer3",
+                "EF2",
+                "Sbi1",
+                "Sscrofa10.2",
+                "susScr3",
+                "AGPv3"
+            ]
+
+            elem["enumNames"] = [
+                "Arabidopsis thaliana (TAIR10)",
+                "Bacillus subtilis 168 (EB2)",
+                "Bos taurus (UMD3.1)",
+                "Bos taurus (bosTau8)",
+                "Caenorhabditis elegans (WBcel235)",
+                "Caenorhabditis elegans (ce10)",
+                "Canis familiaris (CanFam3.1)",
+                "Canis familiaris (canFam3)",
+                "Danio rerio (GRCz10)",
+                "Danio rerio (danRer10)",
+                "Drosophila melanogaster (BDGP6)",
+                "Drosophila melanogaster (dm6)",
+                "Equus caballus (EquCab2)",
+                "Equus caballus (equCab2)",
+                "Escherichia coli K 12 DH10B (EB1)",
+                "Gallus gallus (Galgal4)",
+                "Glycine max (Gm01)",
+                "Homo sapiens (GRCh37)",
+                "Homo sapiens (GRCh38)",
+                "Homo sapiens (hg18)",
+                "Homo sapiens (hg19)",
+                "Homo sapiens (hg38)",
+                "Macaca mulatta (Mmul 1)",
+                "Mus musculus (GRCm38)",
+                "Mus musculus (mm10)",
+                "Oryza sativa japonica (IRGSP-1.0)",
+                "Pan troglodytes (CHIMP2.1.4)",
+                "Pan troglodytes (panTro4)",
+                "Rattus norvegicus (Rnor 5.0)",
+                "Rattus norvegicus (Rnor 6.0)",
+                "Rattus norvegicus (rn6)",
+                "Saccharomyces cerevisiae (R64-1-1)",
+                "Saccharomyces cerevisiae (sacCer3)",
+                "Schizosaccharomyces pombe (EF2)",
+                "Sorghum bicolor (Sbi1)",
+                "Sus scrofa (Sscrofa10.2)",
+                "Sus scrofa (susScr3)",
+                "Zea mays (AGPv3)"
+                ]
+
+        elif prompt_type == "File from the input dataset":
+
+            elem["type"] = "string"
+            elem["file"] = f"**/*{ask('text', 'What is the expected file extension?')}"
+            elem["pathType"] = "dataset"
+            elem["mm"] = dict(matchBase=True)
+
+        elif prompt_type == "File from a project reference":
+
+            elem["type"] = "string"
+            elem["pathType"] = "references"
+
+            ref_title = ask("text", "What is the name of the reference type?")
+            ref_file = ask("text", "What is the name of the file within the reference?")
+            elem["file"] = f"**/{ref_title}/**/{ref_file}"
+        
+        else:
+            assert f"Internal error: prompt type not configured: {prompt_type}"
+
+        # Map the form entry to the input params
+        self.process_config["input"][kw] = f"{section_key}.{kw}"
+
+        # Return the configuration of the parameter
+        return kw, elem, required
+
     def _configure_inputs(self):
         """Configure any additional inputs."""
 
         if ask(
             "confirm",
-            "Would you like to add any fixed parameter values?\n     These values will not change based on user input."
+            "Would you like to add any fixed parameter values?\n  These values will not change based on user input."
         ):
 
             self._add_fixed_param_input()
@@ -599,9 +834,36 @@ class WorkflowConfig:
     def _add_fixed_param_input(self):
         """Allow the user to add a single key-value entry to the params."""
 
-        # Get a key-value pair
-        param_key = ask("text", "Parameter key:")
-        param_value = ask("text", "Parameter value:")
+        # Allow the user to select some pubweb-specific elements
+        param_type = ask(
+            "select",
+            "What type of parameter is this?",
+            choices=[
+                "Fixed value",
+                "Location of data inputs",
+                "Location of data outputs",
+            ]
+        )
+
+        if param_type == "Fixed value":
+
+            # Get a key-value pair
+            param_key = ask("text", "Parameter key:")
+            param_value = ask("text", "Parameter value:")
+
+        elif param_type == "Location of data inputs":
+
+            param_key = ask("text", "Parameter key:")
+            param_value = "$.params.inputs[0].s3|/data/"
+
+        elif param_type == "Location of data outputs":
+
+            param_key = ask("text", "Parameter key:")
+            param_value = "$.params.dataset.s3|/data/"
+
+        else:
+
+            print(f"Internal error: parameter type {param_type} is not configured")
 
         # Let the user confirm their entry
         if ask("confirm", f"Confirm: {param_key} = {param_value}"):
@@ -653,18 +915,18 @@ class WorkflowConfig:
         # Get the path of the output file(s) relative to the output directory
         source = ask(
             "text", 
-            "\n     ".join([
+            "\n  ".join([
                 "What is the location of the output files(s) within the workflow output directory?",
-                "Multiple files with the same format can be included using wildcard (*) characters."
+                "Multiple files with the same format can be included using wildcard (*) characters.\n"
             ])
         )
 
         # Get the value used to separate columns
         sep = ask(
             "text", 
-            "\n     ".join([
+            "\n  ".join([
                 "What is the character used to separate columns?",
-                "e.g. ',' for CSV, '\t' for TSV"
+                "e.g. ',' for CSV, '\\t' for TSV:"
             ])
         )
 
@@ -697,7 +959,7 @@ class WorkflowConfig:
                 f"Reference URL: {url}",
                 f"Columns:"
             ] + [
-                f"    {col['col'] - col['name'] - col['desc']}"
+                f"    {col['col']} - {col['name']} - {col['desc']}"
                 for col in columns
             ] + [
                 "Is all of the information above correct?"
