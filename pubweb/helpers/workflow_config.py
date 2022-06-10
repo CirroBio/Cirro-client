@@ -288,7 +288,7 @@ class WorkflowConfig:
         # Get a list of the processes which are available
         process_choices = [
             f"{process['name']}\n     {process['desc']}\n     {process['id']}"
-            for process in self.client.process.list()
+            for process in self.client.process.list(process_type='NEXTFLOW')
         ]
         process_choices.sort()
 
