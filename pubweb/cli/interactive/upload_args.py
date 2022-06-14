@@ -6,7 +6,7 @@ from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
 
 from pubweb.cli.interactive.common_args import ask_project
-from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
+from pubweb.cli.interactive.utils import prompt_wrapper
 from pubweb.cli.models import UploadArguments
 from pubweb.file_utils import get_directory_stats
 

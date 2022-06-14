@@ -1,8 +1,10 @@
 from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
 from pubweb.auth import UsernameAndPasswordAuth
+from pubweb.cli.interactive.workflow_args import get_preprocess_script
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
+from pubweb.helpers import WorkflowConfig
 from pubweb.utils import parse_json_date, format_date
 from pubweb import PubWeb
 
@@ -87,7 +89,18 @@ def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
-    pubweb.configure_workflow()
+    processes = pubweb.process.list(process_type='NEXTFLOW')
+
+    workflow = WorkflowConfig()
+    workflow.with_repository()
+
+    preprocess_py = get_preprocess_script()
+
+    # If they did want to include one
+    if preprocess_py is not None:
+        workflow.with_preprocess(preprocess_py)
+
+    workflow.save_local()
 
 
 def run_configure():

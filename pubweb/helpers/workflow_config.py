@@ -1,76 +1,17 @@
 import json
+import os
 import shutil
 import tarfile
+from pathlib import Path
 
 import requests
 from github import Github
-import os
-import questionary
 
-
-def prompt_wrapper(questions):
-    answers = questionary.prompt(questions)
-    # Prompt catches KeyboardInterrupt and sends back an empty dictionary
-    # We want to catch this exception
-    if len(answers) == 0:
-        raise KeyboardInterrupt()
-    return answers
-
-
-def type_validator(t, v):
-    """Return a boolean indicating whether `v` can be cast to `t(v)` without raising a ValueError."""
-    try:
-        t(v)
-        return True
-    except ValueError:
-        return False
-
-
-def ask(fname, msg, validate_type=None, output_f=None, **kwargs) -> str:
-    """Wrap questionary functions to catch escapes and exit gracefully."""
-
-    # Get the questionary function
-    questionary_f = questionary.__dict__.get(fname)
-
-    # Make sure that the function exists
-    assert questionary_f is not None, f"No such questionary function: {fname}"
-
-    if fname == "select":
-        kwargs["use_shortcuts"] = True
-
-    if validate_type is not None:
-        kwargs["validate"] = lambda v: type_validator(validate_type, v)
-
-    # The default value must be a string
-    if kwargs.get("default") is not None:
-        kwargs["default"] = str(kwargs["default"])
-
-    # Add a spacer line before asking the question
-    print("")
-
-    # Get the response
-    resp = questionary_f(msg, **kwargs).ask()
-
-    # If the user escaped the question
-    if resp is None:
-        raise KeyboardInterrupt()
-
-    # If an output transformation function was defined
-    if output_f is not None:
-
-        # Call the function
-        resp = output_f(resp)
-
-    # Otherwise
-    return resp
-
-def ask_yes_no(msg):
-
-    return ask("select", msg, choices=["Yes", "No"]) == "Yes"
+from pubweb.cli.interactive.utils import prompt_wrapper, ask, ask_yes_no
+from pubweb.helpers.constants import IGENOMES_REFERENCES, S3_RESOURCES_PREFIX
 
 
 class WorkflowConfig:
-
     def __init__(self, client):
         """Initialize the workflow configuration object with a PubWeb client."""
         
@@ -80,7 +21,7 @@ class WorkflowConfig:
         # Connect to GitHub
         self.gh = Github()
 
-        # All of the parameters will be added to a single object
+        # All the parameters will be added to a single object
         self.process_config = dict(
             dynamo=dict(),
             form=dict(),
@@ -88,198 +29,54 @@ class WorkflowConfig:
             output=dict()
         )
 
-    def configure(self):
-        """Main method for getting user input, parsing the repo, and creating process docs."""
-
-        # Configure the workflow repository
-        # used to populate process-dynamo.json
-        self._configure_repository()
-
-        # Configure the compute configuration
-        # used to populate process-compute.config
-        self._configure_compute()
-
-        # Configure the form
-        self._configure_form()
-        # used to populate process-form.json and process-input.json
-
-        # Configure any additional inputs
-        # used to add to process-input.json
-        self._configure_inputs()
-
-        # Configure outputs
-        # used to configure process-output.json
-        self._configure_outputs()
+        self.compute_config = ""
+        self.output_folder = Path.cwd()
 
     def save_local(self):
         """Write out the workflow configuration as a collection of files."""
 
         # Save each of the items in the process configuration
-        for k, v in self.process_config.items():
-
-            # Use the dictionary key to drive the file name
-            output_fp = os.path.join(self.output_folder, f"process-{k}.json")
+        for config_name, config_value in self.process_config.items():
+            output_fp = Path(self.output_folder, f"process-{config_name}.json")
             print(f"Writing out to {output_fp}")
 
-            # Open the file
-            with open(output_fp, "w") as handle:
-
-                # Serialize as JSON
-                json.dump(v, handle, indent=4)
+            with output_fp.open('w') as handle:
+                json.dump(config_value, handle, indent=4)
 
         # Write the compute configuration
-        output_fp = os.path.join(self.output_folder, "process-compute.config")
+        compute_path = Path(self.output_folder, "process-compute.config")
 
-        with open(output_fp, "w") as handle:
+        with compute_path.open("w") as handle:
             handle.write(self.compute_config)
 
-        print(f"Boilerplate compute configuration has been written to {output_fp} -- please modify that file as necessary.")
+        print(f"Boilerplate compute configuration has been written to {self.output_folder}"
+              f" -- please modify that file as necessary.")
 
-        print(f"Done writing all process configuration items to {output_fp}")
+        print(f"Done writing all process configuration items to {self.output_folder}")
 
-    def _get_resources_repo(self):
-        """Get the location of the folder within the pubweb resources repository to write to."""
-
-        # Get the base directory of the repository
-        repo_folder = self._get_repo_folder()
-
-        # Build the subdirectory for the process
-        subdirectory = ask(
-            "text",
-            "What subdirectory within the process/ folder which should be used to save the outputs? (e.g. hutch/fastqc/1.0)"
-        )
-
-        resources_folder = os.path.join(repo_folder, "process", subdirectory)
-
-        # If the folder already exists
-        while os.path.exists(resources_folder):
-
-            if ask(
-                "select",
-                "That folder already exists, would you like to overwrite any existing files or select a new folder?",
-                choices=[f"Use {resources_folder}", "Select another"]
-            ) == "Select another":
-
-                # Build the subdirectory for the process
-                subdirectory = ask(
-                    "text",
-                    "What subdirectory within the process/ folder which should be used to save the outputs? (e.g. hutch/fastqc/1.0)"
-                )
-                resources_folder = os.path.join(repo_folder, "process", subdirectory)
-
-            else:
-                break
-
-        # Create the folder if it does not exist
-        if not os.path.exists(resources_folder):
-            os.makedirs(resources_folder)
-
-        # Return the full path to the folder, as well as the relative path within the repository
-        return resources_folder, subdirectory.strip("/")
-
-    def _get_preprocess_script(self):
-        """Ask if the user wants to add a preprocessing script."""
-
-        if ask_yes_no("Would you like to use a preprocessing script?"):
-
-            script_path = ask(
-                "path",
-                "What script should be used?",
-                default="./"
-            )
-
-            while not os.path.exists(script_path):
-
-                script_path = ask(
-                    "path",
-                    f"Path cannot be found ({script_path}) - please select another",
-                    default=script_path
-                )
-
-            return script_path
-
-    def _get_repo_folder(self):
-        """Get the base location of the pubweb resources repository."""
-
-        repo_folder = ask(
-            "path",
-            "What folder contains a local copy of the PubWeb resources repository?",
-            default="./",
-            only_directories=True
-        )
-
-        # If the path does not exist
-        if not os.path.exists(repo_folder):
-
-            # Ask if it should be created
-            resp = ask(
-                "select",
-                f"The path does not exist: {repo_folder}\nWould you like to create it, or pick another folder?",
-                choices=[
-                    "Create the folder",
-                    "Select another"
-                ]
-            )
-
-            if resp == "Create the folder":
-                os.makedirs(repo_folder)
-                return repo_folder
-
-            else:
-                return self._get_repo_folder()
-
-        else:
-            return repo_folder
-
-    def _configure_repository(self):
+    def with_repository(self,
+                        name: str,
+                        org: str,
+                        repo: str,
+                        version: str,
+                        entrypoint='main.nf',
+                        private=False) -> self:
         """Configure the workflow repository."""
 
         # Set up the boilerplate elements of the dynamo record
         self._add_dynamo_boilerplate()
 
         # Get the name of the process
-        self.process_config["dynamo"]["name"] = ask(
-            "text",
-            "What name should be displayed for this workflow?"
-        )
-
-        # Get the organization
-        org = ask(
-            'text',
-            'Which GitHub organization is the workflow located within?',
-            default='nf-core'
-        )
-
-        # Get the repository
-        repo = self._prompt_repository(org)
-
-        # Get the version
-        version = self._prompt_repository_version(org, repo)
+        self.process_config["dynamo"]["name"] = name
 
         # Set up the process name based on the workflow/version
         process_id = f"process-{org}-{repo}-{version}"
         self.process_config["dynamo"]["id"] = process_id
 
-        # Get the entrypoint to use
-        entrypoint = prompt_wrapper(dict(
-            type="input",
-            name="entrypoint",
-            message="What is the primary entrypoint for the workflow in the repository?",
-            default="main.nf"
-        ))["entrypoint"]
-
-        # Check if the repository is public or private
-        privacy = prompt_wrapper(dict(
-            type="list",
-            message="Is the GitHub repository public or private?",
-            choices=["Public", "Private"],
-            default="Public",
-            name="privacy"
-        ))["privacy"]
-
+        repository_code = f"GITHUB{'PRIVATE' if private else 'PUBLIC'}"
         # Set up the 'code' block of the dynamo record
         self.process_config["dynamo"]["code"] = dict(
-            repository=f"GITHUB{privacy.upper()}",
+            repository=repository_code,
             script=entrypoint,
             uri=f"{org}/{repo}",
             version=version
@@ -302,38 +99,28 @@ class WorkflowConfig:
             )
         ]
 
-        # Get the folder which should be used to write the outputs,
-        # as well as the path relative to the repository
-        self.output_folder, self.repo_prefix = self._get_resources_repo()
-
-        # Ask if the user wants to add a preprocessing script
-        preprocess_py = self._get_preprocess_script()
-
-        # If they did want to include one
-        if preprocess_py is not None:
-
-            # Copy it to the output folder
-            shutil.copyfile(
-                preprocess_py, 
-                os.path.join(self.output_folder, preprocess_py.split("/")[-1])
-            )
-
-            # Add it to the dynamo record
-            self.process_config["dynamo"]["preProcessScript"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/{preprocess_py.split('/')[-1]}"
-
         # Use the relative path within the repository to set up the relative
         # paths in the dynamo record
-        self.process_config["dynamo"]["computeDefaults"] = [
-            {
-                "executor": "NEXTFLOW",
-                "json": f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-compute.config",
-                "name": "Default"
-            }
-        ]
+        self.process_config["dynamo"]["paramMapJson"] = \
+            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-input.json"
+        self.process_config["dynamo"]["formJson"] = \
+            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-form.json"
+        self.process_config["dynamo"]["webOptimizationJson"] = \
+            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-output.json"
 
-        self.process_config["dynamo"]["paramMapJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-input.config"
-        self.process_config["dynamo"]["formJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-form.config"
-        self.process_config["dynamo"]["webOptimizationJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-output.config"
+        return self
+
+    def with_preprocess(self, preprocess_py_path: Path):
+        shutil.copyfile(
+            preprocess_py_path,
+            Path(self.output_folder, preprocess_py_path.name)
+        )
+
+        # Add it to the dynamo record
+        self.process_config["dynamo"]["preProcessScript"] = \
+            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/{preprocess_py_path.name}"
+
+        return self
 
     def _add_dynamo_boilerplate(self):
         """Add the elements of the dynamo record which do not vary by user entry."""
@@ -344,100 +131,31 @@ class WorkflowConfig:
         self.process_config["dynamo"]["componentJson"] = ""
         self.process_config["dynamo"]["infoJson"] = ""
 
-    def _prompt_repository(self, org):
-        """Prompt the user for a repository contained within an organization."""
+    def with_compute(self, max_retry=2):
+        """
+        Configure the compute configuration.
+        The compute configuration is boilerplate at this point
+        """
 
-        # Get a list of repos in that organization
-        repo_list = [
-            repo.name for repo in self.gh.get_user(org).get_repos()
-            if repo.name != '.github'
+        self.process_config["dynamo"]["computeDefaults"] = [
+            {
+                "executor": "NEXTFLOW",
+                "json": f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-compute.config",
+                "name": "Default"
+            }
         ]
 
-        # then use that to ask the user which repo to look at
-        return prompt_wrapper({
-            'type': 'list',
-            'name': 'repo',
-            'message': 'Which repository contains the workflow of interest?',
-            'choices': repo_list,
-            'default': None
-        })['repo']
-
-    def _prompt_repository_version(self, org, repo_name):
-        """Parse the repository and ask the user which tag/version to use."""
-
-        # Get the repository object
-        repo = self.gh.get_repo(f"{org}/{repo_name}")
-
-        # The version will be specified with either a branch or a release
-        version_type = prompt_wrapper({
-            'type': 'list',
-            'name': 'version_type',
-            'message': 'Should the workflow version be specified by branch or release tag?',
-            'choices': ['branch', 'release'],
-            'default': None
-        })['version_type']
-
-        # If the user decided to select the version type by release (tag)
-        if version_type == 'release':
-
-            # Get the releases which are available
-            version_list = [x for x in repo.get_releases()]
-            pretty_version_list = [f"{x.tag_name} ({x.title})" for x in version_list]
-            
-            version_prompt = {
-                'type': 'list',
-                'name': 'version',
-                'message': f"Which version of {repo_name} do you want to use?",
-                'choices': pretty_version_list,
-                'default': None
-            }
-            answers = prompt_wrapper(version_prompt)
-
-            version = [x for x in version_list if f"{x.tag_name} ({x.title})" == answers['version']][0]
-
-            # Set the URL of the tag
-            self.process_config["dynamo"]["documentationUrl"] = f"https://github.com/{org}/{repo_name}/releases/tag/{version.tag_name}"
-
-            # Set the URL of the tarball
-            self.tarball_url = f"https://github.com/{org}/{repo_name}/archive/refs/tags/{version.tag_name}.tar.gz"
-
-            return version.tag_name
-
-        else:
-
-            assert version_type == "branch"
-
-            # Select from the branches which are available
-            branch = prompt_wrapper({
-                'type': 'list',
-                'name': 'branch',
-                'message': f"Which branch of {org}/{repo_name} do you want to use?",
-                'choices': [branch.name for branch in repo.get_branches()],
-                'default': None
-            })['branch']
-
-            # Set the URL of the branch
-            self.process_config["dynamo"]["documentationUrl"] = f"https://github.com/{org}/{repo_name}/tree/{branch}"
-
-            # Set the URL of the tarball
-            self.tarball_url = f"https://github.com/{org}/{repo_name}/archive/refs/heads/{branch}.tar.gz"
-
-            return branch
-
-    def _configure_compute(self):
-        """Configure the compute configuration."""
-        
-        # The compute configuration is boilerplate at this point
-        self.compute_config = """profiles {
-    standard {
-        process {
+        self.compute_config = f"""profiles {{
+    standard {{
+        process {{
             executor = 'awsbatch'
             errorStrategy = 'retry'
-            maxRetries = 2
-        }
-    }
-}
+            maxRetries = {max_retry}
+        }}
+    }}
+}}
 """
+        return self
 
     def _configure_form(self):
         """Configure the form."""
@@ -710,87 +428,8 @@ class WorkflowConfig:
 
         elif prompt_type == "List of iGenomes references":
             elem["type"] = "string"
-            elem["enum"] = [
-                "TAIR10",
-                "EB2",
-                "UMD3.1",
-                "bosTau8",
-                "WBcel235",
-                "ce10",
-                "CanFam3.1",
-                "canFam3",
-                "GRCz10",
-                "danRer10",
-                "BDGP6",
-                "dm6",
-                "EquCab2",
-                "equCab2",
-                "EB1",
-                "Galgal4",
-                "Gm01",
-                "GRCh37",
-                "GRCh38",
-                "hg18",
-                "hg19",
-                "hg38",
-                "Mmul 1",
-                "GRCm38",
-                "mm10",
-                "IRGSP-1.0",
-                "CHIMP2.1.4",
-                "panTro4",
-                "Rnor 5.0",
-                "Rnor 6.0",
-                "rn6",
-                "R64-1-1",
-                "sacCer3",
-                "EF2",
-                "Sbi1",
-                "Sscrofa10.2",
-                "susScr3",
-                "AGPv3"
-            ]
-
-            elem["enumNames"] = [
-                "Arabidopsis thaliana (TAIR10)",
-                "Bacillus subtilis 168 (EB2)",
-                "Bos taurus (UMD3.1)",
-                "Bos taurus (bosTau8)",
-                "Caenorhabditis elegans (WBcel235)",
-                "Caenorhabditis elegans (ce10)",
-                "Canis familiaris (CanFam3.1)",
-                "Canis familiaris (canFam3)",
-                "Danio rerio (GRCz10)",
-                "Danio rerio (danRer10)",
-                "Drosophila melanogaster (BDGP6)",
-                "Drosophila melanogaster (dm6)",
-                "Equus caballus (EquCab2)",
-                "Equus caballus (equCab2)",
-                "Escherichia coli K 12 DH10B (EB1)",
-                "Gallus gallus (Galgal4)",
-                "Glycine max (Gm01)",
-                "Homo sapiens (GRCh37)",
-                "Homo sapiens (GRCh38)",
-                "Homo sapiens (hg18)",
-                "Homo sapiens (hg19)",
-                "Homo sapiens (hg38)",
-                "Macaca mulatta (Mmul 1)",
-                "Mus musculus (GRCm38)",
-                "Mus musculus (mm10)",
-                "Oryza sativa japonica (IRGSP-1.0)",
-                "Pan troglodytes (CHIMP2.1.4)",
-                "Pan troglodytes (panTro4)",
-                "Rattus norvegicus (Rnor 5.0)",
-                "Rattus norvegicus (Rnor 6.0)",
-                "Rattus norvegicus (rn6)",
-                "Saccharomyces cerevisiae (R64-1-1)",
-                "Saccharomyces cerevisiae (sacCer3)",
-                "Schizosaccharomyces pombe (EF2)",
-                "Sorghum bicolor (Sbi1)",
-                "Sus scrofa (Sscrofa10.2)",
-                "Sus scrofa (susScr3)",
-                "Zea mays (AGPv3)"
-                ]
+            elem["enum"] = IGENOMES_REFERENCES.keys()
+            elem["enumNames"] = IGENOMES_REFERENCES.values()
 
         elif prompt_type == "File from the input dataset":
 
@@ -869,11 +508,12 @@ class WorkflowConfig:
         if ask("confirm", f"Confirm: {param_key} = {param_value}"):
             self.process_config["input"][param_key] = param_value
 
-    def _configure_outputs(self):
+    def with_output(self):
         """Configure any additional outputs."""
 
         # Set up the blank output object
-        self.process_config["output"] = dict(commands=[])
+        commands = []
+        self.process_config["output"] = dict(commands=commands)
 
         if ask(
             "confirm",
@@ -885,20 +525,29 @@ class WorkflowConfig:
             while ask("confirm", "Would you like to add another?"):
 
                 self._add_single_output()
+        return self
 
-        # Add the commands to index all of the files which were output
-        self.process_config["output"]["commands"].extend([
-            {
-                "command": "hot.Manifest",
-                "params": {}
-            },
+    def with_common_outputs(self):
+        commands = self.process_config["output"]["commands"]
+
+        # Add hot.Manifest if hot.Dsv is present
+        if any(entry['command'] == 'hot.Dsv' for entry in commands):
+            commands.append(
+                {
+                    "command": "hot.Manifest",
+                    "params": {}
+                }
+            )
+
+        # Add the commands to index all the files which were output
+        commands.append(
             {
                 "command": "save.ManifestJson",
                 "params": {
                     "files": [
-                    {
-                        "glob": "$dataDirectory/**/*.*"
-                    }
+                        {
+                            "glob": "$dataDirectory/**/*.*"
+                        }
                     ],
                     "tables": [],
                     "jsons": [],
@@ -907,9 +556,10 @@ class WorkflowConfig:
                     "version": "2"
                 }
             }
-        ])
+        )
+        return self
 
-    def _add_single_output(self):
+    def with_output(self):
         """Configure a single output file."""
 
         # Get the path of the output file(s) relative to the output directory
@@ -968,7 +618,7 @@ class WorkflowConfig:
 
             self.process_config["output"]["commands"].append(
                 dict(
-                    command="Hot.Dsv",
+                    command="hot.Dsv",
                     params=dict(
                         url=url,
                         source=source,

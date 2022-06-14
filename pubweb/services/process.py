@@ -1,6 +1,7 @@
 from gql import gql
 
 from pubweb.clients.utils import get_id_from_name, filter_deleted
+from pubweb.helpers import WorkflowConfig
 from pubweb.services.base import BaseService
 
 
@@ -24,7 +25,7 @@ class ProcessService(BaseService):
         ''')
         item_filter = {}
         if process_type:
-            item_filter['executor'] = {'eq': 'INGEST'}
+            item_filter['executor'] = {'eq': process_type}
         resp = self._api_client.query(query, variables={'filter': item_filter})['listProcesses']
         return filter_deleted(resp['items'])
 
