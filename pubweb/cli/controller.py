@@ -96,10 +96,11 @@ def run_configure_workflow():
 
     preprocess_py = get_preprocess_script()
 
-    # If they did want to include one
     if preprocess_py is not None:
         workflow.with_preprocess(preprocess_py)
 
+
+    workflow.with_common_outputs()
     workflow.save_local()
 
 

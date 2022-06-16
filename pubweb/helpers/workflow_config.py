@@ -3,20 +3,18 @@ import os
 import shutil
 import tarfile
 from pathlib import Path
+from typing import List
 
 import requests
 from github import Github
 
-from pubweb.cli.interactive.utils import prompt_wrapper, ask, ask_yes_no
+from pubweb.cli.interactive.utils import ask, ask_yes_no
 from pubweb.helpers.constants import IGENOMES_REFERENCES, S3_RESOURCES_PREFIX
 
 
 class WorkflowConfig:
-    def __init__(self, client):
+    def __init__(self, repo_prefix: str, output_folder: Path):
         """Initialize the workflow configuration object with a PubWeb client."""
-        
-        # Attach the client
-        self.client = client
 
         # Connect to GitHub
         self.gh = Github()
@@ -28,9 +26,12 @@ class WorkflowConfig:
             input=dict(),
             output=dict()
         )
+        # Set up the boilerplate elements of the dynamo record
+        self._add_dynamo_boilerplate()
 
         self.compute_config = ""
-        self.output_folder = Path.cwd()
+        self.repo_prefix = repo_prefix
+        self.output_folder = output_folder or Path.cwd()
 
     def save_local(self):
         """Write out the workflow configuration as a collection of files."""
@@ -60,11 +61,8 @@ class WorkflowConfig:
                         repo: str,
                         version: str,
                         entrypoint='main.nf',
-                        private=False) -> self:
+                        private=False):
         """Configure the workflow repository."""
-
-        # Set up the boilerplate elements of the dynamo record
-        self._add_dynamo_boilerplate()
 
         # Get the name of the process
         self.process_config["dynamo"]["name"] = name
@@ -82,31 +80,17 @@ class WorkflowConfig:
             version=version
         )
 
-        # Get a list of the processes which are available
-        process_choices = [
-            f"{process['name']}\n     {process['desc']}\n     {process['id']}"
-            for process in self.client.process.list(process_type='NEXTFLOW')
-        ]
-        process_choices.sort()
-
-        # Add any child processes that may exist
-        self.process_config["dynamo"]["childProcessIds"] = [
-            p.split("\n")[-1].strip(" ")
-            for p in ask(
-                "checkbox",
-                "Select any processes which can be run on the outputs of this workflow",
-                choices=process_choices
-            )
-        ]
-
         # Use the relative path within the repository to set up the relative
         # paths in the dynamo record
         self.process_config["dynamo"]["paramMapJson"] = \
             f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-input.json"
         self.process_config["dynamo"]["formJson"] = \
             f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-form.json"
-        self.process_config["dynamo"]["webOptimizationJson"] = \
-            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-output.json"
+
+        return self
+
+    def with_child_processes(self, child_processes: List[str]):
+        self.process_config["dynamo"]["childProcessIds"] = child_processes
 
         return self
 
@@ -200,7 +184,6 @@ class WorkflowConfig:
             )
 
     def _get_repo_tarball(self):
-
         """Clone a local copy of the repository which will be imported/parsed."""
         file_name = os.path.basename(self.tarball_url)
         print(f"Downloading {file_name} from {self.tarball_url}")
@@ -509,97 +492,12 @@ class WorkflowConfig:
             self.process_config["input"][param_key] = param_value
 
     def with_output(self):
-        """Configure any additional outputs."""
-
-        # Set up the blank output object
-        commands = []
-        self.process_config["output"] = dict(commands=commands)
-
-        if ask(
-            "confirm",
-            "Does this workflow produce output files which should be indexed for visualization?"
-        ):
-
-            self._add_single_output()
-
-            while ask("confirm", "Would you like to add another?"):
-
-                self._add_single_output()
-        return self
-
-    def with_common_outputs(self):
-        commands = self.process_config["output"]["commands"]
-
-        # Add hot.Manifest if hot.Dsv is present
-        if any(entry['command'] == 'hot.Dsv' for entry in commands):
-            commands.append(
-                {
-                    "command": "hot.Manifest",
-                    "params": {}
-                }
-            )
-
-        # Add the commands to index all the files which were output
-        commands.append(
-            {
-                "command": "save.ManifestJson",
-                "params": {
-                    "files": [
-                        {
-                            "glob": "$dataDirectory/**/*.*"
-                        }
-                    ],
-                    "tables": [],
-                    "jsons": [],
-                    "lists": [],
-                    "tensors": [],
-                    "version": "2"
-                }
-            }
-        )
-        return self
-
-    def with_output(self):
         """Configure a single output file."""
-
-        # Get the path of the output file(s) relative to the output directory
-        source = ask(
-            "text", 
-            "\n  ".join([
-                "What is the location of the output files(s) within the workflow output directory?",
-                "Multiple files with the same format can be included using wildcard (*) characters.\n"
-            ])
-        )
-
-        # Get the value used to separate columns
-        sep = ask(
-            "text", 
-            "\n  ".join([
-                "What is the character used to separate columns?",
-                "e.g. ',' for CSV, '\\t' for TSV:"
-            ])
-        )
-
-        name = ask("text", "Short name for output file(s)")
-        desc = ask("text", "Longer description for output file(s)")
-        url = ask("text", "Optional website documenting file contents")
-
-        # Build the list of columns
-        columns = []
-
-        print("")
-
-        while len(columns) == 0 or ask("confirm", "Are there additional columns to add?"):
-
-            columns.append(dict(
-                col=ask("text", "Column header (value in the first line of the file)"),
-                name=ask("text", "Column name (to be displayed to the user)"),
-                desc=ask("text", "Column description (to be displayed to the user)")
-            ))
+        self._init_outputs()
 
         # Let the user confirm
         if ask(
-            "confirm", 
+            "confirm",
             "\n     ".join([
                 "File configuration:",
                 f"Path: {source}",
@@ -630,3 +528,45 @@ class WorkflowConfig:
                     )
                 )
             )
+        return self
+
+    def with_common_outputs(self):
+        self._init_outputs()
+        commands = self.process_config["output"]["commands"]
+
+        # Add hot.Manifest if hot.Dsv is present
+        if any(entry['command'] == 'hot.Dsv' for entry in commands):
+            # Add the command to index datasources that are present
+            commands.append(
+                {
+                    "command": "hot.Manifest",
+                    "params": {}
+                }
+            )
+
+        # Add the command to index all the files which were outputted
+        commands.append(
+            {
+                "command": "save.ManifestJson",
+                "params": {
+                    "files": [
+                        {
+                            "glob": "$dataDirectory/**/*.*"
+                        }
+                    ],
+                    "tables": [],
+                    "jsons": [],
+                    "lists": [],
+                    "tensors": [],
+                    "version": "2"
+                }
+            }
+        )
+        return self
+
+    def _init_outputs(self):
+        """Checks if we need to initialize the blank output"""
+        if not self.process_config["output"]:
+            self.process_config["output"] = dict(commands=[])
+            self.process_config["dynamo"]["webOptimizationJson"] = \
+                f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-output.json"

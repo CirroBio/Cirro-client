@@ -76,6 +76,72 @@ def _get_repo_folder():
         return repo_folder
 
 
+def get_child_processes(processes):
+    # Get a list of the processes which are available
+    process_choices = [
+        f"{process['name']}\n     {process['desc']}\n     {process['id']}"
+        for process in processes
+    ]
+    process_choices.sort()
+
+    return [
+        p.split("\n")[-1].strip(" ")
+        for p in ask(
+            "checkbox",
+            "Select any processes which can be run on the outputs of this workflow",
+            choices=process_choices
+        )
+    ]
+
+
+def get_outputs():
+    if ask(
+            "confirm",
+            "Does this workflow produce output files which should be indexed for visualization?"
+    ):
+
+        _add_single_output()
+
+        while ask("confirm", "Would you like to add another?"):
+            _add_single_output()
+
+
+def _add_single_output():
+    # Get the path of the output file(s) relative to the output directory
+    source = ask(
+        "text",
+        "\n  ".join([
+            "What is the location of the output files(s) within the workflow output directory?",
+            "Multiple files with the same format can be included using wildcard (*) characters.\n"
+        ])
+    )
+
+    # Get the value used to separate columns
+    sep = ask(
+        "text",
+        "\n  ".join([
+            "What is the character used to separate columns?",
+            "e.g. ',' for CSV, '\\t' for TSV:"
+        ])
+    )
+
+    name = ask("text", "Short name for output file(s)")
+    desc = ask("text", "Longer description for output file(s)")
+    url = ask("text", "Optional website documenting file contents")
+
+    # Build the list of columns
+    columns = []
+
+    print("")
+
+    while len(columns) == 0 or ask("confirm", "Are there additional columns to add?"):
+        columns.append(dict(
+            col=ask("text", "Column header (value in the first line of the file)"),
+            name=ask("text", "Column name (to be displayed to the user)"),
+            desc=ask("text", "Column description (to be displayed to the user)")
+        ))
+
+
 def get_preprocess_script():
     """Ask if the user wants to add a preprocessing script."""
 
