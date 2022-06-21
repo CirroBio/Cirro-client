@@ -331,9 +331,9 @@ class WorkflowConfig:
             }
         ]
 
-        self.process_config["dynamo"]["paramMapJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-input.config"
-        self.process_config["dynamo"]["formJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-form.config"
-        self.process_config["dynamo"]["webOptimizationJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-output.config"
+        self.process_config["dynamo"]["paramMapJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-input.json"
+        self.process_config["dynamo"]["formJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-form.json"
+        self.process_config["dynamo"]["webOptimizationJson"] = f"s3://<RESOURCES_BUCKET>/{self.repo_prefix}/process-output.json"
 
     def _add_dynamo_boilerplate(self):
         """Add the elements of the dynamo record which do not vary by user entry."""
