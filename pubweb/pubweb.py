@@ -1,7 +1,6 @@
 from pubweb.auth import AuthInfo
 from pubweb.clients import ApiClient
 from pubweb.services import DatasetService, ProcessService, ProjectService
-from pubweb.helpers import WorkflowConfig
 
 
 class PubWeb:

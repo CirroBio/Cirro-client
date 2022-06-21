@@ -1,10 +1,14 @@
+from pathlib import Path
+
 from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
 from pubweb.auth import UsernameAndPasswordAuth
-from pubweb.cli.interactive.workflow_args import get_preprocess_script
+from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_inputs, get_outputs, get_child_processes, \
+    get_repository, get_description
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
-from pubweb.helpers import WorkflowConfig
+from pubweb.helpers import WorkflowConfigBuilder
+from pubweb.helpers.schema_helpers import get_nextflow_schema, convert_nf_schema
 from pubweb.utils import parse_json_date, format_date
 from pubweb import PubWeb
 
@@ -89,19 +93,50 @@ def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
-    processes = pubweb.process.list(process_type='NEXTFLOW')
+    process_options = pubweb.process.list(process_type='NEXTFLOW')
 
-    workflow = WorkflowConfig()
-    workflow.with_repository()
+    repo_prefix = get_repo_prefix()
+    workflow = WorkflowConfigBuilder(repo_prefix)
+
+    # Process record
+    repo = get_repository()
+    workflow.with_repository(repo)
 
     preprocess_py = get_preprocess_script()
-
     if preprocess_py is not None:
         workflow.with_preprocess(preprocess_py)
 
+    workflow.with_child_processes(
+        get_child_processes(process_options)
+    )
 
+    # Process form & process inputs
+    nf_schema = get_nextflow_schema(repo.repo_path, repo.version)
+    if nf_schema is not None:
+        inputs = {}
+        form = {**nf_schema}
+        convert_nf_schema(form, inputs)
+
+        workflow.with_description(nf_schema['description'])
+        workflow.with_form_inputs()
+
+        for input_name, input_value in inputs.items():
+            workflow.with_input(input_name, input_value)
+
+    else:
+        workflow.with_description(get_description())
+        workflow.with_form_inputs()
+
+    # Additional inputs
+    for input_name, input_value in get_inputs():
+        workflow.with_input(input_name, input_value)
+
+    # Process outputs
+    for output in get_outputs():
+        workflow.with_output(output)
     workflow.with_common_outputs()
-    workflow.save_local()
+
+    workflow.save_local(Path.cwd())
 
 
 def run_configure():

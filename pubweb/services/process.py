@@ -1,7 +1,6 @@
 from gql import gql
 
 from pubweb.clients.utils import get_id_from_name, filter_deleted
-from pubweb.helpers import WorkflowConfig
 from pubweb.services.base import BaseService
 
 
