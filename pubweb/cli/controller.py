@@ -3,7 +3,7 @@ from pathlib import Path
 from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
 from pubweb.auth import UsernameAndPasswordAuth
 from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_inputs, get_outputs, get_child_processes, \
-    get_repository, get_description
+    get_repository, get_description, get_output_resources_path
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
@@ -94,16 +94,16 @@ def run_configure_workflow():
 
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
     process_options = pubweb.process.list(process_type='NEXTFLOW')
+    repo_folder, resources_folder = get_output_resources_path()
 
-    repo_prefix = get_repo_prefix()
-    workflow = WorkflowConfigBuilder(repo_prefix)
+    workflow = WorkflowConfigBuilder(repo_folder)
 
     # Process record
     repo = get_repository()
     workflow.with_repository(repo)
 
-    preprocess_py = get_preprocess_script()
-    if preprocess_py is not None:
+    # Prompt for optional pre-process script
+    if preprocess_py := get_preprocess_script():
         workflow.with_preprocess(preprocess_py)
 
     workflow.with_child_processes(
@@ -136,7 +136,7 @@ def run_configure_workflow():
         workflow.with_output(output)
     workflow.with_common_outputs()
 
-    workflow.save_local(Path.cwd())
+    workflow.save_local(resources_folder)
 
 
 def run_configure():

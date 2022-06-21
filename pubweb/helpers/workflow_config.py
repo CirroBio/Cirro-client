@@ -101,6 +101,7 @@ class WorkflowConfigBuilder:
         # Add it to the dynamo record
         self.process_config["dynamo"]["preProcessScript"] = \
             f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/{preprocess_py_path.name}"
+        self.preprocess_py_path = preprocess_py_path
 
         return self
 
