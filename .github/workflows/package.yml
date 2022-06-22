@@ -1,0 +1,47 @@
+name: Build Python package
+
+on:
+  release:
+    types:
+      - published
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Test install
+        run: |
+          python setup.py install
+          pubweb-cli
+
+      - name: Build python package
+        run: |
+          python setup.py bdist_wheel
+
+      - name: Publish package
+        if: github.event_name == 'release'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
