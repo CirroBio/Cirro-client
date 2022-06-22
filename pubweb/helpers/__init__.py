@@ -1,1 +1,1 @@
-from pubweb.helpers.workflow_config import WorkflowConfig
+from pubweb.helpers.workflow_config import WorkflowConfigBuilder

@@ -24,7 +24,7 @@ class ProcessService(BaseService):
         ''')
         item_filter = {}
         if process_type:
-            item_filter['executor'] = {'eq': 'INGEST'}
+            item_filter['executor'] = {'eq': process_type}
         resp = self._api_client.query(query, variables={'filter': item_filter})['listProcesses']
         return filter_deleted(resp['items'])
 
