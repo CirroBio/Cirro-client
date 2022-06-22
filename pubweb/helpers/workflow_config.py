@@ -3,7 +3,7 @@ import shutil
 from pathlib import Path
 from typing import List, Dict
 
-from pubweb.helpers.constants import S3_RESOURCES_PREFIX
+from pubweb.helpers.constants import PROCESSES_PATH_S3
 from pubweb.models.process import Process
 from pubweb.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
 
@@ -80,7 +80,7 @@ class WorkflowConfigBuilder:
         self.process_config["dynamo"]["name"] = repo.display_name
 
         # Set up the process name based on the workflow/version
-        process_id = f"process-{repo.org}-{repo.repo_name}-{repo.version}"
+        process_id = f"process-{repo.org}-{repo.repo_name}-{repo.version}".lower()
         self.process_config["dynamo"]["id"] = process_id
 
         repository_code = f"GITHUB{'PRIVATE' if repo.private else 'PUBLIC'}"
@@ -109,7 +109,7 @@ class WorkflowConfigBuilder:
         """
         # Add it to the dynamo record
         self.process_config["dynamo"]["preProcessScript"] = \
-            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/{preprocess_py_path.name}"
+            f"{PROCESSES_PATH_S3}/{self.repo_prefix}/{preprocess_py_path.name}"
         self.preprocess_py_path = preprocess_py_path
 
         return self
@@ -125,11 +125,11 @@ class WorkflowConfigBuilder:
         self.process_config["dynamo"]["componentJson"] = ""
         self.process_config["dynamo"]["infoJson"] = ""
         self.process_config["dynamo"]["paramMapJson"] = \
-            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-input.json"
+            f"{PROCESSES_PATH_S3}/{self.repo_prefix}/process-input.json"
         self.process_config["dynamo"]["formJson"] = \
-            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-form.json"
+            f"{PROCESSES_PATH_S3}/{self.repo_prefix}/process-form.json"
         self.process_config["dynamo"]["webOptimizationJson"] = \
-            f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-output.json"
+            f"{PROCESSES_PATH_S3}/{self.repo_prefix}/process-output.json"
 
     def with_compute(self, max_retries=2):
         """
@@ -140,7 +140,7 @@ class WorkflowConfigBuilder:
         self.process_config["dynamo"]["computeDefaults"] = [
             {
                 "executor": "NEXTFLOW",
-                "json": f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-compute.config",
+                "json": f"{PROCESSES_PATH_S3}/{self.repo_prefix}/process-compute.config",
                 "name": "Default"
             }
         ]
@@ -256,4 +256,4 @@ class WorkflowConfigBuilder:
         if not self.process_config["output"]:
             self.process_config["output"] = dict(commands=[])
             self.process_config["dynamo"]["webOptimizationJson"] = \
-                f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-output.json"
+                f"{PROCESSES_PATH_S3}/{self.repo_prefix}/process-output.json"
