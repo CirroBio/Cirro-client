@@ -314,7 +314,7 @@ def get_description():
     )
 
 
-def get_inputs():
+def get_additional_inputs():
     """Configure any additional inputs."""
 
     inputs = []
