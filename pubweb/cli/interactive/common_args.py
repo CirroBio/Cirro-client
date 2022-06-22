@@ -12,3 +12,17 @@ def ask_project(projects, input_value):
     }
     answers = prompt_wrapper(project_prompt)
     return answers['project']
+
+
+def ask_use_third_party_tool():
+    answers = prompt_wrapper({
+        'type': 'list',
+        'message': 'How would you like to upload or download your data?',
+        'name': 'use_tool',
+        'choices': [
+            "PubWeb CLI",
+            "Third-party tool (must support temporary credentials)"
+        ]
+    })
+
+    return answers['use_tool'] != 'PubWeb CLI'

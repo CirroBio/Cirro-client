@@ -8,7 +8,7 @@ from pubweb.clients.utils import filter_deleted, GET_FILE_ACCESS_TOKEN_QUERY
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
 from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse
-from pubweb.services.base import BaseService
+from pubweb.services.file import FileEnabledService
 from pubweb.services.project import get_bucket
 
 
@@ -19,7 +19,7 @@ def _get_dataset_files(dataset_id: str, project_id: str, s3_client: S3Client) ->
     return [file['file'] for file in manifest['files']]
 
 
-class DatasetService(BaseService):
+class DatasetService(FileEnabledService):
     def find_by_project(self, project_id):
         query = gql('''
           query DatasetsByProject(
@@ -99,6 +99,7 @@ class DatasetService(BaseService):
         upload_directory(directory, files, s3_client, get_bucket(project_id), path)
 
     def download_files(self, project_id: str, dataset_id: str, download_location: str):
+        self._file_service.g
         token_request = {
             'projectId': project_id,
             'datasetId': dataset_id,
@@ -106,9 +107,7 @@ class DatasetService(BaseService):
             'operation': 'DOWNLOAD'
         }
         variables = {'input': token_request}
-        credentials_response = self._api_client.query(GET_FILE_ACCESS_TOKEN_QUERY,
-                                                      variables=variables)
-        credentials: Creds = credentials_response['getFileAccessToken']
+
 
         s3_client = S3Client(credentials)
 

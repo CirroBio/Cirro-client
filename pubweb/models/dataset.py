@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, NamedTuple
 
 
 class DatasetCreateResponse(TypedDict):
@@ -12,3 +12,12 @@ class CreateIngestDatasetInput(TypedDict):
     processId: str
     projectId: str
     files: List[str]
+
+
+class Dataset:
+    id: str
+    name: str
+    status: str
+    desc: str
+
+

@@ -4,10 +4,6 @@ from pubweb.clients.utils import get_id_from_name, filter_deleted
 from pubweb.services.base import BaseService
 
 
-def get_bucket(project_id):
-    return f'z-{project_id}'
-
-
 class ProjectService(BaseService):
     def list(self):
         query = gql('''
