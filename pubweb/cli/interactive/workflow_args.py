@@ -45,7 +45,7 @@ def get_output_resources_path():
         else:
             break
 
-    return repo_folder, resources_folder
+    return resources_folder, subdirectory
 
 
 def _get_repo_folder():

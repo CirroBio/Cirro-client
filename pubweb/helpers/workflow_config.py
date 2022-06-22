@@ -1,14 +1,9 @@
 import json
-import os
 import shutil
-import tarfile
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
-import requests
-
-from pubweb.cli.interactive.utils import ask, ask_yes_no
-from pubweb.helpers.constants import IGENOMES_REFERENCES, S3_RESOURCES_PREFIX
+from pubweb.helpers.constants import S3_RESOURCES_PREFIX
 from pubweb.models.workflow_models import OptimizedOutput, WorkflowRepository
 
 
@@ -16,7 +11,7 @@ class WorkflowConfigBuilder:
     def __init__(self, repo_prefix: str):
         """
         Initializes workflow config builder
-        :param repo_prefix: sub directory to write to (i.e. hutch/fastqc/1.0
+        :param repo_prefix: subdirectory to write to (i.e. hutch/fastqc/1.0
         """
 
         # All the parameters will be added to a single object
@@ -33,12 +28,10 @@ class WorkflowConfigBuilder:
         # Set up the boilerplate elements of the dynamo record
         self._add_dynamo_boilerplate()
 
-    def save_local(self, output_base: Path):
+    def save_local(self, output_folder: Path):
         """
         Write out the workflow configuration as a collection of files.
-        :param output_base: Base path to write files to (i.e. PubWeb-resources base)
         """
-        output_folder = Path(output_base, self.repo_prefix)
 
         # Save each of the items in the process configuration
         for config_name, config_value in self.process_config.items():
@@ -61,17 +54,14 @@ class WorkflowConfigBuilder:
                 Path(output_folder, self.preprocess_py_path.name)
             )
 
-        print(f"Boilerplate compute configuration has been written to {output_folder}"
-              f" -- please modify that file as necessary.")
-
-        print(f"Done writing all process configuration items to {output_folder}")
-
     def with_description(self, description: str):
         self.process_config["dynamo"]["description"] = description
         return self
 
     def with_repository(self, repo: WorkflowRepository):
-        """Configure the workflow repository."""
+        """
+        Configure the workflow repository.
+        """
 
         # Get the name of the process
         self.process_config["dynamo"]["name"] = repo.display_name
@@ -93,11 +83,17 @@ class WorkflowConfigBuilder:
         return self
 
     def with_child_processes(self, child_processes: List[str]):
+        """
+        Specify what child processes are allowed to run from the output of this dataset
+        """
         self.process_config["dynamo"]["childProcessIds"] = child_processes
 
         return self
 
     def with_preprocess(self, preprocess_py_path: Path):
+        """
+        Add a preprocess file
+        """
         # Add it to the dynamo record
         self.process_config["dynamo"]["preProcessScript"] = \
             f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/{preprocess_py_path.name}"
@@ -106,7 +102,9 @@ class WorkflowConfigBuilder:
         return self
 
     def _add_dynamo_boilerplate(self):
-        """Add the elements of the dynamo record which do not vary by user entry."""
+        """
+        Add the elements of the dynamo record which do not vary by user entry.
+        """
 
         self.process_config["dynamo"]["executor"] = "NEXTFLOW"
         self.process_config["dynamo"]["paramDefaults"] = []
@@ -120,7 +118,7 @@ class WorkflowConfigBuilder:
         self.process_config["dynamo"]["webOptimizationJson"] = \
             f"{S3_RESOURCES_PREFIX}/{self.repo_prefix}/process-output.json"
 
-    def with_compute(self, max_retry=2):
+    def with_compute(self, max_retries=2):
         """
         Configure the compute configuration.
         The compute configuration is boilerplate at this point
@@ -139,7 +137,7 @@ class WorkflowConfigBuilder:
         process {{
             executor = 'awsbatch'
             errorStrategy = 'retry'
-            maxRetries = {max_retry}
+            maxRetries = {max_retries}
         }}
     }}
 }}
@@ -147,7 +145,9 @@ class WorkflowConfigBuilder:
         return self
 
     def with_form_inputs(self, form):
-        """Configure the form."""
+        """
+        Configure the form. UI customizations not supported yet.
+        """
         # TODO This could be improved to take a list of form objects
         #  instead of a json schema
 
@@ -159,12 +159,27 @@ class WorkflowConfigBuilder:
         )
         return self
 
+    def with_inputs(self, inputs: Dict[str, str]):
+        """
+        Configure multiple inputs
+        """
+        self.process_config["input"] = {
+            **self.process_config["input"],
+            **inputs
+        }
+        return self
+
     def with_input(self, input_name: str, input_value: str):
+        """
+        Configure a single input parameter mapping
+        """
         self.process_config["input"][input_name] = input_value
         return self
 
     def with_output(self, output: OptimizedOutput):
-        """Configure a single output file."""
+        """
+        Configure a single output file.
+        """
         self._init_outputs()
         self.process_config["output"]["commands"].append(
             dict(

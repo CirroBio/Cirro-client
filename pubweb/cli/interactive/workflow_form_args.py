@@ -2,26 +2,27 @@ from pubweb.cli.interactive.utils import ask, ask_yes_no
 from pubweb.helpers.constants import IGENOMES_REFERENCES
 
 
-def _prompt_user_inputs(self):
+def prompt_user_inputs():
     """Prompt for user inputs which should be included in the form."""
 
     # Make a dict with the properties which should be rendered in the form
     # Each parameter will fall inside a section with its own title
     properties = dict()
+    inputs = dict()
 
     print("The form which is presented to the user is broken into sections, each with its own heading")
 
     while len(properties) == 0 or ask("confirm", "Would you like to add another section of parameters?"):
         # Get the contents of this section
-        section_key, section_contents = self._prompt_user_input_section()
+        section_key, section_contents = _prompt_user_input_section(inputs)
 
         # Add those contents to the form
         properties[section_key] = section_contents
 
-    return properties
+    return properties, inputs
 
 
-def _prompt_user_input_section(self):
+def _prompt_user_input_section(inputs):
     """Ask the user for all of the parameters which are found in a single section of the input form."""
 
     section_title = ask("text", "What is the title of this section?")
@@ -35,7 +36,7 @@ def _prompt_user_input_section(self):
     # Keep track of which inputs are required
     required = []
 
-    for input_key, input_val, input_required in self._yield_form_input_single(section_key):
+    for input_key, input_val, input_required in _yield_form_input_single(inputs, section_key):
 
         properties[input_key] = input_val
         if input_required:
@@ -51,7 +52,7 @@ def _prompt_user_input_section(self):
     return section_key, section_contents
 
 
-def _yield_form_input_single(self, section_key):
+def _yield_form_input_single(inputs, section_key):
     """Allow the user to add as many form inputs as they require."""
 
     initial = True
@@ -59,21 +60,21 @@ def _yield_form_input_single(self, section_key):
     while initial or ask("confirm", "Would you like to add another parameter to this section?"):
         initial = False
 
-        yield self._prompt_form_input_single(section_key)
+        yield _prompt_form_input_single(inputs, section_key)
 
 
-def _prompt_form_input_single(self, section_key):
+def _prompt_form_input_single(inputs, section_key):
     """Prompt the user for a single element in the form."""
 
     # Prompt for the parameter key
     kw = ask("text", "Parameter key used in workflow")
 
     # There should be no collision between keys
-    while len(kw) == 0 or kw in self.process_config["input"]:
+    while len(kw) == 0 or kw in inputs:
         kw = ask("text", f"Parameter key is not valid or has already been used, please select another")
 
     elem = dict()
-    elem["title"] = ask("text", "Parameter title")
+    elem["title"] = ask("text", "Parameter title (optional)")
     elem["description"] = ask("text", "Parameter description")
     required = ask_yes_no("Is this parameter required?")
 
@@ -150,7 +151,7 @@ def _prompt_form_input_single(self, section_key):
         assert f"Internal error: prompt type not configured: {prompt_type}"
 
     # Map the form entry to the input params
-    self.process_config["input"][kw] = f"{section_key}.{kw}"
+    inputs[kw] = f"{section_key}.{kw}"
 
     # Return the configuration of the parameter
     return kw, elem, required

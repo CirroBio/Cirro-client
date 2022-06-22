@@ -1,16 +1,17 @@
-from pathlib import Path
-
-from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
+from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth
-from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_additional_inputs, get_outputs, get_child_processes, \
+from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, \
+    gather_download_arguments_dataset, gather_login
+from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_additional_inputs, get_outputs, \
+    get_child_processes, \
     get_repository, get_description, get_output_resources_path
+from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
 from pubweb.helpers.schema_helpers import get_nextflow_schema, convert_nf_schema
-from pubweb.utils import parse_json_date, format_date
-from pubweb import PubWeb
+from pubweb.utils import parse_json_date
 
 
 def get_credentials():
@@ -94,9 +95,9 @@ def run_configure_workflow():
 
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
     process_options = pubweb.process.list(process_type='NEXTFLOW')
-    repo_folder, resources_folder = get_output_resources_path()
+    resources_folder, repo_prefix = get_output_resources_path()
 
-    workflow = WorkflowConfigBuilder(repo_folder)
+    workflow = WorkflowConfigBuilder(repo_prefix)
 
     # Process record
     repo = get_repository()
@@ -118,17 +119,17 @@ def run_configure_workflow():
         convert_nf_schema(form, inputs)
 
         workflow.with_description(nf_schema['description'])
-        workflow.with_form_inputs()
+        workflow.with_form_inputs(form)
 
     else:
         workflow.with_description(get_description())
-        workflow.with_form_inputs()
+        form, inputs = prompt_user_inputs()
+        workflow.with_form_inputs(form)
 
     # Inputs based on form config
-    for input_name, input_value in inputs.items():
-        workflow.with_input(input_name, input_value)
+    workflow.with_inputs(inputs)
 
-    # Additional inputs
+    # Additional process inputs
     for input_name, input_value in get_additional_inputs():
         workflow.with_input(input_name, input_value)
 
@@ -137,8 +138,13 @@ def run_configure_workflow():
         workflow.with_output(output)
     workflow.with_common_outputs()
 
-    # Save to r
+    # Save to resources
     workflow.save_local(resources_folder)
+
+    print(f"Boilerplate compute configuration has been written to {resources_folder}"
+          f" -- please modify that file as necessary.")
+
+    print(f"Done writing all process configuration items to {resources_folder}")
 
 
 def run_configure():
