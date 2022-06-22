@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import List, Dict
 
 from pubweb.helpers.constants import S3_RESOURCES_PREFIX
-from pubweb.models.workflow_models import OptimizedOutput, WorkflowRepository
+from pubweb.models.process import Process
+from pubweb.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
 
 
 class WorkflowConfigBuilder:
@@ -15,7 +16,7 @@ class WorkflowConfigBuilder:
         """
 
         # All the parameters will be added to a single object
-        self.process_config = dict(
+        self.process_config = ProcessConfig(
             dynamo=dict(),
             form=dict(),
             input=dict(),
@@ -32,6 +33,13 @@ class WorkflowConfigBuilder:
         """
         Write out the workflow configuration as a collection of files.
         """
+        output_folder.mkdir(parents=True, exist_ok=True)
+
+        # Reorder dynamo config based on model order
+        ordered_record = {}
+        for key in Process.__annotations__.keys():
+            ordered_record[key] = self.process_config["dynamo"][key]  # type: ignore
+        self.process_config["dynamo"] = ordered_record
 
         # Save each of the items in the process configuration
         for config_name, config_value in self.process_config.items():
@@ -43,19 +51,24 @@ class WorkflowConfigBuilder:
 
         # Write the compute configuration
         compute_path = Path(output_folder, "process-compute.config")
+        print(f"Boilerplate compute configuration has been written to {compute_path}"
+              f" -- please modify that file as necessary.")
 
         with compute_path.open("w") as handle:
             handle.write(self.compute_config)
 
         # Copy preprocess file
         if self.preprocess_py_path is not None:
+            preprocess_dest = Path(output_folder, self.preprocess_py_path.name)
+            print(f"Copying preprocess from {self.preprocess_py_path} to {preprocess_dest}")
             shutil.copyfile(
                 self.preprocess_py_path,
-                Path(output_folder, self.preprocess_py_path.name)
+                preprocess_dest
             )
+        print(f"Done writing all process configuration items to {output_folder}")
 
     def with_description(self, description: str):
-        self.process_config["dynamo"]["description"] = description
+        self.process_config["dynamo"]["desc"] = description
         return self
 
     def with_repository(self, repo: WorkflowRepository):

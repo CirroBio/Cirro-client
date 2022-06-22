@@ -1,16 +1,17 @@
 from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth
-from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, \
-    gather_download_arguments_dataset, gather_login
+from pubweb.cli.interactive.auth_args import gather_login
+from pubweb.cli.interactive.download_args import gather_download_arguments, gather_download_arguments_dataset
+from pubweb.cli.interactive.list_dataset_args import gather_list_arguments
+from pubweb.cli.interactive.upload_args import gather_upload_arguments
 from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_additional_inputs, get_outputs, \
     get_child_processes, \
     get_repository, get_description, get_output_resources_path
-from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs
+from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
-from pubweb.helpers.schema_helpers import get_nextflow_schema, convert_nf_schema
 from pubweb.utils import parse_json_date
 
 
@@ -104,12 +105,15 @@ def run_configure_workflow():
     workflow.with_repository(repo)
 
     # Prompt for optional pre-process script
-    if preprocess_py := get_preprocess_script():
+    if (preprocess_py := get_preprocess_script()) is not None:
         workflow.with_preprocess(preprocess_py)
 
     workflow.with_child_processes(
         get_child_processes(process_options)
     )
+
+    # Process compute
+    workflow.with_compute()
 
     # Process form & process inputs
     nf_schema = get_nextflow_schema(repo.repo_path, repo.version)
@@ -140,11 +144,6 @@ def run_configure_workflow():
 
     # Save to resources
     workflow.save_local(resources_folder)
-
-    print(f"Boilerplate compute configuration has been written to {resources_folder}"
-          f" -- please modify that file as necessary.")
-
-    print(f"Done writing all process configuration items to {resources_folder}")
 
 
 def run_configure():

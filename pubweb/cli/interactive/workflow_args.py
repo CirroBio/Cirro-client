@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Union
 
+import github
 from github import Github
 from github.Branch import Branch
 from github.GitRelease import GitRelease
@@ -125,6 +126,7 @@ def _add_single_output() -> OptimizedOutput:
             "Multiple files with the same format can be included using wildcard (*) characters.\n"
         ])
     )
+    # TODO: automatically get details based on sample file
 
     # Get the value used to separate columns
     sep = ask(
@@ -238,6 +240,7 @@ def get_repository() -> WorkflowRepository:
         "What is the primary entrypoint for the workflow in the repository?",
         default="main.nf"
     )
+
     return WorkflowRepository(display_name=name,
                               org=org,
                               repo_name=repo_name,
@@ -252,17 +255,33 @@ def _prompt_repository(org, github_connection):
     """Prompt the user for a repository contained within an organization."""
 
     # Get a list of repos in that organization
-    repo_list = [
-        repo.name for repo in github_connection.get_user(org).get_repos()
-        if repo.name != '.github'
-    ]
+    user = github_connection.get_user(org)
+    repo_count = user.public_repos
 
-    # then use that to ask the user which repo to look at
-    return ask(
-        'select',
-        'Which repository contains the workflow of interest?',
-        choices=repo_list
-    )
+    if repo_count < 500:
+        repo_list = [
+            repo.name for repo in github_connection.get_user(org).get_repos()
+            if repo.name != '.github'
+        ]
+
+        # then use that to ask the user which repo to look at
+        return ask(
+            'autocomplete',
+            'Which repository contains the workflow of interest?',
+            choices=repo_list
+        )
+
+    while True:
+        repo_name = ask(
+            'text',
+            'Enter the name of the repository'
+        )
+
+        try:
+            user.get_repo(repo_name)
+            return repo_name
+        except github.UnknownObjectException:
+            print('Repository name not valid')
 
 
 def _prompt_repository_version(repo: Repository) -> Union[GitRelease, Branch]:
@@ -322,10 +341,12 @@ def get_additional_inputs():
         "confirm",
         "Would you like to add any fixed parameter values?\n  These values will not change based on user input."
     ):
-        inputs.append(_add_fixed_param_input())
+        if (input_param := _add_fixed_param_input()) is not None:
+            inputs.append(input_param)
 
         while ask("confirm", "Would you like to add another?"):
-            inputs.append(_add_fixed_param_input())
+            if (input_param := _add_fixed_param_input()) is not None:
+                inputs.append(input_param)
 
     return inputs
 

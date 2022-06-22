@@ -1,4 +1,13 @@
-from typing import NamedTuple, List, Optional
+from typing import NamedTuple, List, Optional, Dict, TypedDict
+
+from pubweb.models.process import Process
+
+
+class ProcessConfig(TypedDict):
+    dynamo: Process
+    form: Dict
+    input: Dict[str, str]
+    output: Dict
 
 
 class WorkflowRepository(NamedTuple):
