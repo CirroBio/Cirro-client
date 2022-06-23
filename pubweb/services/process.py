@@ -1,11 +1,14 @@
+from typing import List
+
 from gql import gql
 
 from pubweb.clients.utils import get_id_from_name, filter_deleted
+from pubweb.models.process import Executor, Process
 from pubweb.services.base import BaseService
 
 
 class ProcessService(BaseService):
-    def list(self, process_type=None):
+    def list(self, process_type: Executor = None) -> List[Process]:
         query = gql('''
           query ListProcesses(
             $filter: ModelProcessFilterInput
@@ -24,7 +27,7 @@ class ProcessService(BaseService):
         ''')
         item_filter = {}
         if process_type:
-            item_filter['executor'] = {'eq': process_type}
+            item_filter['executor'] = {'eq': process_type.value}
         resp = self._api_client.query(query, variables={'filter': item_filter})['listProcesses']
         return filter_deleted(resp['items'])
 

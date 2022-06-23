@@ -21,7 +21,8 @@ def get_output_resources_path():
     subdirectory = ask(
         "text",
         "What subdirectory within the process/ folder which should be used to save the outputs?"
-        " (e.g. hutch/fastqc/1.0)"
+        " (e.g. hutch/fastqc/1.0)",
+        required=True
     )
 
     resources_folder = Path(repo_folder, "process", subdirectory)
@@ -39,7 +40,8 @@ def get_output_resources_path():
             subdirectory = ask(
                 "text",
                 "What subdirectory within the process/ folder which should be used to save the outputs?"
-                " (e.g. hutch/fastqc/1.0)"
+                " (e.g. hutch/fastqc/1.0)",
+                required=True
             )
             resources_folder = Path(repo_folder, "process", subdirectory)
 
@@ -208,14 +210,16 @@ def get_repository() -> WorkflowRepository:
 
     name = ask(
         "text",
-        "What name should be displayed for this workflow?"
+        "What name should be displayed for this workflow?",
+        required=True
     )
 
     # Get the organization
     org = ask(
         'text',
         'Which GitHub organization is the workflow located within?',
-        default='nf-core'
+        default='nf-core',
+        required=True
     )
 
     # Get the repository
@@ -240,6 +244,10 @@ def get_repository() -> WorkflowRepository:
         "What is the primary entrypoint for the workflow in the repository?",
         default="main.nf"
     )
+    try:
+        repo.get_contents(entrypoint, version_name)
+    except github.UnknownObjectException:
+        print(f"Warning: {entrypoint} not found in {repo_name}")
 
     return WorkflowRepository(display_name=name,
                               org=org,
@@ -267,14 +275,15 @@ def _prompt_repository(org, github_connection):
         # then use that to ask the user which repo to look at
         return ask(
             'autocomplete',
-            'Which repository contains the workflow of interest?',
+            'Which repository contains the workflow of interest? (use TAB to display options)',
             choices=repo_list
         )
 
     while True:
         repo_name = ask(
             'text',
-            'Enter the name of the repository'
+            'Enter the name of the repository',
+            required=True
         )
 
         try:
@@ -303,7 +312,7 @@ def _prompt_repository_version(repo: Repository) -> Union[GitRelease, Branch]:
 
         version = ask(
             'select',
-            'Which version of {repo_name} do you want to use?',
+            f'Which version of {repo.name} do you want to use?',
             choices=pretty_version_list
         )
 

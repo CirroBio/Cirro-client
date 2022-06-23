@@ -12,6 +12,7 @@ from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
+from pubweb.models.process import Executor
 from pubweb.utils import parse_json_date
 
 
@@ -47,7 +48,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
     if interactive:
         projects = pubweb.project.list()
-        processes = pubweb.process.list(process_type='INGEST')
+        processes = pubweb.process.list(process_type=Executor.INGEST)
         input_params = gather_upload_arguments(input_params, projects, processes)
 
     directory = input_params['data_directory']
@@ -95,7 +96,7 @@ def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
-    process_options = pubweb.process.list(process_type='NEXTFLOW')
+    process_options = pubweb.process.list(process_type=Executor.NEXTFLOW)
     resources_folder, repo_prefix = get_output_resources_path()
 
     workflow = WorkflowConfigBuilder(repo_prefix)

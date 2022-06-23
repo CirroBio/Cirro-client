@@ -39,6 +39,10 @@ def ask(fname, msg, validate_type=None, output_f=None, **kwargs) -> str:
     if kwargs.get("default") is not None:
         kwargs["default"] = str(kwargs["default"])
 
+    if kwargs.get("required"):
+        del kwargs["required"]
+        kwargs["validate"] = lambda val: len(val.strip()) > 0 or "This field is required"
+
     # Add a spacer line before asking the question
     print("")
 

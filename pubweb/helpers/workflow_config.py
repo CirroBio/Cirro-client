@@ -38,7 +38,7 @@ class WorkflowConfigBuilder:
         # Reorder dynamo config based on model order
         ordered_record = {}
         for key in Process.__annotations__.keys():
-            ordered_record[key] = self.process_config["dynamo"][key]  # type: ignore
+            ordered_record[key] = self.process_config["dynamo"].get(key)  # type: ignore
         self.process_config["dynamo"] = ordered_record
 
         # Save each of the items in the process configuration

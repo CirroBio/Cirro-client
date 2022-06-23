@@ -1,4 +1,12 @@
+from enum import Enum
 from typing import TypedDict, List, Optional
+
+
+class Executor(Enum):
+    INGEST = 'INGEST'
+    "Process type used when manually uploading files"
+    NEXTFLOW = 'NEXTFLOW'
+    "Processes that are ran using Nextflow"
 
 
 class ProcessCode(TypedDict):
@@ -19,7 +27,7 @@ class Process(TypedDict):
     childProcessIds: List[str]
     name: str
     desc: str
-    executor: str
+    executor: Executor
     documentationUrl: str
     code: ProcessCode
     paramDefaults: List
