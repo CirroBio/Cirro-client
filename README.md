@@ -63,7 +63,7 @@ Options:
 
 #### Uploading a dataset:
 ```bash
-Usage: cli.py upload [OPTIONS]
+Usage: pubweb-cli upload [OPTIONS]
 
   Upload and create a dataset
 
