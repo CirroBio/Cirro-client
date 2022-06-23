@@ -3,12 +3,10 @@ from typing import List
 
 from gql import gql
 
-from pubweb.clients import S3Client
 from pubweb.clients.utils import filter_deleted
 from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse
 from pubweb.models.file import FileAccessContext
 from pubweb.services.file import FileEnabledService
-from pubweb.services.project import get_bucket
 
 
 class DatasetService(FileEnabledService):

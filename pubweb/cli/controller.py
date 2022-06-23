@@ -1,12 +1,13 @@
-from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, gather_download_arguments_dataset, gather_login
+from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth
+from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, \
+    gather_download_arguments_dataset, gather_login
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb.models.auth import print_credentials
 from pubweb.models.file import FileAccessContext
-from pubweb.utils import parse_json_date, format_date
-from pubweb import PubWeb
+from pubweb.utils import parse_json_date
 
 
 def get_credentials():
