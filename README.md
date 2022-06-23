@@ -63,18 +63,21 @@ Options:
 
 #### Uploading a dataset:
 ```bash
-Usage: pubweb-cli upload [OPTIONS]
+Usage: cli.py upload [OPTIONS]
 
   Upload and create a dataset
 
 Options:
-  --name TEXT            Name of the dataset
-  --description TEXT     Description of the dataset (optional)
-  --project TEXT         Name or ID of the project
-  --process TEXT         Name or ID of the ingest process
-  --data-directory TEXT  Directory you wish to upload
-  --interactive          Gather arguments interactively
-  --help                 Show this message and exit.
+  --name TEXT             Name of the dataset
+  --description TEXT      Description of the dataset (optional)
+  --project TEXT          Name or ID of the project
+  --process TEXT          Name or ID of the ingest process
+  --data-directory TEXT   Directory you wish to upload
+  --interactive           Gather arguments interactively
+  --use-third-party-tool  Use third party tool for upload (only generate
+                          manifest)
+  --help                  Show this message and exit.
+
 ```
 
 ### SDK Usage
@@ -83,6 +86,7 @@ Options:
 from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth, IAMAuth
 from pubweb.models.dataset import CreateIngestDatasetInput
+from pubweb.file_utils import filter_files_by_pattern
 
 # Username / Password auth
 client = PubWeb(auth_info=UsernameAndPasswordAuth("<username>", "<password>"))
@@ -90,6 +94,8 @@ client = PubWeb(auth_info=UsernameAndPasswordAuth("<username>", "<password>"))
 client = PubWeb(auth_info=IAMAuth.load_current())
 
 project_id = '<project_id>'
+
+# Creating a dataset & uploading files
 dataset_create_request: CreateIngestDatasetInput = {
     'projectId': project_id,
     'processId': 'sequencing-run',
@@ -110,6 +116,21 @@ client.dataset.upload_files(
     directory=directory_to_upload,
     files=dataset_create_request['files']
 )
+
+
+# Downloading files
+datasets = client.dataset.find_by_project(project_id)
+dataset_id = datasets[0]['id']
+
+files = client.dataset.get_dataset_files(project_id=project_id,
+                                         dataset_id=dataset_id)
+files = filter_files_by_pattern(files, '*.csv')
+
+# Files is an optional parameter, if you omit it, it will download all the dataset files
+client.dataset.download_files(project_id=project_id,
+                              dataset_id=dataset_id,
+                              download_location='/tmp',
+                              files=files)
 ```
 
 ### Development

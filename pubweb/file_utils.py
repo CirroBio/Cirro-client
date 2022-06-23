@@ -1,8 +1,19 @@
-from boto3.exceptions import S3UploadFailedError
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import List
 
+from boto3.exceptions import S3UploadFailedError
+
 from pubweb.clients import S3Client
+
+
+def filter_files_by_pattern(files: List[str], pattern: str) -> List[str]:
+    """
+    Filters a list of files by a glob pattern
+    """
+    return [
+        file for file in files
+        if PurePath(file).match(pattern)
+    ]
 
 
 def get_files_in_directory(directory) -> List[str]:
@@ -67,3 +78,4 @@ def download_directory(directory: str, files: List[str], s3_client: S3Client, bu
         s3_client.download_file(local_path=local_path,
                                 bucket=bucket,
                                 key=key)
+
