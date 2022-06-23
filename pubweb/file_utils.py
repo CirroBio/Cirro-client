@@ -58,7 +58,7 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
                 break
 
 
-def download_directory(directory: str, s3_client: S3Client, bucket: str, prefix: str, files: List[str]):
+def download_directory(directory: str, files: List[str], s3_client: S3Client, bucket: str, prefix: str):
     for file in files:
         key = f'{prefix}/{file}'
         local_path = Path(directory, file)

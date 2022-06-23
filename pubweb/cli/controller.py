@@ -3,6 +3,8 @@ from pubweb.auth import UsernameAndPasswordAuth
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
+from pubweb.models.auth import print_credentials
+from pubweb.models.file import FileAccessContext
 from pubweb.utils import parse_json_date, format_date
 from pubweb import PubWeb
 
@@ -58,11 +60,13 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     create_resp = pubweb.dataset.create(create_request)
 
     if input_params['use_third_party_tool']:
+        access_context = FileAccessContext.download_dataset(create_request['projectId'], create_resp['datasetId'])
+        creds = pubweb.file.get_access_credentials(access_context)
+        # TODO: support custom expiration time
         print("Please use the following information in your tool:")
+        print(f"Bucket: {access_context.bucket}")
         print(f"Data path: {create_resp['dataPath']}")
-        print(f'AWS_ACCESS_KEY:{create_resp["a"]}')
-        print(f'AWS_SECRET_KEY:{create_resp["a"]}')
-        print(f'AWS_SESSION_TOKEN:{create_resp["a"]}')
+        print_credentials(creds)
     else:
         pubweb.dataset.upload_files(dataset_id=create_resp['datasetId'],
                                     project_id=create_request['projectId'],
