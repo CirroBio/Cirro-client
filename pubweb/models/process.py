@@ -27,7 +27,7 @@ class Process(TypedDict):
     childProcessIds: List[str]
     name: str
     desc: str
-    executor: Executor
+    executor: str
     documentationUrl: str
     code: ProcessCode
     paramDefaults: List

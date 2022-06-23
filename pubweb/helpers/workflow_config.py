@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict
 
 from pubweb.helpers.constants import PROCESSES_PATH_S3
-from pubweb.models.process import Process
+from pubweb.models.process import Process, Executor
 from pubweb.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
 
 
@@ -38,7 +38,9 @@ class WorkflowConfigBuilder:
         # Reorder dynamo config based on model order
         ordered_record = {}
         for key in Process.__annotations__.keys():
-            ordered_record[key] = self.process_config["dynamo"].get(key)  # type: ignore
+            value = self.process_config["dynamo"].get(key)  # type: ignore
+            if value is not None:
+                ordered_record[key] = value
         self.process_config["dynamo"] = ordered_record
 
         # Save each of the items in the process configuration
@@ -119,7 +121,7 @@ class WorkflowConfigBuilder:
         Add the elements of the dynamo record which do not vary by user entry.
         """
 
-        self.process_config["dynamo"]["executor"] = "NEXTFLOW"
+        self.process_config["dynamo"]["executor"] = Executor.NEXTFLOW.value
         self.process_config["dynamo"]["paramDefaults"] = []
         self.process_config["dynamo"]["fileJson"] = ""
         self.process_config["dynamo"]["componentJson"] = ""
