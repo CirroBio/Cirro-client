@@ -82,6 +82,9 @@ class S3Client:
         return self._client.head_object(Bucket=bucket, Key=key)
 
     def _check_credentials(self):
+        if not self._creds_expiration:
+            return
+
         expiration = parse_json_date(self._creds_expiration)
 
         if expiration < datetime.datetime.now():

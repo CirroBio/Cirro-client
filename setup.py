@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import setup, find_packages
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
@@ -16,6 +17,7 @@ install_requires = [
     "questionary==1.10.0",
     "gql[requests]==3.0.0",
     "requests==2.27.1",
+    "requests_aws4auth==1.1.2",
     "pycognito==2022.1.0",
     "tqdm==4.62.3"
 ]
@@ -27,7 +29,7 @@ setup(
     license='MIT',
     author_email='viz@fredhutch.org',
     description='CLI tool for interacting with the PubWeb platform',
-    packages=find_packages(),
+    packages=find_packages(include=['pubweb*']),
     install_requires=install_requires,
     url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points,

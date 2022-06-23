@@ -1,12 +1,10 @@
-from gql import gql
-
 from pubweb.clients.utils import get_id_from_name, filter_deleted
 from pubweb.services.base import BaseService
 
 
 class ProjectService(BaseService):
     def list(self):
-        query = gql('''
+        query = '''
           query ListProjects(
             $filter: ModelProjectFilterInput
             $limit: Int
@@ -21,7 +19,7 @@ class ProjectService(BaseService):
               }
             }
           }
-        ''')
+        '''
 
         resp = self._api_client.query(query)['listProjects']
         return filter_deleted(resp['items'])

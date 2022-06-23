@@ -81,11 +81,13 @@ Options:
 
 ```python
 from pubweb import PubWeb
-from pubweb.auth import UsernameAndPasswordAuth
+from pubweb.auth import UsernameAndPasswordAuth, IAMAuth
 from pubweb.models.dataset import CreateIngestDatasetInput
 
-
+# Username / Password auth
 client = PubWeb(auth_info=UsernameAndPasswordAuth("<username>", "<password>"))
+# IAM Authentication
+client = PubWeb(auth_info=IAMAuth.load_current())
 
 project_id = '<project_id>'
 dataset_create_request: CreateIngestDatasetInput = {

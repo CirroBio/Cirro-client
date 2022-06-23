@@ -1,8 +1,6 @@
 import json
 from typing import List
 
-from gql import gql
-
 from pubweb.clients.utils import filter_deleted
 from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse
 from pubweb.models.file import FileAccessContext
@@ -11,7 +9,7 @@ from pubweb.services.file import FileEnabledService
 
 class DatasetService(FileEnabledService):
     def find_by_project(self, project_id):
-        query = gql('''
+        query = '''
           query DatasetsByProject(
             $project: ID!
             $sortDirection: ModelSortDirection
@@ -42,7 +40,7 @@ class DatasetService(FileEnabledService):
               startedAt
             }
           }
-        ''')
+        '''
         variables = {
             'project': project_id,
             'filter': {
@@ -56,25 +54,25 @@ class DatasetService(FileEnabledService):
 
     def create(self, create_request: CreateIngestDatasetInput) -> DatasetCreateResponse:
         print(f"Creating dataset {create_request['name']}")
-        query = gql('''
+        query = '''
           mutation CreateIngestDataset($input: CreateIngestDatasetInput!) {
             createIngestDataset(input: $input) {
               datasetId
               dataPath
             }
           }
-        ''')
+        '''
         variables = {'input': create_request}
         data: DatasetCreateResponse = self._api_client.query(query, variables=variables)['createIngestDataset']
         print(f"Dataset ID: {data['datasetId']}")
         return data
 
-    def get_dataset_files(self, dataset_id: str, project_id: str) -> List[str]:
-        access_context = FileAccessContext.download_dataset(dataset_id, project_id)
+    def get_dataset_files(self, project_id: str, dataset_id: str) -> List[str]:
+        access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
         return self._get_dataset_files(access_context)
 
     def upload_files(self, project_id: str, dataset_id: str, directory: str, files: List[str]):
-        access_context = FileAccessContext.upload_dataset(dataset_id, project_id)
+        access_context = FileAccessContext.upload_dataset(project_id=project_id, dataset_id=dataset_id)
         self._file_service.upload_files(access_context, directory, files)
 
     def download_files(self, project_id: str, dataset_id: str, download_location: str, files: List[str] = None):
@@ -82,7 +80,7 @@ class DatasetService(FileEnabledService):
          Downloads all the dataset files
          If the files argument isn't provided, all files will be downloaded
         """
-        access_context = FileAccessContext.download_dataset(dataset_id, project_id)
+        access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
         if files is None:
             files = self._get_dataset_files(access_context)
         self._file_service.download_files(access_context, download_location, files)
