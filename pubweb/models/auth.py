@@ -1,8 +1,8 @@
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 
 class Creds(TypedDict):
     AccessKeyId: str
-    Expiration: str
     SecretAccessKey: str
-    SessionToken: str
+    SessionToken: Optional[str]
+    Expiration: Optional[str]

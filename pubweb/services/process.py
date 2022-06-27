@@ -1,7 +1,5 @@
 from typing import List
 
-from gql import gql
-
 from pubweb.clients.utils import get_id_from_name, filter_deleted
 from pubweb.models.process import Executor, Process
 from pubweb.services.base import BaseService
@@ -9,7 +7,7 @@ from pubweb.services.base import BaseService
 
 class ProcessService(BaseService):
     def list(self, process_type: Executor = None) -> List[Process]:
-        query = gql('''
+        query = '''
           query ListProcesses(
             $filter: ModelProcessFilterInput
             $limit: Int
@@ -24,7 +22,7 @@ class ProcessService(BaseService):
               }
             }
           }
-        ''')
+        '''
         item_filter = {}
         if process_type:
             item_filter['executor'] = {'eq': process_type.value}

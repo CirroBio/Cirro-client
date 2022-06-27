@@ -1,5 +1,9 @@
+from pubweb.models.file import FileAccessContext
+
 from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth
+from pubweb.cli.interactive import gather_list_arguments, gather_upload_arguments, gather_download_arguments, \
+    gather_download_arguments_dataset, gather_login
 from pubweb.cli.interactive.auth_args import gather_login
 from pubweb.cli.interactive.download_args import gather_download_arguments, gather_download_arguments_dataset
 from pubweb.cli.interactive.list_dataset_args import gather_list_arguments
@@ -13,7 +17,7 @@ from pubweb.config import AuthConfig, save_config, load_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
 from pubweb.models.process import Executor
-from pubweb.utils import parse_json_date
+from pubweb.utils import parse_json_date, print_credentials
 
 
 def get_credentials():
@@ -65,10 +69,24 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     }
 
     create_resp = pubweb.dataset.create(create_request)
-    pubweb.dataset.upload_files(dataset_id=create_resp['datasetId'],
-                                project_id=create_request['projectId'],
-                                directory=directory,
-                                files=files)
+
+    if input_params['use_third_party_tool']:
+        access_context = FileAccessContext.upload_dataset(project_id=create_request['projectId'],
+                                                          dataset_id=create_resp['datasetId'])
+        creds = pubweb.file.get_access_credentials(access_context)
+        # TODO: support custom expiration time
+        print()
+        print("Please use the following information in your tool:")
+        print(f"Bucket: {access_context.bucket}")
+        print(f"Data path: {create_resp['dataPath']}")
+        print()
+        print_credentials(creds)
+
+    else:
+        pubweb.dataset.upload_files(dataset_id=create_resp['datasetId'],
+                                    project_id=create_request['projectId'],
+                                    directory=directory,
+                                    files=files)
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
