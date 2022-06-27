@@ -64,7 +64,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
     if input_params['use_third_party_tool']:
         stats = get_directory_stats(directory)
-        token_lifetime = estimate_token_lifetime(stats['size'])
+        token_lifetime = max(estimate_token_lifetime(stats['size']), 12)
         access_context = FileAccessContext.upload_dataset(project_id=create_request['projectId'],
                                                           dataset_id=create_resp['datasetId'],
                                                           token_lifetime_override=token_lifetime)
