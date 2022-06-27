@@ -40,7 +40,7 @@ def confirm_data_directory(directory):
     stats = get_directory_stats(directory)
     answers = prompt_wrapper({
         'type': 'confirm',
-        'message': f'Please confirm that you wish to upload {stats["numberOfFiles"]} files ({stats["size"]})',
+        'message': f'Please confirm that you wish to upload {stats["numberOfFiles"]} files ({stats["sizeFriendly"]})',
         'name': 'continue',
         'default': True
     })

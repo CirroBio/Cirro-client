@@ -1,6 +1,6 @@
-from typing import Literal, TypedDict
+from typing import Literal, TypedDict, Optional
 
-from pubweb.clients.api import ApiQuery
+from pubweb.models.api import ApiQuery
 
 AccessType = Literal['PROJECT', 'CHART', 'DATASET', 'RESOURCES']
 FileOperation = Literal['UPLOAD', 'DOWNLOAD']
@@ -24,7 +24,14 @@ class S3AuthorizerInput(TypedDict):
     accessType: AccessType
     operation: FileOperation
     projectId: str
-    datasetId: str
+    datasetId: Optional[str]
+    tokenLifetimeHours: Optional[int]
+
+
+class DirectoryStatistics(TypedDict):
+    size: float
+    sizeFriendly: str
+    numberOfFiles: int
 
 
 class FileAccessContext:
@@ -44,18 +51,20 @@ class FileAccessContext:
         return cls(
             {
                 'accessType': 'PROJECT', 'operation': 'DOWNLOAD',
-                'datasetId': dataset_id, 'projectId': project_id
+                'datasetId': dataset_id, 'projectId': project_id,
+                'tokenLifetimeHours': None
             },
             get_project_bucket(project_id),
             f'datasets/{dataset_id}'
         )
 
     @classmethod
-    def upload_dataset(cls, dataset_id: str, project_id: str):
+    def upload_dataset(cls, dataset_id: str, project_id: str, token_lifetime_override: int = None):
         return cls(
             {
                 'accessType': 'DATASET', 'operation': 'UPLOAD',
-                'datasetId': dataset_id, 'projectId': project_id
+                'datasetId': dataset_id, 'projectId': project_id,
+                'tokenLifetimeHours': token_lifetime_override
             },
             get_project_bucket(project_id),
             f'datasets/{dataset_id}/data'
