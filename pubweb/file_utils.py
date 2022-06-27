@@ -4,6 +4,9 @@ from typing import List
 from boto3.exceptions import S3UploadFailedError
 
 from pubweb.clients import S3Client
+from pubweb.models.file import DirectoryStatistics
+
+DEFAULT_TRANSFER_SPEED = 160
 
 
 def filter_files_by_pattern(files: List[str], pattern: str) -> List[str]:
@@ -32,10 +35,12 @@ def get_files_in_directory(directory) -> List[str]:
     return paths
 
 
-def get_directory_stats(directory):
+def get_directory_stats(directory) -> DirectoryStatistics:
     sizes = [f.stat().st_size for f in Path(directory).glob('**/*') if f.is_file()]
+    total_size = sum(sizes) / float(1 << 30)
     return {
-        'size': f'{sum(sizes) / float(1 << 30):,.3f} GB',
+        'sizeFriendly': f'{total_size:,.3f} GB',
+        'size': total_size,
         'numberOfFiles': len(sizes)
     }
 
@@ -48,7 +53,7 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
 
         # Retry up to max_retries times
         for retry in range(max_retries):
-            
+
             # Try the upload
             try:
                 s3_client.upload_file(
@@ -79,3 +84,12 @@ def download_directory(directory: str, files: List[str], s3_client: S3Client, bu
                                 bucket=bucket,
                                 key=key)
 
+
+def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRANSFER_SPEED) -> int:
+    """
+    :param data_size_gb: Gigabytes
+    :param speed_mbps: Megabits per second
+    """
+    transfer_time_seconds = (data_size_gb * 8 * 1000) / speed_mbps
+    transfer_time_hours = transfer_time_seconds / 60 / 60
+    return max(round(transfer_time_hours), 1)

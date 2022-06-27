@@ -4,7 +4,7 @@ from pubweb.cli.interactive import gather_list_arguments, gather_upload_argument
     gather_download_arguments_dataset, gather_login
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
-from pubweb.file_utils import get_files_in_directory
+from pubweb.file_utils import get_files_in_directory, get_directory_stats, estimate_token_lifetime
 from pubweb.models.file import FileAccessContext
 from pubweb.utils import parse_json_date, print_credentials
 
@@ -33,8 +33,11 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     datasets = pubweb.dataset.find_by_project(input_params['project'])
 
     sorted_datasets = sorted(datasets, key=lambda d: parse_json_date(d["createdAt"]), reverse=True)
-    print("\n\n".join([f'Name: {dataset["name"]}\nDesc: {dataset["desc"]}\nGUID: ({dataset["id"]})' for dataset in sorted_datasets]))
-    
+    print("\n\n".join([f'Name: {dataset["name"]}\n'
+                       f'Desc: {dataset["desc"]}\n'
+                       f'GUID: ({dataset["id"]})'
+                       for dataset in sorted_datasets]))
+
 
 def run_ingest(input_params: UploadArguments, interactive=False):
     pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
@@ -60,10 +63,12 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     create_resp = pubweb.dataset.create(create_request)
 
     if input_params['use_third_party_tool']:
+        stats = get_directory_stats(directory)
+        token_lifetime = max(estimate_token_lifetime(stats['size']), 12)
         access_context = FileAccessContext.upload_dataset(project_id=create_request['projectId'],
-                                                          dataset_id=create_resp['datasetId'])
+                                                          dataset_id=create_resp['datasetId'],
+                                                          token_lifetime_override=token_lifetime)
         creds = pubweb.file.get_access_credentials(access_context)
-        # TODO: support custom expiration time
         print()
         print("Please use the following information in your tool:")
         print(f"Bucket: {access_context.bucket}")

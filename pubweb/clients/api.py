@@ -1,4 +1,4 @@
-from typing import Dict, NamedTuple
+from typing import Dict
 
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
@@ -10,11 +10,6 @@ HEADERS = {
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 }
-
-
-class ApiQuery(NamedTuple):
-    query: str
-    variables: Dict
 
 
 def _build_gql_client(auth_info: AuthInfo, endpoint: str):

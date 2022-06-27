@@ -10,5 +10,3 @@ def get_id_from_name(items, name_or_id) -> str:
 
 def filter_deleted(items: List) -> List:
     return list(filter(lambda item: not item.get('_deleted', False), items))
-
-
