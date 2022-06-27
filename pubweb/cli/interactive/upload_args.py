@@ -4,7 +4,6 @@ from typing import List
 
 from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
-from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
 
 from pubweb.cli.interactive.common_args import ask_project, ask_use_third_party_tool
 from pubweb.cli.interactive.utils import prompt_wrapper
