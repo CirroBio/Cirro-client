@@ -30,7 +30,6 @@ $ pubweb-cli upload --interactive
 ? What type of files?  Illumina Sequencing Run
 ? What is the name of this dataset?  test
 ? Enter a description of the dataset (optional)
-
 ```
 
 
@@ -74,10 +73,8 @@ Options:
   --process TEXT          Name or ID of the ingest process
   --data-directory TEXT   Directory you wish to upload
   --interactive           Gather arguments interactively
-  --use-third-party-tool  Use third party tool for upload (only generate
-                          manifest)
+  --use-third-party-tool  Use third party tool for upload (Generate manifest and one-time upload authentication token)
   --help                  Show this message and exit.
-
 ```
 
 ### SDK Usage

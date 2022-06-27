@@ -59,7 +59,7 @@ def download(**kwargs):
               help='Gather arguments interactively',
               is_flag=True, default=False)
 @click.option('--use-third-party-tool',
-              help='Use third party tool for upload (only generate manifest)',
+              help='Use third party tool for upload (Generate manifest and one-time upload authentication token)',
               is_flag=True, default=False)
 def upload(**kwargs):
     check_required_args(kwargs)
