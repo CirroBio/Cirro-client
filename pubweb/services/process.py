@@ -1,12 +1,10 @@
-from gql import gql
-
 from pubweb.clients.utils import get_id_from_name, filter_deleted
 from pubweb.services.base import BaseService
 
 
 class ProcessService(BaseService):
     def list(self, process_type=None):
-        query = gql('''
+        query = '''
           query ListProcesses(
             $filter: ModelProcessFilterInput
             $limit: Int
@@ -21,7 +19,7 @@ class ProcessService(BaseService):
               }
             }
           }
-        ''')
+        '''
         item_filter = {}
         if process_type:
             item_filter['executor'] = {'eq': 'INGEST'}
