@@ -21,7 +21,7 @@ def ask_use_third_party_tool():
         'name': 'use_tool',
         'choices': [
             "PubWeb CLI",
-            "Third-party tool (must support temporary credentials)"
+            "Third-party tool (using AWS credentials temporarily issued for download)"
         ]
     })
 
