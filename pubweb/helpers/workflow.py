@@ -71,7 +71,7 @@ class PreprocessDataset:
         with Path(local_path).open(mode="wt") as handle:
             return json.dump(dat, handle, indent=indent)
 
-    def add_param(self, kw:str, val, overwrite=False):
+    def add_param(self, kw: str, val, overwrite=False):
         """Add a parameter to the dataset."""
 
         assert overwrite or kw not in self.params, f"Cannot add parameter {kw}, already exists (and overwrite=False)"
