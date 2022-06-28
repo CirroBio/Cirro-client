@@ -164,7 +164,7 @@ def _add_single_output() -> OptimizedOutput:
                                f"Name: {name}",
                                f"Description: {desc}",
                                f"Reference URL: {url}",
-                               f"Columns:"
+                               "Columns:"
                            ] + [
                                f"    {col.header} - {col.display_name} - {col.description}"
                                for col in columns

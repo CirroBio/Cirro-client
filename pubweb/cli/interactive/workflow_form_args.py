@@ -75,7 +75,7 @@ def _prompt_form_input_single(inputs, section_key):
 
     # There should be no collision between keys
     while len(kw) == 0 or kw in inputs:
-        kw = ask("text", f"Parameter key is not valid or has already been used, please select another:")
+        kw = ask("text", "Parameter key is not valid or has already been used, please select another:")
 
     elem = dict()
     elem["title"] = ask("text", "Parameter title (optional)")
@@ -175,7 +175,7 @@ def get_nextflow_schema(repo: str, ref: str):
 
         return nf_schema
     except UnknownObjectException:
-        print(f"No nextflow_schema.json file found, please specify any required inputs")
+        print("No nextflow_schema.json file found, please specify any required inputs")
         return None
 
 
@@ -202,7 +202,8 @@ def convert_nf_schema(form_obj, inputs, param_root="$.params.dataset.paramJson")
     if form_obj["type"] == "object":
 
         # It must have "properties"
-        assert "properties" in form_obj, f"Expected 'properties' when type='object':\n({json.dumps(form_obj, indent=4)})"
+        assert "properties" in form_obj, f"Expected 'properties' when type='object':\n" \
+                                         f"({json.dumps(form_obj, indent=4)})"
 
         # Give the user the option to remove items from that list
 
