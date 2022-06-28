@@ -22,6 +22,12 @@ install_requires = [
     "tqdm==4.62.3"
 ]
 
+install_analysis_requires = [
+    "pandas>=1.4.0,<1.5.0"
+]
+
+install_all_requires = install_requires + install_analysis_requires
+
 setup(
     name='pubweb',
     version='0.1.5',
@@ -31,6 +37,10 @@ setup(
     description='CLI tool for interacting with the PubWeb platform',
     packages=find_packages(include=['pubweb*']),
     install_requires=install_requires,
+    extras_require={
+        "all": install_all_requires,
+        "analysis": install_analysis_requires
+    },
     url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points,
     # long_description=long_description
