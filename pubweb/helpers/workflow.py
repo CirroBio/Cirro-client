@@ -1,14 +1,14 @@
 import json
+import logging
 import os
 from pathlib import Path
-
 import pandas as pd
 
 
-class RunningWorkflowHelper:
+class PreprocessDataset:
     """
-    Could be a better name
-    Provides common utility methods for running workflows
+    Helper functions for performing preparatory tasks immediately before launching
+    the analysis workflow for a dataset.
     """
 
     def __init__(self, s3_dataset: str):
@@ -27,6 +27,16 @@ class RunningWorkflowHelper:
             "config/params.json"
         )
 
+        # Log to STDOUT
+        logFormatter = logging.Formatter(
+            '%(asctime)s %(levelname)-8s [PreprocessDataset] %(message)s'
+        )
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.INFO)
+        consoleHandler = logging.StreamHandler()
+        consoleHandler.setFormatter(logFormatter)
+        self.logger.addHandler(consoleHandler)
+
     @classmethod
     def from_running(cls):
         """
@@ -39,9 +49,9 @@ class RunningWorkflowHelper:
     def log(self):
         """Print logging messages about the dataset."""
 
-        print(f"Storage location for dataset: {self.s3_dataset}")
-        print(f"Number of files in dataset: {self.files.shape[0]:,}")
-        print(f"Number of samples in dataset: {self.samplesheet.shape[0]:,}")
+        self.logger.info(f"Storage location for dataset: {self.s3_dataset}")
+        self.logger.info(f"Number of files in dataset: {self.files.shape[0]:,}")
+        self.logger.info(f"Number of samples in dataset: {self.samplesheet.shape[0]:,}")
 
     def _read_csv(self, suffix: str, required_columns=None) -> pd.DataFrame:
         """Read a CSV from the dataset and check for any required columns."""
@@ -53,6 +63,21 @@ class RunningWorkflowHelper:
             assert col in df.columns.values, f"Did not find expected columns {col} in {self.s3_dataset}/{suffix}"
         return df
 
-    def _read_json(self, suffix: str):
-        with Path(f'{self.s3_dataset}/{suffix}').open() as handle:
+    def _read_json(self, local_path: str):
+        with Path(local_path).open() as handle:
             return json.load(handle)
+
+    def _write_json(self, dat, local_path: str, indent=4):
+        with Path(local_path).open(mode="wt") as handle:
+            return json.dump(dat, handle, indent=indent)
+
+    def add_param(self, kw:str, val, overwrite=False):
+        """Add a parameter to the dataset."""
+
+        assert overwrite or kw not in self.params, f"Cannot add parameter {kw}, already exists (and overwrite=False)"
+
+        self.logger.info(f"Adding parameter {kw} = {val}")
+        self.params[kw] = val
+
+        self.logger.info("Saving parameters")
+        self._write_json(self.params, "config/params.json")
