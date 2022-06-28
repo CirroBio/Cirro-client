@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from pathlib import Path
+
 import pandas as pd
 
 
@@ -28,20 +29,20 @@ class PreprocessDataset:
         )
 
         # Log to STDOUT
-        logFormatter = logging.Formatter(
+        log_formatter = logging.Formatter(
             '%(asctime)s %(levelname)-8s [PreprocessDataset] %(message)s'
         )
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.INFO)
-        consoleHandler = logging.StreamHandler()
-        consoleHandler.setFormatter(logFormatter)
-        self.logger.addHandler(consoleHandler)
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(log_formatter)
+        self.logger.addHandler(console_handler)
 
     @classmethod
     def from_running(cls):
         """
-        Creates a workflow
-        :return:
+        Creates a dataset instance from the currently running dataset
+          expected to be called from the headnode
         """
         dataset_path = os.getenv("PW_S3_DATASET")
         return cls(dataset_path)
