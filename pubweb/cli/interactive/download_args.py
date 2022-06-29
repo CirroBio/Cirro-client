@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List
 
 from pubweb.cli.interactive.common_args import ask_project
-from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
+from pubweb.cli.interactive.utils import prompt_wrapper
 from pubweb.cli.models import DownloadArguments
 from pubweb.utils import parse_json_date, format_date
 

@@ -1,4 +1,4 @@
-from pubweb.cli.interactive.prompt_wrapper import prompt_wrapper
+from pubweb.cli.interactive.utils import prompt_wrapper
 
 
 def ask_project(projects, input_value):

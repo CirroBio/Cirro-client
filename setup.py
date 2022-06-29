@@ -19,7 +19,8 @@ install_requires = [
     "requests==2.27.1",
     "requests_aws4auth==1.1.2",
     "pycognito==2022.1.0",
-    "tqdm==4.62.3"
+    "tqdm==4.62.3",
+    "pygithub>=1.55"
 ]
 
 install_analysis_requires = [
