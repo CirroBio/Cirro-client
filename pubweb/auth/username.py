@@ -7,6 +7,11 @@ from pubweb.auth import AuthInfo
 
 
 class UsernameAndPasswordAuth(AuthInfo):
+    """
+    Uses your username & password to authenticate
+    Note: this does not work with federated identities (Fred Hutch login)
+    You must contact HDC to manually create an account
+    """
     def __init__(self, username, password):
         self.username = username
         self.password = password

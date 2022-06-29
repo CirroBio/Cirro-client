@@ -8,6 +8,10 @@ from pubweb.models.auth import Creds
 
 
 class IAMAuth(AuthInfo):
+    """
+    Uses AWS access tokens for authentication
+    Note: this does not with any API calls at the moment
+    """
     def __init__(self, access_key: str, secret_key: str, token: str = None):
         self.creds: Creds = {
             'AccessKeyId': access_key,

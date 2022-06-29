@@ -1,6 +1,6 @@
-import datetime
 import math
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
@@ -87,7 +87,7 @@ class S3Client:
 
         expiration = parse_json_date(self._creds_expiration)
 
-        if expiration < datetime.datetime.now():
+        if expiration < datetime.now(timezone.utc):
             new_creds = self._creds_getter()
             self._client = build_client(new_creds)
             self._creds_expiration = new_creds['Expiration']

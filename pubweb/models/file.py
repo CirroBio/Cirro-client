@@ -35,13 +35,15 @@ class DirectoryStatistics(TypedDict):
 
 
 class FileAccessContext:
+    """
+    Context holder for accessing various files in PubWeb and abstracting out their location
+    Supports dataset paths
+    Prefer to use the class methods to instantiate
+    """
     def __init__(self,
                  access_input: S3AuthorizerInput,
                  bucket: str,
                  path: str = None):
-        """
-        Prefer using class methods to instantiate
-        """
         self._access_input = access_input
         self.bucket = bucket
         self._path = path
@@ -70,8 +72,11 @@ class FileAccessContext:
             f'datasets/{dataset_id}/data'
         )
 
+    # TODO: support reference upload
+
     @property
     def get_token_query(self) -> ApiQuery:
+        """ Used to fetch access token """
         return ApiQuery(
             query=_GET_FILE_ACCESS_TOKEN_QUERY,
             variables={'input': self._access_input}

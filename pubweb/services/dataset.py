@@ -8,7 +8,8 @@ from pubweb.services.file import FileEnabledService
 
 
 class DatasetService(FileEnabledService):
-    def find_by_project(self, project_id):
+    def find_by_project(self, project_id: str):
+        """ Lists datasets by project """
         query = '''
           query DatasetsByProject(
             $project: ID!
@@ -53,6 +54,9 @@ class DatasetService(FileEnabledService):
         return filter_deleted(resp['items'])
 
     def create(self, create_request: CreateIngestDatasetInput) -> DatasetCreateResponse:
+        """
+        Creates an ingest dataset
+        """
         print(f"Creating dataset {create_request['name']}")
         query = '''
           mutation CreateIngestDataset($input: CreateIngestDatasetInput!) {
@@ -68,6 +72,9 @@ class DatasetService(FileEnabledService):
         return data
 
     def get_dataset_files(self, project_id: str, dataset_id: str) -> List[str]:
+        """
+        Returns a list of file names that are in the provided dataset
+        """
         access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
         return self._get_dataset_files(access_context)
 

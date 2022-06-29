@@ -20,6 +20,9 @@ class FileService(BaseService):
         return credentials_response['getFileAccessToken']
 
     def get_file(self, access_context: FileAccessContext, file_path: str) -> str:
+        """
+        Gets the string contents of an individual file
+        """
         s3_client = S3Client(partial(self.get_access_credentials, access_context))
         full_path = f'{access_context.path_prefix}/{file_path}'
         return s3_client.get_file(access_context.bucket, full_path)
@@ -47,6 +50,9 @@ class FileService(BaseService):
 
 
 class FileEnabledService(BaseService):
+    """
+    Not to be instantiated directly
+    """
     _file_service: FileService
 
     def __init__(self, api_client: ApiClient, file_service: FileService):
