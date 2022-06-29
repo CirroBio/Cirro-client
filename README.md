@@ -1,5 +1,9 @@
 # PubWeb Client
 
+[![Build Python package](https://github.com/FredHutch/PubWeb-client/actions/workflows/package.yml/badge.svg)](https://github.com/FredHutch/PubWeb-client/actions/workflows/package.yml)
+[![Lint and run tests](https://github.com/FredHutch/PubWeb-client/actions/workflows/lint.yml/badge.svg)](https://github.com/FredHutch/PubWeb-client/actions/workflows/lint.yml)
+![](https://img.shields.io/pypi/v/pubweb.svg)
+
 A Python 3.8+ library for the PubWeb platform.
 
 ## Installation
@@ -128,13 +132,4 @@ client.dataset.download_files(project_id=project_id,
                               dataset_id=dataset_id,
                               download_location='/tmp',
                               files=files)
-```
-
-### Development
-
-Building
-
-```
-python setup.py bdist_wheel
-twine upload dist/*
 ```
