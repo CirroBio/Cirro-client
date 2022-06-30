@@ -1,7 +1,7 @@
 from typing import List
 
 from pubweb.clients.utils import get_id_from_name, filter_deleted
-from pubweb.models.process import Executor, Process
+from pubweb.models.process import Executor, Process, RunAnalysisCommand
 from pubweb.services.base import BaseService
 
 
@@ -31,3 +31,11 @@ class ProcessService(BaseService):
 
     def get_process_id(self, name_or_id: str) -> str:
         return get_id_from_name(self.list(), name_or_id)
+
+    def run_analysis(self, run_analysis_command: RunAnalysisCommand):
+        query = '''
+          mutation RunAnalysis($input: RunAnalysisInput!) {
+            runAnalysis(input: $input)
+          }
+        '''
+        self._api_client.query(query, variables={'input': run_analysis_command.to_json()})
