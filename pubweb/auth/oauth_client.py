@@ -7,4 +7,4 @@ from pubweb.auth import AuthInfo
 # since cognito auth doesn't work with federated login
 class ClientAuth(AuthInfo):
     def get_request_auth(self) -> AuthBase:
-        pass
+        raise NotImplementedError()

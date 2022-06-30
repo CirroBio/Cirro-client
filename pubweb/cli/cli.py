@@ -14,7 +14,7 @@ def check_required_args(args):
 
 @click.group(help="PubWeb CLI - Tool for interacting with datasets")
 def run():
-    pass
+    pass  # Print out help text, nothing to do
 
 
 @run.command(help='List datasets', no_args_is_help=True)
