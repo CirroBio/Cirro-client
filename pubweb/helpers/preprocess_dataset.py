@@ -82,3 +82,14 @@ class PreprocessDataset:
 
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
+
+    def remove_param(self, kw: str, force=False):
+        """Remove a parameter from the dataset."""
+
+        assert force or kw in self.params, f"Cannot remove parameter {kw}, does not exist (and force=False)"
+
+        self.logger.info(f"Removing parameter {kw}")
+        del self.params[kw]
+
+        self.logger.info("Saving parameters")
+        self._write_json(self.params, "nextflow.json")
