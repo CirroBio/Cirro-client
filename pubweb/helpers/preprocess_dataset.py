@@ -81,4 +81,4 @@ class PreprocessDataset:
         self.params[kw] = val
 
         self.logger.info("Saving parameters")
-        self._write_json(self.params, "config/params.json")
+        self._write_json(self.params, "nextflow.json")
