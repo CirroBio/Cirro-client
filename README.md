@@ -87,6 +87,7 @@ Options:
 from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth, IAMAuth
 from pubweb.models.dataset import CreateIngestDatasetInput
+from pubweb.models.process import RunAnalysisCommand
 from pubweb.file_utils import filter_files_by_pattern
 
 # Username / Password auth
@@ -132,4 +133,28 @@ client.dataset.download_files(project_id=project_id,
                               dataset_id=dataset_id,
                               download_location='/tmp',
                               files=files)
+
+# Running analysis
+fastqs = filter_files_by_pattern(files, '**/treatment/*.fastq.gz')
+references = client.project.get_references(project_id, 'crispr_libraries')
+reference_library = references.find_by_name('BroadGPP-Brunello')
+
+params = {
+    'fastq': ','.join([f.absolute_path for f in fastqs]),
+    "adapter": "CTTGTGGAAAGGACGAAACACCG",
+    "insert_length": 20,
+    "library": reference_library.absolute_path
+}
+
+command = RunAnalysisCommand(
+    name='count analysis',
+    description='test from SDK',
+    process_id='process-hutch-magic_count-1_0',
+    parent_dataset_id=dataset_id,
+    project_id=project_id,
+    params=params,
+    notifications_emails=[]
+)
+
+client.process.run_analysis(command)
 ```

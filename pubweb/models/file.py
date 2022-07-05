@@ -1,4 +1,5 @@
 from typing import Literal, TypedDict, Optional
+from dataclasses import dataclass
 
 from pubweb.models.api import ApiQuery
 
@@ -72,7 +73,29 @@ class FileAccessContext:
             f'datasets/{dataset_id}/data'
         )
 
-    # TODO: support reference upload
+    @classmethod
+    def download_project_resources(cls, project_id: str):
+        return cls(
+            {
+                'accessType': 'PROJECT', 'operation': 'DOWNLOAD',
+                'projectId': project_id, 'datasetId': None,
+                'tokenLifetimeHours': None
+            },
+            get_project_bucket(project_id),
+            f'resources'
+        )
+
+    @classmethod
+    def upload_project_resources(cls, project_id: str):
+        return cls(
+            {
+                'accessType': 'PROJECT', 'operation': 'UPLOAD',
+                'projectId': project_id, 'datasetId': None,
+                'tokenLifetimeHours': None
+            },
+            get_project_bucket(project_id),
+            f'resources/data'
+        )
 
     @property
     def get_token_query(self) -> ApiQuery:
@@ -85,3 +108,25 @@ class FileAccessContext:
     @property
     def path_prefix(self):
         return self._path
+
+    @property
+    def domain(self):
+        return f's3://{self.bucket}/{self.path_prefix}'
+
+
+@dataclass(frozen=True)
+class File:
+    relative_path: str
+    size: int
+    domain: str
+
+    @classmethod
+    def of(cls, file: 'File'):
+        return cls(file.relative_path, file.size, file.domain)
+
+    @property
+    def absolute_path(self):
+        return f'{self.domain}/{self.relative_path.strip("/")}'
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(path={self.relative_path})'

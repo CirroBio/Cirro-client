@@ -33,6 +33,7 @@ class ProcessService(BaseService):
         return get_id_from_name(self.list(), name_or_id)
 
     def run_analysis(self, run_analysis_command: RunAnalysisCommand):
+        # Validate analysis params
         query = '''
           mutation RunAnalysis($input: RunAnalysisInput!) {
             runAnalysis(input: $input)

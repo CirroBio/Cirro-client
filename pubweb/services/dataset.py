@@ -1,9 +1,8 @@
-import json
-from typing import List
+from typing import List, Union
 
 from pubweb.clients.utils import filter_deleted
 from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse
-from pubweb.models.file import FileAccessContext
+from pubweb.models.file import FileAccessContext, File
 from pubweb.services.file import FileEnabledService
 
 
@@ -71,28 +70,26 @@ class DatasetService(FileEnabledService):
         print(f"Dataset ID: {data['datasetId']}")
         return data
 
-    def get_dataset_files(self, project_id: str, dataset_id: str) -> List[str]:
+    def get_dataset_files(self, project_id: str, dataset_id: str) -> List[File]:
         """
         Returns a list of file names that are in the provided dataset
         """
         access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
-        return self._get_dataset_files(access_context)
+        return self._file_service.get_file_listing(access_context)
 
     def upload_files(self, project_id: str, dataset_id: str, directory: str, files: List[str]):
         access_context = FileAccessContext.upload_dataset(project_id=project_id, dataset_id=dataset_id)
         self._file_service.upload_files(access_context, directory, files)
 
-    def download_files(self, project_id: str, dataset_id: str, download_location: str, files: List[str] = None):
+    def download_files(self, project_id: str, dataset_id: str, download_location: str, files: Union[List[File], List[str]] = None):
         """
          Downloads all the dataset files
          If the files argument isn't provided, all files will be downloaded
         """
         access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
         if files is None:
-            files = self._get_dataset_files(access_context)
-        self._file_service.download_files(access_context, download_location, files)
+            files = self._file_service.get_file_listing(access_context)
+        if type(files, List[File]):
+            files = [file.relative_path for file in files]
 
-    def _get_dataset_files(self, access_context: FileAccessContext):
-        file = self._file_service.get_file(access_context, 'web/manifest.json')
-        manifest = json.loads(file)
-        return [file['file'] for file in manifest['files']]
+        self._file_service.download_files(access_context, download_location, files)

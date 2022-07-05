@@ -1,3 +1,4 @@
+import json
 from functools import partial
 from typing import List
 
@@ -5,7 +6,7 @@ from pubweb.auth import IAMAuth
 from pubweb.clients import ApiClient, S3Client
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
-from pubweb.models.file import FileAccessContext
+from pubweb.models.file import FileAccessContext, File
 from pubweb.services.base import BaseService
 
 
@@ -47,6 +48,18 @@ class FileService(BaseService):
         """
         s3_client = S3Client(partial(self.get_access_credentials, access_context))
         download_directory(directory, files, s3_client, access_context.bucket, access_context.path_prefix)
+
+    def get_file_listing(self, access_context: FileAccessContext) -> List[File]:
+        """
+        Gets a listing of files of the current access context,
+        note that this expects a manifest.json file
+        :param access_context: File access context, use class methods to generate
+        :return: relative path of files
+        """
+        file = self.get_file(access_context, 'web/manifest.json')
+        manifest = json.loads(file)
+        return [File(file['file'], file['size'], access_context.domain)
+                for file in manifest['files']]
 
 
 class FileEnabledService(BaseService):
