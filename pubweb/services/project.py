@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pubweb.clients.utils import get_id_from_name, filter_deleted
 from pubweb.file_utils import filter_files_by_pattern
@@ -10,6 +10,9 @@ from pubweb.services.file import FileEnabledService
 
 class ProjectService(FileEnabledService):
     def list(self) -> List[Project]:
+        """
+        Gets a list of projects that you have access to
+        """
         query = '''
           query ListProjects(
             $filter: ModelProjectFilterInput
@@ -33,6 +36,12 @@ class ProjectService(FileEnabledService):
 
     def get_project_id(self, name_or_id: str) -> str:
         return get_id_from_name(self.list(), name_or_id)
+
+    def find_by_name(self, name: str) -> Optional[Project]:
+        """
+        Finds a project by name
+        """
+        return next((p for p in self.list() if p.name == name), None)
 
     def get_references(self, project_id: str, reference_directory: str) -> References:
         """

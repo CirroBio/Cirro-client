@@ -10,8 +10,11 @@ logger = logging.getLogger()
 
 
 class DatasetService(FileEnabledService):
-    def find_by_project(self, project_id: str) -> List[Dataset]:
-        """ Lists datasets by project """
+    def find_by_project(self, project_id: str, name: str = None) -> List[Dataset]:
+        """
+         Lists datasets by project with an optional name provided
+         Dataset names are not unique so providing a name doesn't guarantee one result
+        """
         query = '''
           query DatasetsByProject(
             $project: ID!
@@ -51,6 +54,9 @@ class DatasetService(FileEnabledService):
                 }
             }
         }
+        if name:
+            variables['filter']['name'] = {'eq': name}
+
         resp = self._api_client.query(query, variables=variables)['datasetsByProject']
         not_deleted = filter_deleted(resp['items'])
         return [Dataset.from_record(item) for item in not_deleted]

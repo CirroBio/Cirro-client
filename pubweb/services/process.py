@@ -97,7 +97,7 @@ class ProcessService(FileEnabledService):
         process = self.get_process(process_id)
         path = S3Path(process['formJson'])
         if path.valid:
-            form_spec_json = self._file_service.get_file(access_context, path.key)
+            form_spec_json = self._file_service.get_file_from_path(access_context, path.key)
         else:
             form_spec_json = process['formJson']
         return ParameterSpecification.from_json(form_spec_json)

@@ -131,15 +131,15 @@ class FileAccessContext:
 class File:
     relative_path: str
     size: int
-    domain: str
+    access_context: FileAccessContext
 
     @classmethod
     def of(cls, file: 'File'):
-        return cls(file.relative_path, file.size, file.domain)
+        return cls(file.relative_path, file.size, file.access_context)
 
     @property
     def absolute_path(self):
-        return f'{self.domain}/{self.relative_path.strip("/")}'
+        return f'{self.access_context.domain}/{self.relative_path.strip("/")}'
 
     @property
     def name(self):
