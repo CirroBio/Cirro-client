@@ -17,16 +17,11 @@ from pubweb.models.process import Executor
 from pubweb.utils import parse_json_date, print_credentials
 
 
-def get_credentials():
-    config = load_config()
-    return config.username, config.password
-
-
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
 
     # Instantiate the PubWeb client
-    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
+    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
 
     # If the user provided the --interactive flag
     if interactive:
@@ -48,7 +43,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
+    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
 
     if interactive:
         projects = pubweb.project.list()
@@ -91,7 +86,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
+    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
 
     if interactive:
         projects = pubweb.project.list()
@@ -114,7 +109,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
 def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
-    pubweb = PubWeb(UsernameAndPasswordAuth(*get_credentials()))
+    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
     process_options = pubweb.process.list(process_type=Executor.NEXTFLOW)
     resources_folder, repo_prefix = get_output_resources_path()
 

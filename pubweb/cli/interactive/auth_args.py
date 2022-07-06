@@ -1,9 +1,10 @@
 import os
+from typing import Tuple
 
 from pubweb.cli.interactive.utils import prompt_wrapper
 
 
-def gather_login():
+def gather_login() -> Tuple[str, str]:
     answers = prompt_wrapper([
         {
             'type': 'input',

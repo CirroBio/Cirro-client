@@ -25,7 +25,7 @@ class FileService(BaseService):
         Gets the string contents of an individual file
         """
         s3_client = S3Client(partial(self.get_access_credentials, access_context))
-        full_path = f'{access_context.path_prefix}/{file_path}'
+        full_path = f'{access_context.path_prefix}/{file_path}'.lstrip('/')
         return s3_client.get_file(access_context.bucket, full_path)
 
     def upload_files(self, access_context: FileAccessContext, directory: str, files: List[str]):

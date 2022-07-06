@@ -1,7 +1,20 @@
-from typing import TypedDict
+from dataclasses import dataclass
+
+from pubweb.config import config
 
 
-class Project(TypedDict):
+@dataclass(frozen=True)
+class Project:
     id: str
     name: str
-    desc: str
+    description: str
+
+    @classmethod
+    def from_record(cls, json):
+        return cls(json['id'],
+                   json['name'],
+                   json['desc'])
+
+    @property
+    def url(self):
+        return f'https://{config.base_url}/projects/{self.id}'

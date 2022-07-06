@@ -1,6 +1,7 @@
-from typing import Literal, TypedDict, Optional
 from dataclasses import dataclass
+from typing import Literal, TypedDict, Optional
 
+from pubweb import config
 from pubweb.models.api import ApiQuery
 
 AccessType = Literal['PROJECT', 'CHART', 'DATASET', 'RESOURCES']
@@ -24,7 +25,7 @@ def get_project_bucket(project_id):
 class S3AuthorizerInput(TypedDict):
     accessType: AccessType
     operation: FileOperation
-    projectId: str
+    projectId: Optional[str]
     datasetId: Optional[str]
     tokenLifetimeHours: Optional[int]
 
@@ -95,6 +96,18 @@ class FileAccessContext:
             },
             get_project_bucket(project_id),
             f'resources/data'
+        )
+
+    @classmethod
+    def resources(cls):
+        return cls(
+            {
+                'accessType': 'RESOURCES', 'operation': 'DOWNLOAD',
+                'projectId': None, 'datasetId': None,
+                'tokenLifetimeHours': None
+            },
+            config.resources_bucket,
+            ''
         )
 
     @property
