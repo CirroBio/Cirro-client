@@ -1,9 +1,9 @@
-import json
 from dataclasses import dataclass
 from pathlib import PurePath
 from typing import Dict, Any, List, Optional
 
 from pubweb.models.file import File
+from pubweb.utils import safe_load_json
 
 
 @dataclass(frozen=True)
@@ -15,7 +15,7 @@ class ReferenceType:
 
     @classmethod
     def from_record(cls, record):
-        validation = json.loads(record['validation'])
+        validation = safe_load_json(record['validation'])
         return cls(record['name'], record['description'], record['directory'], validation)
 
     @property

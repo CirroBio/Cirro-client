@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import PurePath
 from typing import Literal, TypedDict, Optional
 
 from pubweb import config
@@ -39,7 +40,6 @@ class DirectoryStatistics(TypedDict):
 class FileAccessContext:
     """
     Context holder for accessing various files in PubWeb and abstracting out their location
-    Supports dataset paths
     Prefer to use the class methods to instantiate
     """
     def __init__(self,
@@ -140,6 +140,10 @@ class File:
     @property
     def absolute_path(self):
         return f'{self.domain}/{self.relative_path.strip("/")}'
+
+    @property
+    def name(self):
+        return PurePath(self.absolute_path).name
 
     def __repr__(self):
         return f'{self.__class__.__name__}(path={self.relative_path})'

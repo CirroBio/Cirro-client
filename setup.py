@@ -25,7 +25,8 @@ install_requires = [
 ]
 
 install_analysis_requires = [
-    "pandas>=1.4.0,<1.5.0"
+    "pandas>=1.4.0,<1.5.0",
+    "s3fs==2022.5.0"
 ]
 
 install_all_requires = install_requires + install_analysis_requires

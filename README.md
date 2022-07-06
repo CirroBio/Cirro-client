@@ -83,10 +83,11 @@ Options:
 
 ### SDK Usage
 
-| Sample                                                             | Description                   |
-|--------------------------------------------------------------------|-------------------------------|
-| [01_Intro](samples/01_Intro.ipynb)                                 | Authenticating and installing |
-| [02_Uploading_a_dataset](samples/02_Uploading_a_dataset.ipynb)     |                               |
-| [03_Downloading_a_dataset](samples/03_Downloading_a_dataset.ipynb) |                               |
-| [04_Analyzing_a_dataset](samples/04_Analyzing_a_dataset.ipynb)     |                               |
-| [05_Using_references](samples/05_Using_references.ipynb)           | Managing reference data       |
+| Sample                                                               | Description                   |
+|----------------------------------------------------------------------|-------------------------------|
+| [01_Intro](samples/01_Intro.ipynb)                                   | Authenticating and installing |
+| [02_Uploading_a_dataset](samples/02_Uploading_a_dataset.ipynb)       |                               |
+| [03_Downloading_a_dataset](samples/03_Downloading_a_dataset.ipynb)   |                               |
+| [04_Interacting_with_files](samples/04_Interacting_with_files.ipynb) |                               |
+| [05_Analyzing_a_dataset](samples/05_Analyzing_a_dataset.ipynb)       |                               |
+| [06_Using_references](samples/06_Using_references.ipynb)             | Managing reference data       |
