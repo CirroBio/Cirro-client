@@ -83,7 +83,7 @@ class FileAccessContext:
                 'tokenLifetimeHours': None
             },
             get_project_bucket(project_id),
-            f'resources'
+            'resources'
         )
 
     @classmethod
@@ -95,7 +95,7 @@ class FileAccessContext:
                 'tokenLifetimeHours': None
             },
             get_project_bucket(project_id),
-            f'resources/data'
+            'resources/data'
         )
 
     @classmethod

@@ -17,7 +17,7 @@ class DevelopmentConfig:
     data_endpoint = 'https://drdt2z4kljdbte5s4zx623kyk4.appsync-api.us-west-2.amazonaws.com/graphql'
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-dev'
-    base_url = "http://dev.pubweb.cloud"
+    base_url = "https://dev.pubweb.cloud"
 
 
 class ProductionConfig:
@@ -26,7 +26,7 @@ class ProductionConfig:
     data_endpoint = 'https://22boctowkfbuzaidvbvwjxfnai.appsync-api.us-west-2.amazonaws.com/graphql'
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-prd'
-    base_url = "http://pubweb.cloud"
+    base_url = "https://pubweb.cloud"
 
 
 if os.environ.get('ENV', '').upper() == 'DEV':

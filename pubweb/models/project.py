@@ -17,4 +17,4 @@ class Project:
 
     @property
     def url(self):
-        return f'https://{config.base_url}/projects/{self.id}'
+        return f'{config.base_url}/projects/{self.id}'
