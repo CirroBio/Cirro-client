@@ -1,9 +1,12 @@
-import boto3
 import json
 import logging
 import os
 from pathlib import Path
+
+import boto3
 import pandas as pd
+
+from pubweb.models.s3_path import S3Path
 
 
 class PreprocessDataset:
@@ -68,16 +71,13 @@ class PreprocessDataset:
         """Read a JSON from the dataset"""
 
         # Make the full S3 path
-        s3_path = f"{self.s3_dataset}/{suffix}"
-
-        # Split up the bucket and key
-        bucket_name, key_name = s3_path[5:].split("/", 1)
+        s3_path = S3Path(f"{self.s3_dataset}/{suffix}")
 
         # Open a connection to S3
         s3 = boto3.client('s3')
 
         # Read the object
-        retr = s3.get_object(Bucket=bucket_name, Key=key_name)
+        retr = s3.get_object(Bucket=s3_path.bucket, Key=s3_path.key)
         text = retr['Body'].read().decode()
 
         # Parse JSON
