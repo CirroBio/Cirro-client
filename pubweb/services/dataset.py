@@ -36,6 +36,8 @@ class DatasetService(FileEnabledService):
                 name
                 desc
                 sourceDatasets
+                infoJson
+                paramJson
                 process
                 createdAt
                 updatedAt

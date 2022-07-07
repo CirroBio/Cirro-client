@@ -1,38 +1,78 @@
 import json
+from dataclasses import dataclass
 from enum import Enum
 from typing import NamedTuple, Dict, Any, TypedDict, List, Optional
 
 
 class Executor(Enum):
+    UNKNOWN = 'UNKNOWN'
     INGEST = 'INGEST'
     "Process type used when manually uploading files"
     NEXTFLOW = 'NEXTFLOW'
     "Processes that are ran using Nextflow"
 
 
-class ProcessCode(TypedDict):
+@dataclass(frozen=True)
+class ProcessCode:
     repository: str
     uri: str
     script: str
     version: str
 
+    @classmethod
+    def from_record(cls, record: Dict):
+        if not record:
+            return None
+        return cls(**record)
 
-class ProcessCompute(TypedDict):
+
+@dataclass(frozen=True)
+class ProcessCompute:
     executor: str
     json: str
     name: str
 
 
-class Process(TypedDict):
+@dataclass(frozen=True)
+class Process:
+    id: str
+    name: str
+    description: str
+    child_process_ids: List[str]
+    executor: Executor
+    documentation_url: str
+    code: ProcessCode
+    form_spec_json: str
+    sample_sheet_path: str
+    file_requirements_message: str
+    file_mapping_rules: List
+
+    @classmethod
+    def from_record(cls, record: 'ProcessRecord'):
+        return cls(
+            record.get('id'),
+            record.get('name'),
+            record.get('desc'),
+            record.get('childProcessIds'),
+            Executor[record.get('executor')],
+            record.get('documentationUrl'),
+            ProcessCode.from_record(record.get('code', {})),
+            record.get('formJson'),
+            record.get('sampleSheetPath'),
+            record.get('fileRequirementsMessage'),
+            record.get('fileMappingRules'))
+
+
+class ProcessRecord(TypedDict):
     id: str
     childProcessIds: List[str]
     name: str
     desc: str
     executor: str
     documentationUrl: str
-    code: ProcessCode
+    code: Dict
     paramDefaults: List
-    computeDefaults: List[ProcessCompute]
+    computeDefaults: List[Dict]
     paramMapJson: str
     formJson: str
     fileJson: str

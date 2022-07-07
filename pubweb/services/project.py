@@ -35,6 +35,7 @@ class ProjectService(FileEnabledService):
         return [Project.from_record(item) for item in items]
 
     def get_project_id(self, name_or_id: str) -> str:
+        # TODO: move this out into CLI module
         return get_id_from_name(self.list(), name_or_id)
 
     def find_by_name(self, name: str) -> Optional[Project]:

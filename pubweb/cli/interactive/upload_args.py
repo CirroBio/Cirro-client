@@ -77,7 +77,7 @@ def ask_description(input_value: str) -> str:
 
 
 def ask_process(processes: List[Process], input_value: str) -> str:
-    process_names = [process['name'] for process in processes]
+    process_names = [process.name for process in processes]
     process_prompt = {
         'type': 'list',
         'name': 'process',
