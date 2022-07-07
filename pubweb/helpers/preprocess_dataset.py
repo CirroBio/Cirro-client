@@ -3,7 +3,10 @@ import logging
 import os
 from pathlib import Path
 
+import boto3
 import pandas as pd
+
+from pubweb.models.s3_path import S3Path
 
 
 class PreprocessDataset:
@@ -64,9 +67,21 @@ class PreprocessDataset:
             assert col in df.columns.values, f"Did not find expected columns {col} in {self.s3_dataset}/{suffix}"
         return df
 
-    def _read_json(self, local_path: str):
-        with Path(local_path).open() as handle:
-            return json.load(handle)
+    def _read_json(self, suffix: str):
+        """Read a JSON from the dataset"""
+
+        # Make the full S3 path
+        s3_path = S3Path(f"{self.s3_dataset}/{suffix}")
+
+        # Open a connection to S3
+        s3 = boto3.client('s3')
+
+        # Read the object
+        retr = s3.get_object(Bucket=s3_path.bucket, Key=s3_path.key)
+        text = retr['Body'].read().decode()
+
+        # Parse JSON
+        return json.loads(text)
 
     def _write_json(self, dat, local_path: str, indent=4):
         with Path(local_path).open(mode="wt") as handle:
