@@ -9,6 +9,8 @@ from pubweb.cli.interactive.common_args import ask_project, ask_use_third_party_
 from pubweb.cli.interactive.utils import prompt_wrapper
 from pubweb.cli.models import UploadArguments
 from pubweb.file_utils import get_directory_stats
+from pubweb.models.process import Process
+from pubweb.models.project import Project
 
 
 class DataDirectoryValidator(Validator):
@@ -21,7 +23,7 @@ class DataDirectoryValidator(Validator):
             )
 
 
-def ask_data_directory(input_value):
+def ask_data_directory(input_value: str) -> str:
     directory_prompt = {
         'type': 'path',
         'name': 'data_directory',
@@ -36,7 +38,7 @@ def ask_data_directory(input_value):
     return answers['data_directory']
 
 
-def confirm_data_directory(directory):
+def confirm_data_directory(directory: str):
     stats = get_directory_stats(directory)
     answers = prompt_wrapper({
         'type': 'confirm',
@@ -49,7 +51,7 @@ def confirm_data_directory(directory):
         sys.exit(1)
 
 
-def ask_name(input_value):
+def ask_name(input_value: str) -> str:
     name_prompt = {
         'type': 'input',
         'name': 'name',
@@ -62,7 +64,7 @@ def ask_name(input_value):
     return answers['name']
 
 
-def ask_description(input_value):
+def ask_description(input_value: str) -> str:
     description_prompt = {
         'type': 'input',
         'name': 'description',
@@ -74,8 +76,8 @@ def ask_description(input_value):
     return answers['description']
 
 
-def ask_process(processes, input_value):
-    process_names = [process['name'] for process in processes]
+def ask_process(processes: List[Process], input_value: str) -> str:
+    process_names = [process.name for process in processes]
     process_prompt = {
         'type': 'list',
         'name': 'process',
@@ -87,7 +89,7 @@ def ask_process(processes, input_value):
     return answers['process']
 
 
-def gather_upload_arguments(input_params: UploadArguments, projects: List, processes: List):
+def gather_upload_arguments(input_params: UploadArguments, projects: List[Project], processes: List[Process]):
     input_params['project'] = ask_project(projects, input_params.get('project'))
 
     input_params['data_directory'] = ask_data_directory(input_params.get('data_directory'))

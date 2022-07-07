@@ -1,15 +1,20 @@
-import json
-from typing import List
+import logging
+from typing import List, Union
 
 from pubweb.clients.utils import filter_deleted
-from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse
-from pubweb.models.file import FileAccessContext
+from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse, Dataset
+from pubweb.models.file import FileAccessContext, File
 from pubweb.services.file import FileEnabledService
+
+logger = logging.getLogger()
 
 
 class DatasetService(FileEnabledService):
-    def find_by_project(self, project_id: str):
-        """ Lists datasets by project """
+    def find_by_project(self, project_id: str, name: str = None) -> List[Dataset]:
+        """
+         Lists datasets by project with an optional name provided
+         Dataset names are not unique so providing a name doesn't guarantee one result
+        """
         query = '''
           query DatasetsByProject(
             $project: ID!
@@ -32,6 +37,7 @@ class DatasetService(FileEnabledService):
                 desc
                 sourceDatasets
                 infoJson
+                paramJson
                 process
                 createdAt
                 updatedAt
@@ -50,14 +56,18 @@ class DatasetService(FileEnabledService):
                 }
             }
         }
+        if name:
+            variables['filter']['name'] = {'eq': name}
+
         resp = self._api_client.query(query, variables=variables)['datasetsByProject']
-        return filter_deleted(resp['items'])
+        not_deleted = filter_deleted(resp['items'])
+        return [Dataset.from_record(item) for item in not_deleted]
 
     def create(self, create_request: CreateIngestDatasetInput) -> DatasetCreateResponse:
         """
         Creates an ingest dataset
         """
-        print(f"Creating dataset {create_request['name']}")
+        logger.info(f"Creating dataset {create_request.name}")
         query = '''
           mutation CreateIngestDataset($input: CreateIngestDatasetInput!) {
             createIngestDataset(input: $input) {
@@ -66,33 +76,39 @@ class DatasetService(FileEnabledService):
             }
           }
         '''
-        variables = {'input': create_request}
+        variables = {'input': create_request.to_json()}
         data: DatasetCreateResponse = self._api_client.query(query, variables=variables)['createIngestDataset']
-        print(f"Dataset ID: {data['datasetId']}")
+        logger.info(f"Dataset ID: {data['datasetId']}")
         return data
 
-    def get_dataset_files(self, project_id: str, dataset_id: str) -> List[str]:
+    def get_dataset_files(self, project_id: str, dataset_id: str) -> List[File]:
         """
         Returns a list of file names that are in the provided dataset
         """
         access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
-        return self._get_dataset_files(access_context)
+        return self._file_service.get_file_listing(access_context)
 
     def upload_files(self, project_id: str, dataset_id: str, directory: str, files: List[str]):
+        """
+        Uploads files to a given dataset from the specified local directory
+        """
         access_context = FileAccessContext.upload_dataset(project_id=project_id, dataset_id=dataset_id)
         self._file_service.upload_files(access_context, directory, files)
 
-    def download_files(self, project_id: str, dataset_id: str, download_location: str, files: List[str] = None):
+    def download_files(self, project_id: str, dataset_id: str, download_location: str,
+                       files: Union[List[File], List[str]] = None):
         """
          Downloads all the dataset files
          If the files argument isn't provided, all files will be downloaded
         """
+        if len(files) == 0:
+            return
+
+        if isinstance(files[0], File):
+            files = [file.relative_path for file in files]
+
         access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
         if files is None:
-            files = self._get_dataset_files(access_context)
-        self._file_service.download_files(access_context, download_location, files)
+            files = self._file_service.get_file_listing(access_context)
 
-    def _get_dataset_files(self, access_context: FileAccessContext):
-        file = self._file_service.get_file(access_context, 'web/manifest.json')
-        manifest = json.loads(file)
-        return [file['file'] for file in manifest['files']]
+        self._file_service.download_files(access_context, download_location, files)

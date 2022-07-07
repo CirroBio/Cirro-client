@@ -1,10 +1,10 @@
 from typing import NamedTuple, List, Optional, Dict, TypedDict
 
-from pubweb.models.process import Process
+from pubweb.models.process import ProcessRecord
 
 
 class ProcessConfig(TypedDict):
-    dynamo: Process
+    dynamo: ProcessRecord
     form: Dict
     input: Dict[str, str]
     output: Dict

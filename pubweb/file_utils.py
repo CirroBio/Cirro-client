@@ -1,21 +1,24 @@
 from pathlib import Path, PurePath
-from typing import List
+from typing import List, Union
 
 from boto3.exceptions import S3UploadFailedError
 
 from pubweb.clients import S3Client
-from pubweb.models.file import DirectoryStatistics
+from pubweb.models.file import DirectoryStatistics, File
 
 DEFAULT_TRANSFER_SPEED = 160
 
 
-def filter_files_by_pattern(files: List[str], pattern: str) -> List[str]:
+def filter_files_by_pattern(files: Union[List[File], List[str]], pattern: str) -> List[File]:
     """
     Filters a list of files by a glob pattern
     """
+    def matches_glob(file: Union[File, str]):
+        return PurePath(file if isinstance(file, str) else file.relative_path).match(pattern)
+
     return [
         file for file in files
-        if PurePath(file).match(pattern)
+        if matches_glob(file)
     ]
 
 

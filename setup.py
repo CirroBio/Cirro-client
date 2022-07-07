@@ -20,11 +20,13 @@ install_requires = [
     "requests_aws4auth==1.1.2",
     "pycognito==2022.1.0",
     "tqdm==4.62.3",
-    "pygithub>=1.55"
+    "pygithub>=1.55",
+    "jsonschema==4.6.1"
 ]
 
 install_analysis_requires = [
-    "pandas>=1.4.0,<1.5.0"
+    "pandas>=1.4.0,<1.5.0",
+    "s3fs==2022.5.0"
 ]
 
 install_all_requires = install_requires + install_analysis_requires

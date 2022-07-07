@@ -1,9 +1,13 @@
+import json
 from datetime import timezone, datetime
+from typing import Optional, Union
 
 from pubweb.models.auth import Creds
 
 
-def parse_json_date(json_date: str) -> datetime:
+def parse_json_date(json_date: str) -> Optional[datetime]:
+    if not json_date:
+        return None
     local_zone = datetime.now(timezone.utc).astimezone().tzinfo
     try:
         parsed = datetime.strptime(json_date, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -16,8 +20,17 @@ def parse_json_date(json_date: str) -> datetime:
         .astimezone(local_zone)
 
 
-def format_date(json_date: str) -> str:
-    return parse_json_date(json_date).strftime('%m/%d/%Y, %H:%M:%S')
+def safe_load_json(json_str: Optional[str]):
+    if json_str is not None:
+        return json.loads(json_str)
+    else:
+        return {}
+
+
+def format_date(date: Union[str, datetime]) -> str:
+    if isinstance(date, str):
+        date = parse_json_date(date)
+    return date.strftime('%m/%d/%Y, %H:%M:%S')
 
 
 def print_credentials(creds: Creds):

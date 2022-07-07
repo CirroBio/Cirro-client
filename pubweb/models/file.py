@@ -1,5 +1,8 @@
+from dataclasses import dataclass
+from pathlib import PurePath
 from typing import Literal, TypedDict, Optional
 
+from pubweb import config
 from pubweb.models.api import ApiQuery
 
 AccessType = Literal['PROJECT', 'CHART', 'DATASET', 'RESOURCES']
@@ -23,7 +26,7 @@ def get_project_bucket(project_id):
 class S3AuthorizerInput(TypedDict):
     accessType: AccessType
     operation: FileOperation
-    projectId: str
+    projectId: Optional[str]
     datasetId: Optional[str]
     tokenLifetimeHours: Optional[int]
 
@@ -37,7 +40,6 @@ class DirectoryStatistics(TypedDict):
 class FileAccessContext:
     """
     Context holder for accessing various files in PubWeb and abstracting out their location
-    Supports dataset paths
     Prefer to use the class methods to instantiate
     """
     def __init__(self,
@@ -72,7 +74,41 @@ class FileAccessContext:
             f'datasets/{dataset_id}/data'
         )
 
-    # TODO: support reference upload
+    @classmethod
+    def download_project_resources(cls, project_id: str):
+        return cls(
+            {
+                'accessType': 'PROJECT', 'operation': 'DOWNLOAD',
+                'projectId': project_id, 'datasetId': None,
+                'tokenLifetimeHours': None
+            },
+            get_project_bucket(project_id),
+            'resources'
+        )
+
+    @classmethod
+    def upload_project_resources(cls, project_id: str):
+        return cls(
+            {
+                'accessType': 'PROJECT', 'operation': 'UPLOAD',
+                'projectId': project_id, 'datasetId': None,
+                'tokenLifetimeHours': None
+            },
+            get_project_bucket(project_id),
+            'resources/data'
+        )
+
+    @classmethod
+    def resources(cls):
+        return cls(
+            {
+                'accessType': 'RESOURCES', 'operation': 'DOWNLOAD',
+                'projectId': None, 'datasetId': None,
+                'tokenLifetimeHours': None
+            },
+            config.resources_bucket,
+            ''
+        )
 
     @property
     def get_token_query(self) -> ApiQuery:
@@ -85,3 +121,29 @@ class FileAccessContext:
     @property
     def path_prefix(self):
         return self._path
+
+    @property
+    def domain(self):
+        return f's3://{self.bucket}/{self.path_prefix}'
+
+
+@dataclass(frozen=True)
+class File:
+    relative_path: str
+    size: int
+    access_context: FileAccessContext
+
+    @classmethod
+    def of(cls, file: 'File'):
+        return cls(file.relative_path, file.size, file.access_context)
+
+    @property
+    def absolute_path(self):
+        return f'{self.access_context.domain}/{self.relative_path.strip("/")}'
+
+    @property
+    def name(self):
+        return PurePath(self.absolute_path).name
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(path={self.relative_path})'

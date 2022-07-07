@@ -1,14 +1,14 @@
 import configparser
 import os
 from pathlib import Path
+from typing import NamedTuple
 
 PUBWEB_CONFIG_LOCATION = "~/.pubweb/config"
 
 
-class AuthConfig:
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
+class AuthConfig(NamedTuple):
+    username: str
+    password: str
 
 
 class DevelopmentConfig:
@@ -16,6 +16,8 @@ class DevelopmentConfig:
     app_id = '2g2eg0g7tbjhbaa45diohmvqhs'
     data_endpoint = 'https://drdt2z4kljdbte5s4zx623kyk4.appsync-api.us-west-2.amazonaws.com/graphql'
     region = 'us-west-2'
+    resources_bucket = 'pubweb-resources-dev'
+    base_url = "https://dev.pubweb.cloud"
 
 
 class ProductionConfig:
@@ -23,6 +25,8 @@ class ProductionConfig:
     app_id = '7ic2n55r9h4fj0qej5q9ikr2o1'
     data_endpoint = 'https://22boctowkfbuzaidvbvwjxfnai.appsync-api.us-west-2.amazonaws.com/graphql'
     region = 'us-west-2'
+    resources_bucket = 'pubweb-resources-prd'
+    base_url = "https://pubweb.cloud"
 
 
 if os.environ.get('ENV', '').upper() == 'DEV':

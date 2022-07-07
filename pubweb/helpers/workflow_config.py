@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict
 
 from pubweb.helpers.constants import PROCESSES_PATH_S3
-from pubweb.models.process import Process, Executor
+from pubweb.models.process import ProcessRecord, Executor
 from pubweb.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
 
 
@@ -37,7 +37,7 @@ class WorkflowConfigBuilder:
 
         # Reorder dynamo config based on model order
         ordered_record = {}
-        for key in Process.__annotations__.keys():
+        for key in ProcessRecord.__annotations__.keys():
             value = self.process_config["dynamo"].get(key)  # type: ignore
             if value is not None:
                 ordered_record[key] = value
