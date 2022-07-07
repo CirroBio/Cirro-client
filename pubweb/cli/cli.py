@@ -1,6 +1,7 @@
 import click
 
 from pubweb.cli import run_ingest, run_download, run_configure, run_list_datasets, run_configure_workflow
+from pubweb.cli.controller import run_upload_reference
 
 
 def check_required_args(args):
@@ -69,6 +70,11 @@ def upload(**kwargs):
 @run.command(help='Configure a workflow to run in the Data Portal')
 def configure_workflow():
     run_configure_workflow()
+
+
+@run.command(help='Upload a reference to a project', no_args_is_help=True)
+def upload_reference():
+    run_upload_reference()
 
 
 @run.command(help='Configure authentication')
