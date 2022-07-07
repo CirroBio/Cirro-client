@@ -2,13 +2,15 @@ from typing import List, Optional
 
 from pubweb.clients.utils import get_id_from_name, filter_deleted
 from pubweb.file_utils import filter_files_by_pattern
+from pubweb.helpers.constants import REFERENCES_PATH_S3
 from pubweb.models.file import FileAccessContext
 from pubweb.models.project import Project
-from pubweb.models.reference import Reference, References
-from pubweb.services.file import FileEnabledService
+from pubweb.models.reference import Reference, References, ReferenceType
+from pubweb.services.base import BaseService
+from pubweb.services.file import FileEnabledMixin
 
 
-class ProjectService(FileEnabledService):
+class ProjectService(FileEnabledMixin, BaseService):
     def list(self) -> List[Project]:
         """
         Gets a list of projects that you have access to
@@ -50,6 +52,13 @@ class ProjectService(FileEnabledService):
         """
         access_context = FileAccessContext.download_project_resources(project_id)
         resources = self._file_service.get_file_listing(access_context)
-        reference_files = filter_files_by_pattern(resources, f'data/references/{reference_directory}/*/*')
+        reference_files = filter_files_by_pattern(resources, f'{REFERENCES_PATH_S3}/{reference_directory}/*/*')
         references = [Reference.of(file) for file in reference_files]
         return References(references)
+
+    def add_reference(self, project_id: str, reference_name: str,
+                      reference_files: List[str], reference_type: ReferenceType):
+        access_context = FileAccessContext.upload_project_resources(project_id)
+        file_name = ''
+        destination_path = f'{REFERENCES_PATH_S3}/{reference_type.directory}/{reference_name}'
+        self._file_service.upload_files(access_context, destination_path)

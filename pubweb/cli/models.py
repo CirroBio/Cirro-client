@@ -21,3 +21,9 @@ class UploadArguments(TypedDict):
 class ListArguments(TypedDict):
     project: str
     interactive: bool
+
+
+class ReferenceArguments(TypedDict):
+    project: str
+    reference_type: str
+    name: str

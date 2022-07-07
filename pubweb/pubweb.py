@@ -14,9 +14,9 @@ class PubWeb:
 
         self._api_client = ApiClient(auth_info)
         self._file_service = FileService(self._api_client)
-        self._dataset_service = DatasetService(self._api_client, self._file_service)
-        self._project_service = ProjectService(self._api_client, self._file_service)
-        self._process_service = ProcessService(self._api_client, self._file_service)
+        self._dataset_service = DatasetService(self._api_client, file_service=self._file_service)
+        self._project_service = ProjectService(self._api_client, file_service=self._file_service)
+        self._process_service = ProcessService(self._api_client, file_service=self._file_service)
         self._common_service = CommonService(self._api_client)
 
     @property

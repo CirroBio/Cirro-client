@@ -40,3 +40,4 @@ IGENOMES_REFERENCES = {
 }
 
 PROCESSES_PATH_S3 = "s3://<RESOURCES_BUCKET>/process"
+REFERENCES_PATH_S3 = "data/references"

@@ -3,7 +3,7 @@ from functools import partial
 from typing import List
 
 from pubweb.auth import IAMAuth
-from pubweb.clients import ApiClient, S3Client
+from pubweb.clients import S3Client
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
 from pubweb.models.file import FileAccessContext, File
@@ -40,7 +40,6 @@ class FileService(BaseService):
         :param access_context: File access context, use class methods to generate
         :param directory: base path to upload from
         :param files: relative path of files to upload
-        :return:
         """
         s3_client = S3Client(partial(self.get_access_credentials, access_context))
         upload_directory(directory, files, s3_client, access_context.bucket, access_context.path_prefix)
@@ -68,12 +67,9 @@ class FileService(BaseService):
                 for file in manifest['files']]
 
 
-class FileEnabledService(BaseService):
-    """
-    Not to be instantiated directly
-    """
+class FileEnabledMixin:
     _file_service: FileService
 
-    def __init__(self, api_client: ApiClient, file_service: FileService):
-        super(FileEnabledService, self).__init__(api_client)
-        self._file_service = file_service
+    def __init__(self, *args, **kwargs):
+        super(FileEnabledMixin, self).__init__(*args, **kwargs)
+        self._file_service = kwargs.get('file_service')

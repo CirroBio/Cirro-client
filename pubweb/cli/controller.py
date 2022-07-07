@@ -2,18 +2,19 @@ from pubweb import PubWeb
 from pubweb.cli.interactive.auth_args import gather_login
 from pubweb.cli.interactive.download_args import gather_download_arguments, gather_download_arguments_dataset
 from pubweb.cli.interactive.list_dataset_args import gather_list_arguments
+from pubweb.cli.interactive.reference_args import gather_reference_arguments
 from pubweb.cli.interactive.upload_args import gather_upload_arguments
 from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_additional_inputs, get_outputs, \
     get_child_processes, \
     get_repository, get_description, get_output_resources_path
 from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
-from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
+from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments, ReferenceArguments
 from pubweb.config import AuthConfig, save_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
 from pubweb.models.file import FileAccessContext
 from pubweb.models.process import Executor
-from pubweb.utils import parse_json_date, print_credentials
+from pubweb.utils import parse_json_date, print_credentials, find_first
 
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
@@ -159,11 +160,23 @@ def run_configure_workflow():
     workflow.save_local(resources_folder)
 
 
-def run_upload_reference():
+def run_upload_reference(input_params: ReferenceArguments, interactive=False):
     pubweb = PubWeb()
 
     projects = pubweb.project.list()
-    input_params = gather_download_arguments(input_params, projects)
+    reference_types = pubweb.common.get_references_types()
+    if interactive:
+        input_params = gather_reference_arguments(input_params, projects, reference_types)
+
+    reference_type = find_first(reference_types,
+                                lambda x: x.id == input_params['reference_type'])
+
+    # Support single file to start
+    reference_type.validate()
+
+    # Get file name mappings (rename the file to the standard)
+
+    # Upload the file
 
 
 def run_configure():

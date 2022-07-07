@@ -1,7 +1,7 @@
 import click
 
-from pubweb.cli import run_ingest, run_download, run_configure, run_list_datasets, run_configure_workflow
-from pubweb.cli.controller import run_upload_reference
+from pubweb.cli import run_ingest, run_download, run_configure, run_list_datasets, run_configure_workflow, \
+    run_upload_reference
 
 
 def check_required_args(args):
@@ -73,8 +73,20 @@ def configure_workflow():
 
 
 @run.command(help='Upload a reference to a project', no_args_is_help=True)
-def upload_reference():
-    run_upload_reference()
+@click.option('--name',
+              help='Name of the reference')
+@click.option('--project',
+              help='Name or ID of the project')
+@click.option('--reference-type',
+              help='Name or directory of the reference type')
+@click.option('--file',
+              help='Location of the reference files')
+@click.option('--interactive',
+              help='Gather arguments interactively',
+              is_flag=True, default=False)
+def upload_reference(**kwargs):
+    check_required_args(kwargs)
+    run_upload_reference(kwargs, interactive=kwargs.get('interactive'))
 
 
 @run.command(help='Configure authentication')

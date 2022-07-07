@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from pathlib import PurePath
-from typing import Dict, Any, List, Optional
+from typing import List, Optional
 
 from pubweb.models.file import File
-from pubweb.utils import safe_load_json
+from pubweb.models.validation import FileValidationSettings
+from pubweb.utils import safe_load_json, find_first
 
 
 @dataclass(frozen=True)
@@ -11,7 +12,7 @@ class ReferenceType:
     name: str
     description: str
     directory: str
-    validation: Dict[str, Any]
+    validation: List[FileValidationSettings]
 
     @classmethod
     def from_record(cls, record):
@@ -21,6 +22,9 @@ class ReferenceType:
     @property
     def id(self):
         return self.directory
+
+    def validate(self):
+        pass
 
     def __repr__(self):
         fields = f'name={self.name}'
@@ -39,4 +43,4 @@ class Reference(File):
 
 class References(List[Reference]):
     def find_by_name(self, name: str) -> Optional[Reference]:
-        return next((ref for ref in self if ref.name == name), None)
+        return find_first(self, lambda x: x.name == name)

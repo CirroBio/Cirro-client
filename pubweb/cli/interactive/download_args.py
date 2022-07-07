@@ -6,7 +6,7 @@ from pubweb.cli.interactive.utils import ask
 from pubweb.cli.models import DownloadArguments
 from pubweb.models.dataset import Dataset
 from pubweb.models.project import Project
-from pubweb.utils import format_date
+from pubweb.utils import format_date, find_first
 
 
 def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
@@ -15,9 +15,8 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
     default_dataset = None
     if input_value:
-        matched_dataset = next((d for d in datasets
-                                if d.name == input_value or d.id == input_value), None)
-        if matched_dataset is not None:
+        if matched_dataset := find_first(datasets,
+                                         lambda x: x.name == input_value or x.id == input_value):
             default_dataset = matched_dataset
 
     dataset_choice = ask('autocomplete',

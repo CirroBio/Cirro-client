@@ -1,8 +1,10 @@
 import json
 from datetime import timezone, datetime
-from typing import Optional, Union
+from typing import Optional, Union, List, Callable, TypeVar
 
 from pubweb.models.auth import Creds
+
+T = TypeVar("T")
 
 
 def parse_json_date(json_date: str) -> Optional[datetime]:
@@ -40,3 +42,7 @@ def print_credentials(creds: Creds):
     if creds['Expiration']:
         print()
         print(f'These credentials expire at {format_date(creds["Expiration"])}')
+
+
+def find_first(items: List[T], query: Callable[[T], bool]) -> Optional[T]:
+    return next((item for item in items if query(item)), None)
