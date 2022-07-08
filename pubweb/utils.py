@@ -21,10 +21,10 @@ def parse_json_date(json_date: str) -> Optional[datetime]:
 
 
 def safe_load_json(json_str: Optional[str]):
-    if json_str is not None:
-        return json.loads(json_str)
-    else:
+    if json_str is None:
         return {}
+
+    return json.loads(json_str)
 
 
 def format_date(date: Union[str, datetime]) -> str:

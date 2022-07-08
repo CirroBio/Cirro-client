@@ -2,7 +2,7 @@ import json
 from functools import partial
 from typing import List
 
-from pubweb.auth import IAMAuth
+from pubweb.auth.iam import IAMAuth
 from pubweb.clients import ApiClient, S3Client
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
@@ -75,5 +75,5 @@ class FileEnabledService(BaseService):
     _file_service: FileService
 
     def __init__(self, api_client: ApiClient, file_service: FileService):
-        super(FileEnabledService, self).__init__(api_client)
+        super().__init__(api_client)
         self._file_service = file_service
