@@ -5,11 +5,10 @@ from pubweb.models.file import FileAccessContext
 from pubweb.models.form_specification import ParameterSpecification
 from pubweb.models.process import Executor, RunAnalysisCommand, Process
 from pubweb.models.s3_path import S3Path
-from pubweb.services.base import BaseService
-from pubweb.services.file import FileEnabledMixin
+from pubweb.services.file import FileEnabledService
 
 
-class ProcessService(FileEnabledMixin, BaseService):
+class ProcessService(FileEnabledService):
     def list(self, process_type: Executor = None) -> List[Process]:
         """
         Gets a list of processes filtered by an optional process type

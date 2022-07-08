@@ -6,11 +6,10 @@ from pubweb.helpers.constants import REFERENCES_PATH_S3
 from pubweb.models.file import FileAccessContext
 from pubweb.models.project import Project
 from pubweb.models.reference import Reference, References, ReferenceType
-from pubweb.services.base import BaseService
-from pubweb.services.file import FileEnabledMixin
+from pubweb.services.file import FileEnabledService
 
 
-class ProjectService(FileEnabledMixin, BaseService):
+class ProjectService(FileEnabledService):
     def list(self) -> List[Project]:
         """
         Gets a list of projects that you have access to

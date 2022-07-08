@@ -4,13 +4,12 @@ from typing import List, Union
 from pubweb.clients.utils import filter_deleted
 from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse, Dataset
 from pubweb.models.file import FileAccessContext, File
-from pubweb.services.base import BaseService
-from pubweb.services.file import FileEnabledMixin
+from pubweb.services.file import FileEnabledService
 
 logger = logging.getLogger()
 
 
-class DatasetService(FileEnabledMixin, BaseService):
+class DatasetService(FileEnabledService):
     def find_by_project(self, project_id: str, name: str = None) -> List[Dataset]:
         """
          Lists datasets by project with an optional name provided
