@@ -2,8 +2,8 @@ import json
 from functools import partial
 from typing import List
 
-from pubweb.auth import IAMAuth
-from pubweb.clients import S3Client
+from pubweb.auth.iam import IAMAuth
+from pubweb.clients import ApiClient, S3Client
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
 from pubweb.models.file import FileAccessContext, File
@@ -67,9 +67,12 @@ class FileService(BaseService):
                 for file in manifest['files']]
 
 
-class FileEnabledMixin:
+class FileEnabledService(BaseService):
+    """
+    Not to be instantiated directly
+    """
     _file_service: FileService
 
-    def __init__(self, *args, **kwargs):
-        super(FileEnabledMixin, self).__init__(*args, **kwargs)
-        self._file_service = kwargs.get('file_service')
+    def __init__(self, api_client: ApiClient, file_service: FileService):
+        super().__init__(api_client)
+        self._file_service = file_service

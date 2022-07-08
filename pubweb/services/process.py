@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pubweb.clients.utils import get_id_from_name, filter_deleted
+from pubweb.clients.utils import filter_deleted
 from pubweb.models.file import FileAccessContext
 from pubweb.models.form_specification import ParameterSpecification
 from pubweb.models.process import Executor, RunAnalysisCommand, Process
@@ -84,10 +84,6 @@ class ProcessService(FileEnabledMixin, BaseService):
             return None
 
         return self.get_process(matched_process.id)
-
-    def get_process_id(self, name_or_id: str) -> str:
-        # TODO: move this out into CLI module
-        return get_id_from_name(self.list(), name_or_id)
 
     def run_analysis(self, run_analysis_command: RunAnalysisCommand) -> str:
         """

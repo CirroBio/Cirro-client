@@ -3,7 +3,10 @@ import logging
 import os
 from pathlib import Path
 
+import boto3
 import pandas as pd
+
+from pubweb.models.s3_path import S3Path
 
 
 class PreprocessDataset:
@@ -64,32 +67,46 @@ class PreprocessDataset:
             assert col in df.columns.values, f"Did not find expected columns {col} in {self.s3_dataset}/{suffix}"
         return df
 
-    def _read_json(self, local_path: str):
-        with Path(local_path).open() as handle:
-            return json.load(handle)
+    def _read_json(self, suffix: str):
+        """Read a JSON from the dataset"""
+
+        # Make the full S3 path
+        s3_path = S3Path(f"{self.s3_dataset}/{suffix}")
+
+        # Open a connection to S3
+        s3 = boto3.client('s3')
+
+        # Read the object
+        retr = s3.get_object(Bucket=s3_path.bucket, Key=s3_path.key)
+        text = retr['Body'].read().decode()
+
+        # Parse JSON
+        return json.loads(text)
 
     def _write_json(self, dat, local_path: str, indent=4):
         with Path(local_path).open(mode="wt") as handle:
             return json.dump(dat, handle, indent=indent)
 
-    def add_param(self, kw: str, val, overwrite=False):
+    def add_param(self, name: str, value, overwrite=False):
         """Add a parameter to the dataset."""
 
-        assert overwrite or kw not in self.params, f"Cannot add parameter {kw}, already exists (and overwrite=False)"
+        assert overwrite or name not in self.params, \
+            f"Cannot add parameter {name}, already exists (and overwrite=False)"
 
-        self.logger.info(f"Adding parameter {kw} = {val}")
-        self.params[kw] = val
+        self.logger.info(f"Adding parameter {name} = {value}")
+        self.params[name] = value
 
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
 
-    def remove_param(self, kw: str, force=False):
+    def remove_param(self, name: str, force=False):
         """Remove a parameter from the dataset."""
 
-        assert force or kw in self.params, f"Cannot remove parameter {kw}, does not exist (and force=False)"
+        assert force or name in self.params, \
+            f"Cannot remove parameter {name}, does not exist (and force=False)"
 
-        self.logger.info(f"Removing parameter {kw}")
-        del self.params[kw]
+        self.logger.info(f"Removing parameter {name}")
+        del self.params[name]
 
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")

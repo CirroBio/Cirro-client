@@ -3,7 +3,7 @@ from requests.auth import AuthBase
 from requests_aws4auth import AWS4Auth
 
 from pubweb import config
-from pubweb.auth import AuthInfo
+from pubweb.auth.base import AuthInfo
 from pubweb.models.auth import Creds
 
 

@@ -40,7 +40,7 @@ class ParameterSpecification:
         try:
             jsonschema.validate(instance=params, schema=self._form_spec_raw)
         except jsonschema.ValidationError as e:
-            raise RuntimeError(f'Parameter at {e.json_path} error: {e.message}')
+            raise RuntimeError(f'Parameter at {e.json_path} error: {e.message}') from e
 
     def print(self):
         """

@@ -28,7 +28,7 @@ def build_client(creds: Creds):
                         aws_session_token=creds['SessionToken'])
 
 
-class ProgressPercentage(object):
+class ProgressPercentage:
     def __init__(self, progress: tqdm):
         self._lock = threading.Lock()
         self.progress = progress

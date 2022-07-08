@@ -307,7 +307,7 @@ def _prompt_repository_version(repo: Repository) -> Union[GitRelease, Branch]:
     if version_type == 'release':
 
         # Get the releases which are available
-        version_list = [x for x in repo.get_releases()]
+        version_list = repo.get_releases()
         pretty_version_list = [f"{x.tag_name} ({x.title})" for x in version_list]
 
         version = ask(

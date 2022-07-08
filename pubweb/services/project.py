@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pubweb.clients.utils import get_id_from_name, filter_deleted
+from pubweb.clients.utils import filter_deleted
 from pubweb.file_utils import filter_files_by_pattern
 from pubweb.helpers.constants import REFERENCES_PATH_S3
 from pubweb.models.file import FileAccessContext
@@ -35,10 +35,6 @@ class ProjectService(FileEnabledMixin, BaseService):
         resp = self._api_client.query(query)['listProjects']
         items = filter_deleted(resp['items'])
         return [Project.from_record(item) for item in items]
-
-    def get_project_id(self, name_or_id: str) -> str:
-        # TODO: move this out into CLI module
-        return get_id_from_name(self.list(), name_or_id)
 
     def find_by_name(self, name: str) -> Optional[Project]:
         """

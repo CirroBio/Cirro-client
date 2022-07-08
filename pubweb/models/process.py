@@ -97,8 +97,8 @@ class RunAnalysisCommand(NamedTuple):
     def to_json(self):
         try:
             param_json = json.dumps(self.params)
-        except TypeError:
-            raise RuntimeError('Params invalid')
+        except TypeError as e:
+            raise RuntimeError('Params invalid') from e
 
         return {
             'name': self.name,

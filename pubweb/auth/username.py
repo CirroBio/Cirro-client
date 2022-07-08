@@ -2,8 +2,8 @@ import boto3
 from pycognito import AWSSRP
 from requests.auth import AuthBase
 
-from pubweb import config
-from pubweb.auth import AuthInfo
+from pubweb.auth.base import AuthInfo
+from pubweb.config import config
 
 
 class UsernameAndPasswordAuth(AuthInfo):

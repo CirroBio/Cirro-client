@@ -102,14 +102,14 @@ class DatasetService(FileEnabledMixin, BaseService):
          Downloads all the dataset files
          If the files argument isn't provided, all files will be downloaded
         """
+        access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
+        if files is None:
+            files = self._file_service.get_file_listing(access_context)
+
         if len(files) == 0:
             return
 
         if isinstance(files[0], File):
             files = [file.relative_path for file in files]
-
-        access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
-        if files is None:
-            files = self._file_service.get_file_listing(access_context)
 
         self._file_service.download_files(access_context, download_location, files)
