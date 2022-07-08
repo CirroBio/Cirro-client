@@ -33,7 +33,7 @@ install_all_requires = install_requires + install_analysis_requires
 
 setup(
     name='pubweb',
-    version='0.2.1',
+    version='0.2.2',
     author='Fred Hutch',
     license='MIT',
     author_email='viz@fredhutch.org',
