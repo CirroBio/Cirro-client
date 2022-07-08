@@ -87,24 +87,26 @@ class PreprocessDataset:
         with Path(local_path).open(mode="wt") as handle:
             return json.dump(dat, handle, indent=indent)
 
-    def add_param(self, kw: str, val, overwrite=False):
+    def add_param(self, name: str, value, overwrite=False):
         """Add a parameter to the dataset."""
 
-        assert overwrite or kw not in self.params, f"Cannot add parameter {kw}, already exists (and overwrite=False)"
+        assert overwrite or name not in self.params, \
+            f"Cannot add parameter {name}, already exists (and overwrite=False)"
 
-        self.logger.info(f"Adding parameter {kw} = {val}")
-        self.params[kw] = val
+        self.logger.info(f"Adding parameter {name} = {value}")
+        self.params[name] = value
 
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
 
-    def remove_param(self, kw: str, force=False):
+    def remove_param(self, name: str, force=False):
         """Remove a parameter from the dataset."""
 
-        assert force or kw in self.params, f"Cannot remove parameter {kw}, does not exist (and force=False)"
+        assert force or name in self.params, \
+            f"Cannot remove parameter {name}, does not exist (and force=False)"
 
-        self.logger.info(f"Removing parameter {kw}")
-        del self.params[kw]
+        self.logger.info(f"Removing parameter {name}")
+        del self.params[name]
 
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
