@@ -65,3 +65,10 @@ def ask(fname, msg, validate_type=None, output_f=None, **kwargs) -> str:
 
 def ask_yes_no(msg):
     return ask("select", msg, choices=["Yes", "No"]) == "Yes"
+
+
+def get_id_from_name(items, name_or_id: str) -> str:
+    matched = next((p for p in items if p.id == name_or_id), None)
+    if matched:
+        return matched.id
+    return next(p for p in items if p.name == name_or_id).id

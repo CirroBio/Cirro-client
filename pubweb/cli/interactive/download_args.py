@@ -6,13 +6,13 @@ from pubweb.cli.interactive.utils import prompt_wrapper
 from pubweb.cli.models import DownloadArguments
 from pubweb.models.dataset import Dataset
 from pubweb.models.project import Project
-from pubweb.utils import parse_json_date, format_date
+from pubweb.utils import format_date
 
 
 def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     if len(datasets) == 0:
         raise RuntimeWarning("No datasets available")
-    sorted_datasets = sorted(datasets, key=lambda d: parse_json_date(d["createdAt"]), reverse=True)
+    sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
     dataset_prompt = {
         'type': 'autocomplete',
         'name': 'dataset',
