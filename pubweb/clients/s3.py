@@ -71,6 +71,16 @@ class S3Client:
             absolute_path = str(local_path.absolute())
             self._client.download_file(bucket, key, absolute_path, Callback=ProgressPercentage(progress))
 
+    def create_object(self, bucket: str, key: str, contents: str, content_type: str):
+        self._check_credentials()
+        self._client.put_object(
+            Bucket=bucket,
+            Key=key,
+            ContentType=content_type,
+            ContentEncoding='utf-8',
+            Body=bytes(contents, "UTF-8")
+        )
+
     def get_file(self, bucket: str, key: str) -> str:
         self._check_credentials()
         resp = self._client.get_object(Bucket=bucket, Key=key)

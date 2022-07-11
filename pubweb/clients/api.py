@@ -5,6 +5,7 @@ from gql.transport.requests import RequestsHTTPTransport
 
 from pubweb import config
 from pubweb.auth.base import AuthInfo
+from pubweb.auth.iam import IAMAuth
 
 HEADERS = {
     'Accept': 'application/json',
@@ -19,8 +20,20 @@ def _build_gql_client(auth_info: AuthInfo, endpoint: str):
 
 class ApiClient:
     def __init__(self, auth_info: AuthInfo):
-        self.auth_info = auth_info
+        self._auth_info = auth_info
         self._gql_client = _build_gql_client(auth_info, config.data_endpoint)
 
     def query(self, query: str, variables=None) -> Dict:
         return self._gql_client.execute(gql(query), variable_values=variables)
+
+    @property
+    def has_iam_creds(self) -> bool:
+        return isinstance(self._auth_info, IAMAuth)
+
+    @property
+    def current_user(self) -> str:
+        return self._auth_info.get_current_user()
+
+    def get_iam_creds(self):
+        if self.has_iam_creds:
+            return self._auth_info.creds

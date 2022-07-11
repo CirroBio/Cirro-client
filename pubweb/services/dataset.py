@@ -1,4 +1,6 @@
+import json
 import logging
+import uuid
 from typing import List, Union
 
 from pubweb.clients.utils import filter_deleted
@@ -65,9 +67,14 @@ class DatasetService(FileEnabledService):
 
     def create(self, create_request: CreateIngestDatasetInput) -> DatasetCreateResponse:
         """
-        Creates an ingest dataset
+        Creates an ingest dataset.
+        This only registers into the system, does not upload any files
         """
         logger.info(f"Creating dataset {create_request.name}")
+
+        if self._api_client.has_iam_creds:
+            return self._write_dataset_manifest(create_request)
+
         query = '''
           mutation CreateIngestDataset($input: CreateIngestDatasetInput!) {
             createIngestDataset(input: $input) {
@@ -112,3 +119,32 @@ class DatasetService(FileEnabledService):
             files = [file.relative_path for file in files]
 
         self._file_service.download_files(access_context, download_location, files)
+
+    def _write_dataset_manifest(self, request: CreateIngestDatasetInput) -> DatasetCreateResponse:
+        """
+         Internal method for registering a dataset without API access.
+         To be used for machine or service accounts
+        """
+        manifest = {
+            'project': request.project_id,
+            'process': request.process_id,
+            'name': request.name,
+            'desc': request.description,
+            'infoJson': {
+                'ingestedBy': self._api_client.current_user
+            },
+            'files': [{'name': file} for file in request.files]
+        }
+        dataset_id = str(uuid.uuid4())
+        manifest_path = f'datasets/{dataset_id}/artifacts/manifest.json'
+        manifest_json = json.dumps(manifest, indent=4)
+        access_context = FileAccessContext.upload_dataset(dataset_id=dataset_id,
+                                                          project_id=request.project_id)
+        self._file_service.create_file(access_context,
+                                       key=manifest_path,
+                                       contents=manifest_json,
+                                       content_type='application/json')
+        return {
+            'datasetId': dataset_id,
+            'dataPath': f'datasets/{dataset_id}/artifacts/data'
+        }
