@@ -19,6 +19,9 @@ class UsernameAndPasswordAuth(AuthInfo):
     def get_request_auth(self) -> AuthBase:
         return self.RequestAuth(self._get_token()['AccessToken'])
 
+    def get_current_user(self) -> str:
+        return self.username
+
     def _get_token(self):
         cognito = boto3.client('cognito-idp', region_name=config.region)
         aws = AWSSRP(username=self.username,

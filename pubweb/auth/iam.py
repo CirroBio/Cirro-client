@@ -34,3 +34,12 @@ class IAMAuth(AuthInfo):
                         config.region,
                         'appsync',
                         session_token=self.creds['SessionToken'])
+
+    def get_current_user(self) -> str:
+        sts_client = boto3.client('sts',
+                                  aws_access_key_id=self.creds['AccessKeyId'],
+                                  aws_secret_access_key=self.creds['SecretAccessKey'],
+                                  aws_session_token=self.creds['SessionToken'])
+        identity_arn = sts_client.get_caller_identity()['Arn']
+        username = identity_arn.split('/')[-1]
+        return f'iam-{username}'

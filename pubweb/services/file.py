@@ -2,7 +2,6 @@ import json
 from functools import partial
 from typing import List
 
-from pubweb.auth.iam import IAMAuth
 from pubweb.clients import ApiClient, S3Client
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
@@ -14,8 +13,8 @@ class FileService(BaseService):
     def get_access_credentials(self, access_context: FileAccessContext) -> Creds:
         # Special case:
         # we do not need to call the API to get IAM creds if we are using IAM creds
-        if isinstance(self._api_client.auth_info, IAMAuth):
-            return self._api_client.auth_info.creds
+        if self._api_client.has_iam_creds:
+            return self._api_client.get_iam_creds()
         # Call API to get temporary credentials
         credentials_response = self._api_client.query(*access_context.get_token_query)
         return credentials_response['getFileAccessToken']
@@ -33,6 +32,17 @@ class FileService(BaseService):
         s3_client = S3Client(partial(self.get_access_credentials, access_context))
         full_path = f'{access_context.path_prefix}/{file_path}'.lstrip('/')
         return s3_client.get_file(access_context.bucket, full_path)
+
+    def create_file(self, access_context: FileAccessContext, key: str,
+                    contents: str, content_type: str):
+        """
+        Creates a file at the specified path
+        """
+        s3_client = S3Client(partial(self.get_access_credentials, access_context))
+        s3_client.create_object(key=key,
+                                contents=contents,
+                                content_type=content_type,
+                                bucket=access_context.bucket)
 
     def upload_files(self, access_context: FileAccessContext, directory: str, files: List[str]):
         """
