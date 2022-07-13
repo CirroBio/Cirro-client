@@ -240,7 +240,7 @@ class WorkflowConfigBuilder:
                 "params": {
                     "files": [
                         {
-                            "glob": "$dataDirectory/**/*.*"
+                            "glob": "$data_directory/**/*.*"
                         }
                     ],
                     "tables": [],
