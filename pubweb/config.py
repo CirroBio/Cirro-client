@@ -42,7 +42,7 @@ def get_config_path() -> Path:
 
 def save_config(auth_config: AuthConfig):
     ini_config = configparser.SafeConfigParser()
-    ini_config['DEFAULT'] = auth_config.__dict__
+    ini_config['DEFAULT'] = auth_config._asdict()
     config_path = get_config_path()
     config_path.parent.mkdir(exist_ok=True)
     with config_path.open('w') as configfile:
