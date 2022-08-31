@@ -21,7 +21,8 @@ install_requires = [
     "pycognito==2022.1.0",
     "tqdm==4.62.3",
     "pygithub>=1.55",
-    "jsonschema==4.6.1"
+    "jsonschema==4.6.1",
+    "pyjwt==2.4.0"
 ]
 
 install_analysis_requires = [
