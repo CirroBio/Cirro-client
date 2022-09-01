@@ -23,7 +23,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
 
     # Instantiate the PubWeb client
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    pubweb = PubWeb()
 
     # If the user provided the --interactive flag
     if interactive:

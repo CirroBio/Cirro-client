@@ -1,13 +1,30 @@
+import json
+import logging
 import time
 from datetime import datetime
+from pathlib import Path
 
 import boto3
 import jwt
 import requests
+from msal_extensions import build_encrypted_persistence, FilePersistence
 from requests.auth import AuthBase
 
 from pubweb import config
 from pubweb.auth import AuthInfo
+
+logger = logging.getLogger()
+TOKEN_PATH = Path('~', '.pubweb', '.token.dat').expanduser()
+
+
+def _build_token_persistence(location, fallback_to_plaintext=False):
+    try:
+        return build_encrypted_persistence(location)
+    except:  # pylint: disable=bare-except
+        if not fallback_to_plaintext:
+            raise
+        logger.warning("Encryption unavailable. Opting in to plain text.")
+        return FilePersistence(location)
 
 
 def _authenticate():
@@ -36,14 +53,22 @@ def _authenticate():
 
 
 def decode_token(token):
-    return jwt.decode(token,
-                      options={"verify_signature": False})
+    return jwt.decode(token, options={"verify_signature": False})
 
 
 class ClientAuth(AuthInfo):
-    def __init__(self, cache: bool):
-        # TODO: Implement cache
-        self.token_info = _authenticate()
+    def __init__(self, enable_cache: bool):
+        if enable_cache:
+            persistence = _build_token_persistence(TOKEN_PATH, fallback_to_plaintext=False)
+            self.token_info = json.loads(persistence.load())
+
+            if not self.token_info:
+                self.token_info = _authenticate()
+                persistence.save(json.dumps(self.token_info))
+
+        else:
+            self.token_info = _authenticate()
+
         self._update_token_metadata()
 
     def get_request_auth(self) -> AuthBase:
@@ -54,11 +79,11 @@ class ClientAuth(AuthInfo):
 
     def _get_token(self):
         # Check if refresh token is expired, re-auth using device code flow
-        if datetime.now() > self.refresh_token_expiry:
+        if self.refresh_token_expiry < datetime.now():
             self.token_info = _authenticate()
 
         # Refresh access token using refresh token
-        if datetime.now() > self.access_token_expiry:
+        if self.access_token_expiry < datetime.now():
             self._refresh_access_token()
 
         return self.token_info

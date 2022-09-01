@@ -1,8 +1,8 @@
 from typing import Optional
 
-from pubweb.auth import AuthInfo, UsernameAndPasswordAuth
+from pubweb.auth import AuthInfo
+from pubweb.auth.oauth_client import ClientAuth
 from pubweb.clients import ApiClient
-from pubweb.config import load_config
 from pubweb.services import DatasetService, ProcessService, ProjectService, FileService, CommonService
 
 
@@ -10,7 +10,7 @@ class PubWeb:
     def __init__(self, auth_info: Optional[AuthInfo] = None):
         # Default to use username auth from config
         if not auth_info:
-            auth_info = UsernameAndPasswordAuth(*load_config())
+            auth_info = ClientAuth(enable_cache=True)
 
         self._api_client = ApiClient(auth_info)
         self._file_service = FileService(self._api_client)

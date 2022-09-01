@@ -22,7 +22,8 @@ install_requires = [
     "tqdm==4.62.3",
     "pygithub>=1.55",
     "jsonschema==4.6.1",
-    "pyjwt==2.4.0"
+    "pyjwt==2.4.0",
+    "msal-extensions==1.0.0"
 ]
 
 install_analysis_requires = [
