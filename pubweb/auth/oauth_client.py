@@ -12,6 +12,7 @@ from requests.auth import AuthBase
 
 from pubweb import config
 from pubweb.auth import AuthInfo
+from pubweb.models.auth import DeviceTokenResponse, OAuthTokenResponse
 
 logger = logging.getLogger()
 TOKEN_PATH = Path('~', '.pubweb', '.token.dat').expanduser()
@@ -31,8 +32,9 @@ def _authenticate():
     params = {'client_id': config.app_id}
     resp = requests.get(f'{config.auth_endpoint}/device-code', params=params)
 
-    flow = resp.json()
+    flow: DeviceTokenResponse = resp.json()
     print(flow['message'])
+    device_expiry = datetime.fromisoformat(flow['expiry'])
 
     params = {
         'client_id': config.app_id,
@@ -42,8 +44,11 @@ def _authenticate():
     auth_status = 'authorization_pending'
     while auth_status == 'authorization_pending':
         time.sleep(flow['interval'])
+        if device_expiry < datetime.now():
+            raise RuntimeError(f'Timed out')
+
         resp = requests.get(f'{config.auth_endpoint}/token', params=params)
-        token_result = resp.json()
+        token_result: OAuthTokenResponse = resp.json()
         auth_status = token_result.get('message')
 
         if 'access_token' in token_result:
