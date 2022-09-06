@@ -56,7 +56,8 @@ class DatasetService(FileEnabledService):
                 'status': {
                     'eq': 'COMPLETED'
                 }
-            }
+            },
+            'limit': 10000
         }
         if name:
             variables['filter']['name'] = {'eq': name}
