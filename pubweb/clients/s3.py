@@ -5,6 +5,7 @@ from typing import Callable
 
 from boto3 import Session
 from botocore.credentials import RefreshableCredentials
+from botocore.session import get_session
 from tqdm import tqdm
 
 from pubweb.models.auth import Creds
@@ -91,12 +92,13 @@ class S3Client:
         creds = self._creds_getter()
 
         if creds['Expiration']:
-            session = Session()
+            session = get_session()
             session._credentials = RefreshableCredentials.create_from_metadata(
                 metadata=format_creds_for_session(creds),
-                refresh_using=self._refresh_credentials(),
+                refresh_using=self._refresh_credentials,
                 method='sts'
             )
+            session = Session(botocore_session=session)
         else:
             session = Session(
                 aws_access_key_id=creds['AccessKeyId'],
