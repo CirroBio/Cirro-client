@@ -1,10 +1,10 @@
 import math
 import threading
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-import boto3
+from boto3 import Session
+from botocore.credentials import RefreshableCredentials
 from tqdm import tqdm
 
 from pubweb.models.auth import Creds
@@ -21,11 +21,14 @@ def convert_size(size):
     return '%.2f %s' % (s, size_name[i])
 
 
-def build_client(creds: Creds):
-    return boto3.client('s3',
-                        aws_access_key_id=creds['AccessKeyId'],
-                        aws_secret_access_key=creds['SecretAccessKey'],
-                        aws_session_token=creds['SessionToken'])
+def format_creds_for_session(creds: Creds):
+    expiration = parse_json_date(creds['Expiration'])
+    return {
+        'access_key': creds['AccessKeyId'],
+        'secret_key': creds['SecretAccessKey'],
+        'token': creds['SessionToken'],
+        'expiry_time': expiration.isoformat()
+    }
 
 
 class ProgressPercentage:
@@ -40,13 +43,10 @@ class ProgressPercentage:
 
 class S3Client:
     def __init__(self, creds_getter: Callable[[], Creds]):
-        creds = creds_getter()
         self._creds_getter = creds_getter
-        self._creds_expiration = creds['Expiration']
-        self._client = build_client(creds)
+        self._client = self._build_session_client()
 
     def upload_file(self, local_path: Path, bucket: str, key: str):
-        self._check_credentials()
         file_size = local_path.stat().st_size
         file_name = local_path.name
 
@@ -59,7 +59,6 @@ class S3Client:
             self._client.upload_file(absolute_path, bucket, key, Callback=ProgressPercentage(progress))
 
     def download_file(self, local_path: Path, bucket: str, key: str):
-        self._check_credentials()
         file_size = self.get_file_stats(bucket, key)['ContentLength']
         file_name = local_path.name
 
@@ -72,7 +71,6 @@ class S3Client:
             self._client.download_file(bucket, key, absolute_path, Callback=ProgressPercentage(progress))
 
     def create_object(self, bucket: str, key: str, contents: str, content_type: str):
-        self._check_credentials()
         self._client.put_object(
             Bucket=bucket,
             Key=key,
@@ -82,22 +80,31 @@ class S3Client:
         )
 
     def get_file(self, bucket: str, key: str) -> str:
-        self._check_credentials()
         resp = self._client.get_object(Bucket=bucket, Key=key)
         file_body = resp['Body']
         return file_body.read().decode('utf-8')
 
     def get_file_stats(self, bucket: str, key: str):
-        self._check_credentials()
         return self._client.head_object(Bucket=bucket, Key=key)
 
-    def _check_credentials(self):
-        if not self._creds_expiration:
-            return
+    def _build_session_client(self):
+        creds = self._creds_getter()
 
-        expiration = parse_json_date(self._creds_expiration)
+        if creds['Expiration']:
+            session = Session()
+            session._credentials = RefreshableCredentials.create_from_metadata(
+                metadata=format_creds_for_session(creds),
+                refresh_using=self._refresh_credentials(),
+                method='sts'
+            )
+        else:
+            session = Session(
+                aws_access_key_id=creds['AccessKeyId'],
+                aws_secret_access_key=creds['SecretAccessKey'],
+                aws_session_token=creds['SessionToken']
+            )
+        return session.client('s3')
 
-        if expiration < datetime.now(timezone.utc):
-            new_creds = self._creds_getter()
-            self._client = build_client(new_creds)
-            self._creds_expiration = new_creds['Expiration']
+    def _refresh_credentials(self):
+        new_creds = self._creds_getter()
+        return format_creds_for_session(new_creds)

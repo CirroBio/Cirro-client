@@ -1,9 +1,15 @@
+import logging
+from datetime import datetime, timedelta
+from typing import Callable
+
 import boto3
 from pycognito import AWSSRP
 from requests.auth import AuthBase
 
 from pubweb.auth.base import AuthInfo
 from pubweb.config import config
+
+logger = logging.getLogger()
 
 
 class UsernameAndPasswordAuth(AuthInfo):
@@ -15,14 +21,20 @@ class UsernameAndPasswordAuth(AuthInfo):
     def __init__(self, username, password):
         self.username = username
         self.password = password
+        self.auth_result = None
+        self.token_expiry = None
 
     def get_request_auth(self) -> AuthBase:
-        return self.RequestAuth(self._get_token()['AccessToken'])
+        return self.RequestAuth(lambda: self._get_token()['AccessToken'])
 
     def get_current_user(self) -> str:
         return self.username
 
     def _get_token(self):
+        if self.token_expiry and self.token_expiry > datetime.now():
+            return self.auth_result
+
+        logger.debug('Fetching new token from cognito')
         cognito = boto3.client('cognito-idp', region_name=config.region)
         aws = AWSSRP(username=self.username,
                      password=self.password,
@@ -30,12 +42,14 @@ class UsernameAndPasswordAuth(AuthInfo):
                      client_id=config.app_id,
                      client=cognito)
         resp = aws.authenticate_user()
-        return resp['AuthenticationResult']
+        self.auth_result = resp['AuthenticationResult']
+        self.token_expiry = datetime.now() + timedelta(seconds=self.auth_result['ExpiresIn'])
+        return self.auth_result
 
     class RequestAuth(AuthBase):
-        def __init__(self, token):
-            self.token = token
+        def __init__(self, token_getter: Callable[..., str]):
+            self.token_getter = token_getter
 
         def __call__(self, request):
-            request.headers['Authorization'] = self.token
+            request.headers['Authorization'] = self.token_getter()
             return request
