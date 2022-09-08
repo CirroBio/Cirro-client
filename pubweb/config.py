@@ -13,7 +13,7 @@ class AuthConfig(NamedTuple):
 
 class DevelopmentConfig:
     user_pool_id = 'us-west-2_ViB3UFcvp'
-    app_id = '2g2eg0g7tbjhbaa45diohmvqhs'
+    app_id = '39jl0uud4d1i337q7gc5l03r98'
     data_endpoint = 'https://drdt2z4kljdbte5s4zx623kyk4.appsync-api.us-west-2.amazonaws.com/graphql'
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-dev'
@@ -22,7 +22,7 @@ class DevelopmentConfig:
 
 class ProductionConfig:
     user_pool_id = 'us-west-2_LQnstneoZ'
-    app_id = '7ic2n55r9h4fj0qej5q9ikr2o1'
+    app_id = '2seju0a0p55hmdajb61ftm4edc'
     data_endpoint = 'https://22boctowkfbuzaidvbvwjxfnai.appsync-api.us-west-2.amazonaws.com/graphql'
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-prd'
