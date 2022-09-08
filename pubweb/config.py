@@ -15,6 +15,7 @@ class DevelopmentConfig:
     user_pool_id = 'us-west-2_ViB3UFcvp'
     app_id = '39jl0uud4d1i337q7gc5l03r98'
     data_endpoint = 'https://drdt2z4kljdbte5s4zx623kyk4.appsync-api.us-west-2.amazonaws.com/graphql'
+    rest_endpoint = 'https://3b71dp5mn2.execute-api.us-west-2.amazonaws.com/dev'
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-dev'
     base_url = "https://dev.pubweb.cloud"

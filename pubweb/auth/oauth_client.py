@@ -30,8 +30,8 @@ def _build_token_persistence(location, fallback_to_plaintext=False):
 
 def _authenticate():
     params = {'client_id': config.app_id}
-    resp = requests.get(f'{config.auth_endpoint}/device-code', params=params)
-
+    resp = requests.post(f'{config.rest_endpoint}/auth/device-code', params=params)
+    resp.raise_for_status()
     flow: DeviceTokenResponse = resp.json()
     print(flow['message'])
     device_expiry = datetime.fromisoformat(flow['expiry'])
@@ -47,7 +47,7 @@ def _authenticate():
         if device_expiry < datetime.now():
             raise RuntimeError(f'Timed out')
 
-        resp = requests.get(f'{config.auth_endpoint}/token', params=params)
+        resp = requests.post(f'{config.rest_endpoint}/auth/token', params=params)
         token_result: OAuthTokenResponse = resp.json()
         auth_status = token_result.get('message')
 
@@ -65,11 +65,11 @@ class ClientAuth(AuthInfo):
     def __init__(self, enable_cache: bool):
         if enable_cache:
             persistence = _build_token_persistence(TOKEN_PATH, fallback_to_plaintext=False)
-            self.token_info = json.loads(persistence.load())
-
-            if not self.token_info:
+            if not TOKEN_PATH.exists():
                 self.token_info = _authenticate()
                 persistence.save(json.dumps(self.token_info))
+
+            self.token_info = json.loads(persistence.load())
 
         else:
             self.token_info = _authenticate()
