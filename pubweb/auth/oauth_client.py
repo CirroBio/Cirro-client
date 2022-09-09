@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import boto3
@@ -21,7 +21,7 @@ TOKEN_PATH = Path('~', '.pubweb', '.token.dat').expanduser()
 def _build_token_persistence(location, fallback_to_plaintext=False):
     try:
         return build_encrypted_persistence(location)
-    except:  # pylint: disable=bare-except
+    except:
         if not fallback_to_plaintext:
             raise
         logger.warning("Encryption unavailable. Opting in to plain text.")
@@ -41,6 +41,7 @@ def _authenticate():
         'device_code': flow['device_code'],
         'grant_type': 'urn:ietf:params:oauth:grant-type:device_code'
     }
+
     auth_status = 'authorization_pending'
     while auth_status == 'authorization_pending':
         time.sleep(flow['interval'])
@@ -95,7 +96,7 @@ class ClientAuth(AuthInfo):
 
     def _refresh_access_token(self):
         cognito = boto3.client('cognito-idp', region_name=config.region)
-        resp = cognito.iniate_auth(
+        resp = cognito.initiate_auth(
             ClientId=config.app_id,
             AuthFlow='REFRESH_TOKEN_AUTH',
             AuthParameters={
@@ -110,9 +111,8 @@ class ClientAuth(AuthInfo):
 
     def _update_token_metadata(self):
         decoded_access_token = decode_token(self.token_info['access_token'])
-        decoded_refresh_token = decode_token(self.token_info['refresh_token'])
         self.access_token_expiry = datetime.fromtimestamp(decoded_access_token['exp'])
-        self.refresh_token_expiry = datetime.fromtimestamp(decoded_refresh_token['exp'])
+        self.refresh_token_expiry = datetime.now() + timedelta(days=30)
         self.username = decoded_access_token['username']
 
     class RequestAuth(AuthBase):

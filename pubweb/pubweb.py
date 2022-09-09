@@ -8,7 +8,6 @@ from pubweb.services import DatasetService, ProcessService, ProjectService, File
 
 class PubWeb:
     def __init__(self, auth_info: Optional[AuthInfo] = None):
-        # Default to use username auth from config
         if not auth_info:
             auth_info = ClientAuth(enable_cache=True)
 
