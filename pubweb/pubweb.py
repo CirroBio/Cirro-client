@@ -1,15 +1,17 @@
 from typing import Optional
 
-from pubweb.auth import AuthInfo
-from pubweb.auth.oauth_client import ClientAuth
+from pubweb.auth import AuthInfo, get_auth_info_from_config
 from pubweb.clients import ApiClient
 from pubweb.services import DatasetService, ProcessService, ProjectService, FileService, CommonService
 
 
 class PubWeb:
+    """
+    A client for interacting with the PubWeb platform
+    """
     def __init__(self, auth_info: Optional[AuthInfo] = None):
         if not auth_info:
-            auth_info = ClientAuth(enable_cache=True)
+            auth_info = get_auth_info_from_config()
 
         self._api_client = ApiClient(auth_info)
         self._file_service = FileService(self._api_client)

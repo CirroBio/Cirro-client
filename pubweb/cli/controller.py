@@ -1,6 +1,5 @@
 from pubweb import PubWeb
-from pubweb.auth import UsernameAndPasswordAuth
-from pubweb.cli.interactive.auth_args import gather_login
+from pubweb.cli.interactive.auth_args import gather_auth_config
 from pubweb.cli.interactive.download_args import gather_download_arguments, gather_download_arguments_dataset
 from pubweb.cli.interactive.list_dataset_args import gather_list_arguments
 from pubweb.cli.interactive.upload_args import gather_upload_arguments
@@ -10,7 +9,7 @@ from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_addi
     get_repository, get_description, get_output_resources_path
 from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
-from pubweb.config import AuthConfig, save_config, load_config
+from pubweb.config import UserConfig, save_user_config
 from pubweb.file_utils import get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
 from pubweb.models.dataset import CreateIngestDatasetInput
@@ -45,7 +44,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    pubweb = PubWeb()
     projects = pubweb.project.list()
     processes = pubweb.process.list(process_type=Executor.INGEST)
 
@@ -88,7 +87,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    pubweb = PubWeb()
 
     projects = pubweb.project.list()
     if interactive:
@@ -111,7 +110,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
 def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    pubweb = PubWeb()
     process_options = pubweb.process.list(process_type=Executor.NEXTFLOW)
     resources_folder, repo_prefix = get_output_resources_path()
 
@@ -164,6 +163,5 @@ def run_configure_workflow():
 
 
 def run_configure():
-    username, password = gather_login()
-    auth_config = AuthConfig(username, password)
-    save_config(auth_config)
+    auth_method, auth_method_config = gather_auth_config()
+    save_user_config(UserConfig(auth_method=auth_method, auth_method_config=auth_method_config))

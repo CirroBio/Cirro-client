@@ -68,7 +68,7 @@ class DatasetService(FileEnabledService):
 
     def create(self, create_request: CreateIngestDatasetInput) -> DatasetCreateResponse:
         """
-        Creates an ingest dataset.
+        Creates an ingested dataset.
         This only registers into the system, does not upload any files
         """
         logger.info(f"Creating dataset {create_request.name}")
