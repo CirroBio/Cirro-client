@@ -31,6 +31,11 @@ def get_auth_info_from_config():
         raise RuntimeError(f'{user_config.auth_method} not found, please re-run configuration')
 
     try:
-        matched_auth_method(**user_config.auth_method_config)
+        auth_config = user_config.auth_method_config
+
+        if isinstance(matched_auth_method, IAMAuth) and auth_config.get('load_current'):
+            return IAMAuth.load_current()
+
+        return matched_auth_method(**auth_config)
     except Exception:
         raise RuntimeError('Auth method load error, please re-run configuration')
