@@ -59,6 +59,7 @@ class DevelopmentConfig(BaseConfig):
     rest_endpoint = 'https://3b71dp5mn2.execute-api.us-west-2.amazonaws.com/dev'
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-dev'
+    references_bucket = 'pubweb-resources'
     base_url = "https://dev.pubweb.cloud"
 
 
@@ -69,6 +70,7 @@ class ProductionConfig(BaseConfig):
     rest_endpoint = 'https://3b71dp5mn2.execute-api.us-west-2.amazonaws.com/prd'
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-prd'
+    references_bucket = 'pubweb-resources'
     base_url = "https://pubweb.cloud"
 
 
