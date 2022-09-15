@@ -6,8 +6,8 @@ from pubweb.cli.interactive.utils import ask, ask_yes_no
 
 def gather_auth_config() -> Tuple[str, Dict]:
     auth_methods_map = {
-        'Interactive authentication (recommended)': ClientAuth,
-        'Username and Password authentication': UsernameAndPasswordAuth,
+        'Default authentication (recommended)': ClientAuth,
+        'Username/password authentication (non-institutional)': UsernameAndPasswordAuth,
         'AWS IAM Credentials': IAMAuth
     }
 

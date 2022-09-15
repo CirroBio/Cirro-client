@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import NamedTuple, Dict, Optional
 
-PUBWEB_HOME = os.environ.get('PW_HOME', "~/.pubweb")
+PUBWEB_HOME = os.environ.get('PW_HOME', '~/.pubweb')
 config_path = Path(PUBWEB_HOME, 'config.ini').expanduser()
 
 
@@ -60,7 +60,7 @@ class DevelopmentConfig(BaseConfig):
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-dev'
     references_bucket = 'pubweb-resources'
-    base_url = "https://dev.pubweb.cloud"
+    base_url = 'https://dev.pubweb.cloud'
 
 
 class ProductionConfig(BaseConfig):
@@ -71,7 +71,7 @@ class ProductionConfig(BaseConfig):
     region = 'us-west-2'
     resources_bucket = 'pubweb-resources-prd'
     references_bucket = 'pubweb-resources'
-    base_url = "https://pubweb.cloud"
+    base_url = 'https://pubweb.cloud'
 
 
 if os.environ.get('ENV', '').upper() == 'DEV':
