@@ -38,4 +38,4 @@ def get_auth_info_from_config():
 
         return matched_auth_method(**auth_config)
     except Exception:
-        raise RuntimeError('Auth method load error, please re-run configuration')
+        raise RuntimeError('Auth method load error')
