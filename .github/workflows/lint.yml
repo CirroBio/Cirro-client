@@ -25,9 +25,14 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install flake8
-          python setup.py install
+          pip install poetry
+          poetry install --all-extras
 
       - name: Run lint
         run: |
-          flake8 pubweb
+          poetry run flake8 pubweb
+
+      - name: Run Tests
+        working-directory: tests
+        run: |
+          poetry run pytest --cov --cov-report=xml --cov-branch -o junit_family=xunit2 --junitxml=junit/test-results.xml

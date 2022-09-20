@@ -15,20 +15,20 @@ class PreprocessDataset:
     the analysis workflow for a dataset.
     """
 
-    def __init__(self, s3_dataset: str):
+    def __init__(self, s3_dataset: str, config_directory='config'):
         self.s3_dataset = s3_dataset
         self.files = self._read_csv(
-            "config/files.csv",
+            str(Path(config_directory, "files.csv")),
             required_columns=["sample", "file"]
         )
 
         self.samplesheet = self._read_csv(
-            "config/samplesheet.csv",
+            str(Path(config_directory, "samplesheet.csv")),
             required_columns=["sample"]
         )
 
         self.params = self._read_json(
-            "config/params.json"
+            str(Path(config_directory, "params.json")),
         )
 
         # Log to STDOUT
@@ -71,14 +71,16 @@ class PreprocessDataset:
         """Read a JSON from the dataset"""
 
         # Make the full S3 path
-        s3_path = S3Path(f"{self.s3_dataset}/{suffix}")
+        path = f"{self.s3_dataset}/{suffix}"
+        s3_path = S3Path(path)
 
-        # Open a connection to S3
-        s3 = boto3.client('s3')
-
-        # Read the object
-        retr = s3.get_object(Bucket=s3_path.bucket, Key=s3_path.key)
-        text = retr['Body'].read().decode()
+        if s3_path.valid:
+            s3 = boto3.client('s3')
+            retr = s3.get_object(Bucket=s3_path.bucket, Key=s3_path.key)
+            text = retr['Body'].read().decode()
+        else:
+            with Path(path).open() as handle:
+                text = handle.read()
 
         # Parse JSON
         return json.loads(text)
@@ -110,3 +112,44 @@ class PreprocessDataset:
 
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
+
+    def wide_samplesheet(
+        self,
+        index=["sampleIndex", "sample", "lane"],
+        columns="read",
+        values="file",
+        column_prefix="fastq_"
+    ):
+        """Format a wide samplesheet with each read-pair on a row."""
+
+        self.logger.info("Formatting a wide samplesheet")
+        self.logger.info("File table (long)")
+        self.logger.info(self.files.head().to_csv(index=None))
+
+        assert columns in self.files.columns.values, f"Column '{columns}' not found in file table"
+        assert values in self.files.columns.values, f"Column '{values}' not found in file table"
+
+        assert isinstance(index, list), f"index must be a list (not {type(index)})"
+
+        # Get the list of columns from the inputs
+        input_columns = self.files.columns.values
+
+        # Format as a wide dataset
+        # Note that all of the columns in `index` will be added if they are not already present
+        wide_df = self.files.reindex(
+            columns=index + [columns] + [values]
+        ).pivot(
+            index=index,
+            columns=columns,
+            values=values
+        ).rename(
+            columns=lambda i: f"{column_prefix}{int(i)}"
+        ).reset_index(
+        )
+
+        # Remove any columns from the ouput which were added from `index`
+        for cname in index:
+            if cname not in input_columns:
+                wide_df = wide_df.drop(columns=[cname])
+
+        return wide_df

@@ -1,0 +1,5 @@
+sample,fastq_1,fastq_2,lane,sampleIndex
+SAMPLE_1,SAMPLE_1_1.fastq.gz,SAMPLE_1_2.fastq.gz,1,1
+SAMPLE_1,SAMPLE_1_3.fastq.gz,SAMPLE_1_4.fastq.gz,2,1
+SAMPLE_2,SAMPLE_2_1.fastq.gz,SAMPLE_2_2.fastq.gz,1,2
+SAMPLE_2,SAMPLE_2_3.fastq.gz,SAMPLE_2_4.fastq.gz,2,2
