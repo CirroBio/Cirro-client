@@ -124,14 +124,19 @@ class PreprocessDataset:
 
         self.logger.info("Formatting a wide samplesheet")
         self.logger.info("File table (long)")
-        self.logger.info(self.files.head().to_csv())
+        self.logger.info(self.files.head().to_csv(index=None))
 
         assert columns in self.files.columns.values, f"Column '{columns}' not found in file table"
         assert values in self.files.columns.values, f"Column '{values}' not found in file table"
 
         assert isinstance(index, list), f"index must be a list (not {type(index)})"
 
-        return self.files.reindex(
+        # Get the list of columns from the inputs
+        input_columns = self.files.columns.values
+
+        # Format as a wide dataset
+        # Note that all of the columns in `index` will be added if they are not already present
+        wide_df = self.files.reindex(
             columns=index + [columns] + [values]
         ).pivot(
             index=index,
@@ -141,3 +146,10 @@ class PreprocessDataset:
             columns=lambda i: f"{column_prefix}{int(i)}"
         ).reset_index(
         )
+        
+        # Remove any columns from the ouput which were added from `index`
+        for cname in index:
+            if cname not in input_columns:
+                wide_df = wide_df.drop(columns=[cname])
+        
+        return wide_df
