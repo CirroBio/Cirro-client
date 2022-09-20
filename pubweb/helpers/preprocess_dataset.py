@@ -110,3 +110,32 @@ class PreprocessDataset:
 
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
+
+    def wide_samplesheet(
+        self,
+        index=["sampleIndex", "sample", "lane"],
+        columns="read",
+        values="file",
+        column_prefix="fastq_"
+    ):
+        """Format a wide samplesheet with each read-pair on a row."""
+
+        self.logger.info("Formatting a wide samplesheet")
+        self.logger.info("File table (long)")
+        self.logger.info(self.files.head().to_csv())
+
+        assert columns in self.files.columns.values, f"Column '{columns}' not found in file table"
+        assert values in self.files.columns.values, f"Column '{values}' not found in file table"
+
+        assert isinstance(index, list), f"index must be a list (not {type(index)})"
+
+        return self.files.reindex(
+            columns=index + [columns] + [values]
+        ).pivot(
+            index=index,
+            columns=columns,
+            values=values
+        ).rename(
+            columns=lambda i: f"{column_prefix}{int(i)}"
+        ).reset_index(
+        )
