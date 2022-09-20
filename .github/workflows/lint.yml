@@ -31,3 +31,7 @@ jobs:
       - name: Run lint
         run: |
           flake8 pubweb
+
+      - name: Run Tests
+        run: |
+          pytest --cov --cov-report=xml --cov-branch -o junit_family=xunit2 --junitxml=junit/test-results.xml

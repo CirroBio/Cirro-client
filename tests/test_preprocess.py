@@ -21,7 +21,6 @@ class TestPreprocess(unittest.TestCase):
         ds = PreprocessDataset('example_data_2')
         df = ds.wide_samplesheet()
 
-
         expected_df = pandas.read_csv('example_data_2/expected_wide.csv')
 
         self.assertEqual(
