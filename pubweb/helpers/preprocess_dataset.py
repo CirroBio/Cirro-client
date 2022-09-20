@@ -15,20 +15,20 @@ class PreprocessDataset:
     the analysis workflow for a dataset.
     """
 
-    def __init__(self, s3_dataset: str):
+    def __init__(self, s3_dataset: str, config_directory='config'):
         self.s3_dataset = s3_dataset
         self.files = self._read_csv(
-            "config/files.csv",
+            str(Path(config_directory, "files.csv")),
             required_columns=["sample", "file"]
         )
 
         self.samplesheet = self._read_csv(
-            "config/samplesheet.csv",
+            str(Path(config_directory, "samplesheet.csv")),
             required_columns=["sample"]
         )
 
         self.params = self._read_json(
-            "config/params.json"
+            str(Path(config_directory, "params.json")),
         )
 
         # Log to STDOUT
@@ -71,14 +71,16 @@ class PreprocessDataset:
         """Read a JSON from the dataset"""
 
         # Make the full S3 path
-        s3_path = S3Path(f"{self.s3_dataset}/{suffix}")
+        path = f"{self.s3_dataset}/{suffix}"
+        s3_path = S3Path(path)
 
-        # Open a connection to S3
-        s3 = boto3.client('s3')
-
-        # Read the object
-        retr = s3.get_object(Bucket=s3_path.bucket, Key=s3_path.key)
-        text = retr['Body'].read().decode()
+        if s3_path.valid:
+            s3 = boto3.client('s3')
+            retr = s3.get_object(Bucket=s3_path.bucket, Key=s3_path.key)
+            text = retr['Body'].read().decode()
+        else:
+            with Path(path).open() as handle:
+                text = handle.read()
 
         # Parse JSON
         return json.loads(text)
