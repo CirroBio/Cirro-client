@@ -146,7 +146,7 @@ class PreprocessDataset:
             columns=lambda i: f"{column_prefix}{int(i)}"
         ).reset_index(
         )
-        
+
         # Remove any columns from the ouput which were added from `index`
         for cname in index:
             if cname not in input_columns:
