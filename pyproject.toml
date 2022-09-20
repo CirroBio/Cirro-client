@@ -5,6 +5,7 @@ description = "CLI tool and SDK for interacting with the PubWeb platform"
 authors = ["Fred Hutch <viz@fredhutch.org>"]
 license = "MIT"
 readme = "README.md"
+packages = [{include = "pubweb"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"

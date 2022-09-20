@@ -33,7 +33,7 @@ jobs:
       - name: Test install
         run: |
           poetry install --all-extras
-          pubweb-cli
+          poetry run pubweb-cli
 
       - name: Build python package
         run: |
