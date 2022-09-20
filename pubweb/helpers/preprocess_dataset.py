@@ -151,5 +151,5 @@ class PreprocessDataset:
         for cname in index:
             if cname not in input_columns:
                 wide_df = wide_df.drop(columns=[cname])
-        
+
         return wide_df
