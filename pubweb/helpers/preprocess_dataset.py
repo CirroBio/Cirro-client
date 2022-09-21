@@ -113,6 +113,18 @@ class PreprocessDataset:
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
 
+    def update_compute(self, from_str, to_str, fp="nextflow.config"):
+        """Replace all instances of a text string in the compute config file."""
+
+        assert os.path.exists(fp), f"File does not exist: {fp}"
+        with open(fp, 'r') as handle:
+            compute = handle.read()
+        n = len(compute.split(from_str)) - 1
+        self.logger.info(f"Replacing {n:,} instances of {from_str} with {to_str} in {fp}")
+        compute = compute.replace(from_str, to_str)
+        with open(fp, 'wt') as handle:
+            handle.write(compute)
+
     def wide_samplesheet(
         self,
         index=["sampleIndex", "sample", "lane"],
