@@ -113,7 +113,7 @@ class PreprocessDataset:
         self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
 
-    def update_compute(self, from_str, to_str, fp="nextflow.config"):
+    def update_compute(self, from_str, to_str, fp="nextflow-override.config"):
         """Replace all instances of a text string in the compute config file."""
 
         assert os.path.exists(fp), f"File does not exist: {fp}"
