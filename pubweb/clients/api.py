@@ -15,7 +15,7 @@ HEADERS = {
 
 def _build_gql_client(auth_info: AuthInfo, endpoint: str):
     transport = RequestsHTTPTransport(url=endpoint, headers=HEADERS, auth=auth_info.get_request_auth())
-    return Client(transport=transport, fetch_schema_from_transport=True)
+    return Client(transport=transport, fetch_schema_from_transport=False)
 
 
 class ApiClient:
