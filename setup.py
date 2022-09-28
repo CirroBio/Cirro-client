@@ -46,5 +46,5 @@ setup(
     },
     url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points,
-    # long_description=long_description
+    long_description=long_description
 )
