@@ -32,7 +32,7 @@ client = PubWeb()
 ## Command Line Usage
 
 #### Downloading a dataset:
-```bash
+```
 Usage: pubweb-cli download [OPTIONS]
 
   Download dataset files
@@ -46,7 +46,7 @@ Options:
 ```
 
 #### Uploading a dataset:
-```bash
+```
 Usage: pubweb-cli upload [OPTIONS]
 
   Upload and create a dataset
@@ -63,7 +63,7 @@ Options:
 ```
 
 #### Listing datasets:
-```bash
+```
 Usage: pubweb-cli list_datasets [OPTIONS]
 
   List available datasets
@@ -80,7 +80,7 @@ When running a command, you can specify the `--interactive` flag to gather the c
 
 Example:
 
-```bash
+```
 $ pubweb-cli upload --interactive
 ? What project is this dataset associated with?  Test project
 ? Enter the full path of the data directory  /shared/biodata/test
