@@ -16,19 +16,18 @@ or by cloning the repository and running:
 
 `python setup.py install`
 
-Then run a one-time configuration of your login credentials in the command line by running:
+&nbsp;
+Then run a one-time configuration of your login credentials in the command line by running the following. This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
 
-`pubweb-cli configure`
+```
+pubweb-cli configure
+```
 
-This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
-
-Or if you'd prefer, you can configure in a Python session and run:
+Or if you'd prefer, you can configure in a Python session and run the following, which will give you a link to log in through the browser. 
 ```
 from pubweb import PubWeb
 client = PubWeb()
 ```
-
-which will give you a link to log in through the browser. 
 
 ## Command Line Usage
 
@@ -98,7 +97,7 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 | Jupyter Notebook                                                    | Topic                            
 |---------------------------------------------------------------------|----------------------------------|
-| [Introduction](samples/Getting_started.ipynb)                       | Authenticating and installing    |
+| [Introduction](samples/Getting_started.ipynb)                       | Installing and authenticating    |
 | [Uploading a dataset](samples/Uploading_a_dataset.ipynb)            | Uploading data                   |
 | [Downloading a dataset](samples/Downloading_a_dataset.ipynb)        | Downloading data                 |
 | [Interacting with a dataset](samples/Interacting_with_files.ipynb)  | Calling data and reading into tables |
