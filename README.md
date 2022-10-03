@@ -6,7 +6,7 @@
 
 A Python 3.8+ library for the PubWeb platform.
 
-## Installation and Set Up
+## Installation
 
 You can install PubWeb using pip:
 
@@ -16,7 +16,7 @@ or by cloning the repository and running:
 
 `python setup.py install`
 
-<br/><br/>
+## Set Up
 Then run a one-time configuration of your login credentials in the command line by running the following. This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
 
 ```
