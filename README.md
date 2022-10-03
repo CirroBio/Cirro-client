@@ -96,11 +96,11 @@ $ pubweb-cli upload --interactive
 
 See the following set of Jupyter notebooks that contain examples on the following topics:
 
-| Topic                            | Jupyter Notebook                                                    |
-|----------------------------------|---------------------------------------------------------------------|
-| Authenticating and installing    | [Introduction](samples/Getting_started.ipynb)                       |
-| Uploading data                   | [Uploading a dataset](samples/Uploading_a_dataset.ipynb)            |
-| Downloading data                 | [Downloading a dataset](samples/Downloading_a_dataset.ipynb)        |
-| Calling data and reading into tables   | [Analyzing a dataset](samples/Interacting_with_files.ipynb)   |
-| Running analysis pipelines       | [Analyzing a dataset](samples/Analyzing_a_dataset.ipynb)            |
-| Managing reference data          | [Using references](samples/Using_references.ipynb)                  |
+| Jupyter Notebook                                                    | Topic                            
+|--------------------------------------------------------------------------------------------------------|
+| [Introduction](samples/Getting_started.ipynb)                       | Authenticating and installing    |
+| [Uploading a dataset](samples/Uploading_a_dataset.ipynb)            | Uploading data                   |
+| [Downloading a dataset](samples/Downloading_a_dataset.ipynb)        | Downloading data                 |
+| [Interacting with a dataset](samples/Interacting_with_files.ipynb)  | Calling data and reading into tables |
+| [Analyzing a dataset](samples/Analyzing_a_dataset.ipynb)            | Running analysis pipelines       |
+| [Using references](samples/Using_references.ipynb)                  | Managing reference data          |
