@@ -97,7 +97,7 @@ $ pubweb-cli upload --interactive
 See the following set of Jupyter notebooks that contain examples on the following topics:
 
 | Jupyter Notebook                                                    | Topic                            
-|--------------------------------------------------------------------------------------------------------|
+|---------------------------------------------------------------------|----------------------------------|
 | [Introduction](samples/Getting_started.ipynb)                       | Authenticating and installing    |
 | [Uploading a dataset](samples/Uploading_a_dataset.ipynb)            | Uploading data                   |
 | [Downloading a dataset](samples/Downloading_a_dataset.ipynb)        | Downloading data                 |
