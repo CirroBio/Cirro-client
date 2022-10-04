@@ -17,17 +17,12 @@ or by cloning the repository and running:
 `python setup.py install`
 
 ## Set Up
-Then run a one-time configuration of your login credentials in the command line by running the following. This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
+Run a one-time configuration of your login credentials in the command line using:
 
-```
-pubweb-cli configure
-```
+`pubweb-cli configure`
 
-Or if you'd prefer, you can configure in a Python session and run the following, which will give you a link to log in through the browser. 
-```
-from pubweb import PubWeb
-client = PubWeb()
-```
+ This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
+
 
 ## Command Line Usage
 
