@@ -40,6 +40,16 @@ class ProjectService(FileEnabledService):
         """
         return next((p for p in self.list() if p.name == name), None)
 
+    def get_reference_types(self, project_id: str) -> List[str]:
+        """
+        Gets the list of reference types which are available in a project
+        """
+        ref_prefix = "data/references/"
+        access_context = FileAccessContext.download_project_resources(project_id)
+        resources = self._file_service.get_file_listing(access_context)
+        reference_files = filter_files_by_pattern(resources, f'{ref_prefix}*/*/*')
+        return list(set([file.relative_path[len(ref_prefix):].split("/", 1)[0] for file in reference_files]))
+
     def get_references(self, project_id: str, reference_directory: str) -> References:
         """
         Gets a list of references available for a given project and reference directory

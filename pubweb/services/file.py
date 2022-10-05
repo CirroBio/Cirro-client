@@ -21,13 +21,13 @@ class FileService(BaseService):
 
     def get_file(self, file: File) -> str:
         """
-        Gets the string contents of a file
+        Gets the contents of a file
         """
         return self.get_file_from_path(file.access_context, file.relative_path)
 
     def get_file_from_path(self, access_context: FileAccessContext, file_path: str) -> str:
         """
-        Gets the string contents of a file by providing the path, used internally
+        Gets the contents of a file by providing the path, used internally
         """
         s3_client = S3Client(partial(self.get_access_credentials, access_context))
         full_path = f'{access_context.path_prefix}/{file_path}'.lstrip('/')

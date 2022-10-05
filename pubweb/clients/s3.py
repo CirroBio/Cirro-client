@@ -80,10 +80,10 @@ class S3Client:
             Body=bytes(contents, "UTF-8")
         )
 
-    def get_file(self, bucket: str, key: str) -> str:
+    def get_file(self, bucket: str, key: str) -> bytes:
         resp = self._client.get_object(Bucket=bucket, Key=key)
         file_body = resp['Body']
-        return file_body.read().decode('utf-8')
+        return file_body.read()
 
     def get_file_stats(self, bucket: str, key: str):
         return self._client.head_object(Bucket=bucket, Key=key)
