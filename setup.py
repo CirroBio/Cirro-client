@@ -14,7 +14,6 @@ entry_points = {
 install_requires = [
     "click>=8.1.3",
     "boto3>=1.24",
-    "botocore==1.27.60",
     "questionary==1.10.0",
     "gql[requests]==3.4.0",
     "requests==2.28.1",
