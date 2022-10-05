@@ -26,10 +26,10 @@ class DataPortalAssets(list):
     asset_name = 'asset'
     asset_class = DataPortalAsset
 
-    def __init__(self, l):
+    def __init__(self, input_list):
 
         # Add all of the items from the input list
-        self.extend(l)
+        self.extend(input_list)
 
     def __str__(self):
         return "\n\n".join([str(i) for i in self])
@@ -44,7 +44,7 @@ class DataPortalAssets(list):
 
     def get_by_name(self, name: str):
         """Return the item which matches with name attribute."""
-        
+
         assert name is not None, f"Must provide name to identify {self.asset_name}"
 
         # Get the items which have a matching name
@@ -97,7 +97,7 @@ class DataPortalFile:
     """
 
     def __init__(self, file: File, client: PubWeb):
-        
+
         # Note that the 'name' and 'id' attributes are set to the relative path
         # The purpose of this is to support the DataPortalAssets class functions
         self.name = file.relative_path
@@ -130,20 +130,20 @@ class DataPortalFile:
 
         File compression is inferred from the extension, but can be set
         explicitly with the compression= flag.
-        
+
         All other keyword arguments are passed to pandas.read_csv
         https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
         """
 
         if compression == 'infer':
             # If the file appears to be compressed
-            if self.relative_path.endswith('.gz'): 
+            if self.relative_path.endswith('.gz'):
                 compression = dict(method='gzip')
-            elif self.relative_path.endswith('.bz2'): 
+            elif self.relative_path.endswith('.bz2'):
                 compression = dict(method='bz2')
-            elif self.relative_path.endswith('.xz'): 
+            elif self.relative_path.endswith('.xz'):
                 compression = dict(method='zstd')
-            elif self.relative_path.endswith('.zst'): 
+            elif self.relative_path.endswith('.zst'):
                 compression = dict(method='zstd')
             else:
                 compression = None
@@ -194,7 +194,7 @@ class DataPortalFile:
             ) as handle:
                 return handle.read()
 
-    def download(self, download_location:str = None):
+    def download(self, download_location: str = None):
         """Download the file to a local directory."""
 
         assert download_location is not None, "Must provide download location"
@@ -209,7 +209,7 @@ class DataPortalFiles(DataPortalAssets):
     asset_name = "file"
     asset_class = DataPortalFile
 
-    def download(self, download_location:str = None) -> None:
+    def download(self, download_location: str = None) -> None:
         """Download the collection of files to a local directory."""
 
         for f in self:
@@ -219,7 +219,7 @@ class DataPortalFiles(DataPortalAssets):
 class DataPortalProcess:
     """Helper functions for interacting with analysis processes."""
 
-    def __init__(self, process: Process, client:PubWeb):
+    def __init__(self, process: Process, client: PubWeb):
 
         self.id = process.id
         self.name = process.name
@@ -294,12 +294,11 @@ class DataPortalDataset:
             ]
         )
 
-    def download_files(self, download_location:str = None) -> None:
+    def download_files(self, download_location: str = None) -> None:
         """Download all of the files from the dataset to a local directory."""
 
         # Alias for internal method
         self.list_files().download(download_location)
-
 
     def run_analysis(
         self,
@@ -384,7 +383,7 @@ class DataPortalProject:
     to view and/or modify all of the datasets in that collection.
     """
 
-    def __init__(self, proj:Project, client:PubWeb):
+    def __init__(self, proj: Project, client: PubWeb):
         """Initialize the Project from the base PubWeb model."""
 
         self.id = proj.id
@@ -420,7 +419,7 @@ class DataPortalProject:
 
         return self.list_datasets().get_by_id(id)
 
-    def list_references(self, reference_type:str = None) -> DataPortalReferences:
+    def list_references(self, reference_type: str = None) -> DataPortalReferences:
         """
         List the references available in a project.
         Optionally filter to references of a particular type (identified by name)
@@ -454,13 +453,13 @@ class DataPortalProject:
         """Return the reference of a particular type with the specified name."""
 
         assert name is not None, "Must specify the reference name"
-        
+
         return self.list_references(reftype).get_by_name(name)
 
     def upload_dataset(
         self,
         name: str = None,
-        description = '',
+        description='',
         process: DataPortalProcess = None,
         upload_folder: str = None,
         files: list = None
@@ -522,7 +521,7 @@ class DataPortal:
     available in the PubWeb Data Portal.
     """
 
-    def __init__(self, client: PubWeb=None):
+    def __init__(self, client: PubWeb = None):
         """Set up the DataPortal object, establishing a connection with the PubWeb Data Portal."""
 
         # If the user provided their own client to get information from PubWeb
