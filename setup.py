@@ -21,16 +21,11 @@ install_requires = [
     "pycognito==2022.8.0",
     "tqdm==4.62.3",
     "pygithub>=1.55",
-    "jsonschema==4.6.1"
-]
-
-install_analysis_requires = [
+    "jsonschema==4.6.1",
     "pandas>=1.4.0,<1.5.0",
     "s3fs==2022.8.2",
     "fsspec"
 ]
-
-install_all_requires = install_requires + install_analysis_requires
 
 setup(
     name='pubweb',
@@ -41,10 +36,6 @@ setup(
     description='CLI tool for interacting with the PubWeb platform',
     packages=find_packages(include=['pubweb*']),
     install_requires=install_requires,
-    extras_require={
-        "all": install_all_requires,
-        "analysis": install_analysis_requires
-    },
     url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points,
     long_description=long_description
