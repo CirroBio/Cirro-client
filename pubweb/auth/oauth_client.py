@@ -77,7 +77,7 @@ class ClientAuth(AuthInfo):
         self.region = region
 
         if enable_cache:
-            self._persistence = _build_token_persistence(TOKEN_PATH, fallback_to_plaintext=False)
+            self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=False)
             self._token_info = self._load_token_info()
 
         if not self._token_info:
