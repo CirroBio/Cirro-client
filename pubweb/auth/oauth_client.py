@@ -13,12 +13,12 @@ from botocore.exceptions import ClientError
 from msal_extensions import build_encrypted_persistence, FilePersistence
 from requests.auth import AuthBase
 
-from pubweb import config
 from pubweb.auth.base import AuthInfo, RequestAuthWrapper
+from pubweb.config import Constants
 from pubweb.models.auth import DeviceTokenResponse, OAuthTokenResponse
 
 logger = logging.getLogger()
-TOKEN_PATH = Path(config.home, '.token.dat').expanduser()
+TOKEN_PATH = Path(Constants.home, '.token.dat').expanduser()
 
 
 def _build_token_persistence(location, fallback_to_plaintext=False):
@@ -31,16 +31,16 @@ def _build_token_persistence(location, fallback_to_plaintext=False):
         return FilePersistence(location)
 
 
-def _authenticate():
-    params = {'client_id': config.app_id}
-    resp = requests.post(f'{config.rest_endpoint}/auth/device-code', params=params)
+def _authenticate(client_id: str, auth_endpoint: str):
+    params = {'client_id': client_id}
+    resp = requests.post(f'{auth_endpoint}/device-code', params=params)
     resp.raise_for_status()
     flow: DeviceTokenResponse = resp.json()
     print(flow['message'])
     device_expiry = datetime.fromisoformat(flow['expiry'])
 
     params = {
-        'client_id': config.app_id,
+        'client_id': client_id,
         'device_code': flow['device_code'],
         'grant_type': 'urn:ietf:params:oauth:grant-type:device_code'
     }
@@ -51,7 +51,7 @@ def _authenticate():
         if device_expiry < datetime.now():
             raise RuntimeError('Authentication timed out')
 
-        resp = requests.post(f'{config.rest_endpoint}/auth/token', params=params)
+        resp = requests.post(f'{auth_endpoint}/token', params=params)
         token_result: OAuthTokenResponse = resp.json()
         auth_status = token_result.get('message')
         logger.debug(auth_status)
@@ -72,13 +72,16 @@ class ClientAuth(AuthInfo):
     Implements the OAuth device code flow
     This is the preferred way to authenticate
     """
-    def __init__(self, enable_cache=True):
+    def __init__(self, client_id: str, region: str, auth_endpoint: str, enable_cache=True):
+        self.client_id = client_id
+        self.region = region
+
         if enable_cache:
             self._persistence = _build_token_persistence(TOKEN_PATH, fallback_to_plaintext=False)
             self._token_info = self._load_token_info()
 
         if not self._token_info:
-            self._token_info = _authenticate()
+            self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint)
 
         self._save_token_info()
         self._update_token_metadata()
@@ -100,9 +103,9 @@ class ClientAuth(AuthInfo):
 
     def _refresh_access_token(self):
         try:
-            cognito = boto3.client('cognito-idp', region_name=config.region)
+            cognito = boto3.client('cognito-idp', region_name=self.region)
             resp = cognito.initiate_auth(
-                ClientId=config.app_id,
+                ClientId=self.client_id,
                 AuthFlow='REFRESH_TOKEN_AUTH',
                 AuthParameters={
                     'REFRESH_TOKEN': self._token_info['refresh_token']

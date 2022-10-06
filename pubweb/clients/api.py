@@ -5,7 +5,6 @@ import pkg_resources
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-from pubweb import config
 from pubweb.auth.base import AuthInfo
 from pubweb.auth.iam import IAMAuth
 
@@ -27,9 +26,9 @@ def _build_gql_client(auth_info: AuthInfo, endpoint: str):
 
 
 class ApiClient:
-    def __init__(self, auth_info: AuthInfo):
+    def __init__(self, auth_info: AuthInfo, data_endpoint: str):
         self._auth_info = auth_info
-        self._gql_client = _build_gql_client(auth_info, config.data_endpoint)
+        self._gql_client = _build_gql_client(auth_info, data_endpoint)
 
     def query(self, query: str, variables=None) -> Dict:
         return self._gql_client.execute(gql(query), variable_values=variables)

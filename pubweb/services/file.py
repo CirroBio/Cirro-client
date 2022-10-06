@@ -3,6 +3,7 @@ from functools import partial
 from typing import List
 
 from pubweb.clients import ApiClient, S3Client
+from pubweb.config import AppConfig
 from pubweb.file_utils import upload_directory, download_directory
 from pubweb.models.auth import Creds
 from pubweb.models.file import FileAccessContext, File
@@ -84,6 +85,6 @@ class FileEnabledService(BaseService):
     """
     _file_service: FileService
 
-    def __init__(self, api_client: ApiClient, file_service: FileService):
-        super().__init__(api_client)
+    def __init__(self, api_client: ApiClient, file_service: FileService, configuration: AppConfig):
+        super().__init__(api_client, configuration)
         self._file_service = file_service

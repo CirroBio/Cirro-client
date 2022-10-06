@@ -30,6 +30,10 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
         # Get the list of projects available to the user
         projects = pubweb.project.list()
 
+        if len(projects) == 0:
+            print("No projects available")
+            return
+
         # Prompt the user for the project
         input_params = gather_list_arguments(input_params, projects)
 
@@ -47,6 +51,10 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     pubweb = PubWeb()
     projects = pubweb.project.list()
     processes = pubweb.process.list(process_type=Executor.INGEST)
+
+    if len(projects) == 0:
+        print("No projects available")
+        return
 
     if interactive:
         input_params = gather_upload_arguments(input_params, projects, processes)
@@ -90,6 +98,11 @@ def run_download(input_params: DownloadArguments, interactive=False):
     pubweb = PubWeb()
 
     projects = pubweb.project.list()
+
+    if len(projects) == 0:
+        print("No projects available")
+        return
+
     if interactive:
         input_params = gather_download_arguments(input_params, projects)
 
@@ -164,4 +177,6 @@ def run_configure_workflow():
 
 def run_configure():
     auth_method, auth_method_config = gather_auth_config()
-    save_user_config(UserConfig(auth_method=auth_method, auth_method_config=auth_method_config))
+    save_user_config(UserConfig(auth_method=auth_method,
+                                auth_method_config=auth_method_config,
+                                base_url=None))

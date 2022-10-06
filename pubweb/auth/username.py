@@ -7,7 +7,6 @@ from pycognito import AWSSRP
 from requests.auth import AuthBase
 
 from pubweb.auth.base import AuthInfo, RequestAuthWrapper
-from pubweb.config import config
 
 logger = logging.getLogger()
 
@@ -18,7 +17,10 @@ class UsernameAndPasswordAuth(AuthInfo):
     Note: this does not work with federated identities (Fred Hutch login)
     You must contact HDC to manually create an account
     """
-    def __init__(self, username, password):
+    def __init__(self, username: str, password: str, region: str, user_pool_id: str, client_id: str):
+        self.region = region
+        self.client_id = client_id
+        self.user_pool_id = user_pool_id
         self._username = username
         self._password = password
         self._auth_result = None
@@ -37,11 +39,11 @@ class UsernameAndPasswordAuth(AuthInfo):
 
         with self._get_token_lock:
             logger.debug('Fetching new token from cognito')
-            cognito = boto3.client('cognito-idp', region_name=config.region)
+            cognito = boto3.client('cognito-idp', region_name=self.region)
             aws = AWSSRP(username=self._username,
                          password=self._password,
-                         pool_id=config.user_pool_id,
-                         client_id=config.app_id,
+                         pool_id=self.user_pool_id,
+                         client_id=self.client_id,
                          client=cognito)
             resp = aws.authenticate_user()
             self._auth_result = resp['AuthenticationResult']

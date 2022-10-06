@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from pubweb.config import config
-
 
 @dataclass(frozen=True)
 class Project:
@@ -16,5 +14,5 @@ class Project:
                    json['desc'])
 
     @property
-    def url(self):
-        return f'{config.base_url}/projects/{self.id}'
+    def relative_url(self):
+        return f'projects/{self.id}'

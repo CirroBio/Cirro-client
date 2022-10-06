@@ -2,8 +2,7 @@ from pubweb.auth.base import AuthInfo
 from pubweb.auth.iam import IAMAuth
 from pubweb.auth.oauth_client import ClientAuth
 from pubweb.auth.username import UsernameAndPasswordAuth
-from pubweb.config import config
-
+from pubweb.config import AppConfig
 
 __all__ = [
     'AuthInfo',
@@ -12,14 +11,14 @@ __all__ = [
     'ClientAuth',
     'get_auth_info_from_config'
 ]
-default_auth_method = ClientAuth
 
 
-def get_auth_info_from_config():
-    user_config = config.user_config
-
+def get_auth_info_from_config(app_config: AppConfig):
+    user_config = app_config.user_config
     if not user_config or not user_config.auth_method:
-        return default_auth_method()
+        return ClientAuth(region=app_config.region,
+                          client_id=app_config.client_id,
+                          auth_endpoint=app_config.auth_endpoint)
 
     auth_methods = [
         ClientAuth,
@@ -30,12 +29,22 @@ def get_auth_info_from_config():
     if not matched_auth_method:
         raise RuntimeError(f'{user_config.auth_method} not found, please re-run configuration')
 
-    try:
-        auth_config = user_config.auth_method_config
+    auth_config = user_config.auth_method_config
 
-        if isinstance(matched_auth_method, IAMAuth) and auth_config.get('load_current'):
-            return IAMAuth.load_current()
+    if matched_auth_method == ClientAuth:
+        return ClientAuth(region=app_config.region,
+                          client_id=app_config.client_id,
+                          auth_endpoint=app_config.auth_endpoint,
+                          **auth_config)
 
-        return matched_auth_method(**auth_config)
-    except Exception:
-        raise RuntimeError('Auth method load error')
+    if matched_auth_method == IAMAuth and auth_config.get('load_current'):
+        return IAMAuth.load_current()
+
+    if matched_auth_method == IAMAuth:
+        return IAMAuth(region=app_config.region, **auth_config)
+
+    if matched_auth_method == UsernameAndPasswordAuth:
+        return UsernameAndPasswordAuth(region=app_config.region,
+                                       client_id=app_config.client_id,
+                                       user_pool_id=app_config.user_pool_id,
+                                       **auth_config)
