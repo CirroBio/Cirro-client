@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 import threading
 import time
 from datetime import datetime
@@ -10,7 +11,8 @@ import boto3
 import jwt
 import requests
 from botocore.exceptions import ClientError
-from msal_extensions import build_encrypted_persistence, FilePersistence
+from msal_extensions import FilePersistence, FilePersistenceWithDataProtection, \
+    KeychainPersistence, LibsecretPersistence
 from requests.auth import AuthBase
 
 from pubweb.auth.base import AuthInfo, RequestAuthWrapper
@@ -23,7 +25,13 @@ TOKEN_PATH = Path(Constants.home, '.token.dat').expanduser()
 
 def _build_token_persistence(location, fallback_to_plaintext=False):
     try:
-        return build_encrypted_persistence(location)
+        if sys.platform.startswith('win'):
+            return FilePersistenceWithDataProtection(location)
+        if sys.platform.startswith('darwin'):
+            return KeychainPersistence(location, service_name='pubweb-client')
+        if sys.platform.startswith('linux'):
+            return LibsecretPersistence(location)
+        raise RuntimeError(f"Unsupported platform: {sys.platform}")
     except Exception:
         if not fallback_to_plaintext:
             raise
