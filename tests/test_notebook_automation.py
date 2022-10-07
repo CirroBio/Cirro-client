@@ -1,9 +1,11 @@
+from pathlib import Path
 import unittest
 import os
 
-def readline(fp):
-    with open(fp, 'r') as handle:
-        return handle.readline()
+
+def read(fp):
+    return Path(fp).read_text()
+
 
 class TestNotebookAutomation(unittest.TestCase):
     def test_form_setup(self):
@@ -13,8 +15,8 @@ class TestNotebookAutomation(unittest.TestCase):
 
         # Get the output provided by the user in the notebook itself
         self.assertEqual(
-            readline("example_notebook_form/final_story.txt"),
-            readline("example_notebook_form/expected_final_story_1.txt")
+            read("example_notebook_form/final_story.txt"),
+            read("example_notebook_form/expected_final_story_1.txt")
         )
 
         # Now run the notebook with the flag pointing to values provided by the non-interactive input form
@@ -22,8 +24,8 @@ class TestNotebookAutomation(unittest.TestCase):
 
         # Get the output driven by the parameter values from the pw-notebook-data.json file
         self.assertEqual(
-            readline("example_notebook_form/final_story.txt"),
-            readline("example_notebook_form/expected_final_story_2.txt")
+            read("example_notebook_form/final_story.txt"),
+            read("example_notebook_form/expected_final_story_2.txt")
         )
 
 
