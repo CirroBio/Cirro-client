@@ -57,7 +57,7 @@ class DatasetService(FileEnabledService):
                     'eq': 'COMPLETED'
                 }
             },
-            # NOTE: There is currently no way to list >10,000 datasets
+            # TODO: Implement pagination
             'limit': 10000
         }
         if name:
