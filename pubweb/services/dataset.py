@@ -1,3 +1,5 @@
+import fnmatch
+import functools
 import json
 import logging
 import uuid
@@ -7,6 +9,7 @@ from pubweb.clients.utils import filter_deleted
 from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse, Dataset
 from pubweb.models.file import FileAccessContext, File
 from pubweb.services.file import FileEnabledService
+from pubweb.services.process import ProcessService
 
 logger = logging.getLogger()
 
@@ -73,6 +76,8 @@ class DatasetService(FileEnabledService):
         """
         logger.info(f"Creating dataset {create_request.name}")
 
+        self.check_dataset_files(create_request.files, create_request.process_id)
+
         if self._api_client.has_iam_creds:
             return self._write_dataset_manifest(create_request)
 
@@ -88,6 +93,29 @@ class DatasetService(FileEnabledService):
         data: DatasetCreateResponse = self._api_client.query(query, variables=variables)['createIngestDataset']
         logger.info(f"Dataset ID: {data['datasetId']}")
         return data
+
+    def check_dataset_files(self, files: List[str], process_id: str):
+        """
+        Checks if process file types are met for a list of files
+        """
+        file_mapping_rules = ProcessService(self._api_client, self._file_service).get_process(process_id).file_mapping_rules
+
+        def match_non_glob(files, rule):
+            pattern = rule['glob']
+            if '{' in pattern:
+                braces = pattern[pattern.find('{')+1:pattern.find('}')]
+                pattern = [pattern.replace(f'{{{braces}}}', s) for s in braces.split(',')]
+            else:
+                pattern = [pattern]
+                
+            for p in pattern:
+                if fnmatch.filter(files, p):
+                    return True
+            return False
+            
+        if False in map(functools.partial(match_non_glob, files), file_mapping_rules):
+            raise RuntimeWarning("Files do not match dataset type. Expected file type requirements: \n" +
+                                 "\n".join([f" {rule['description']}: {rule['glob']}" for rule in file_mapping_rules]))
 
     def get_dataset_files(self, project_id: str, dataset_id: str) -> List[File]:
         """
