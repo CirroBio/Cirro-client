@@ -59,7 +59,7 @@ Options:
 
 #### Listing datasets:
 ```
-Usage: pubweb-cli list_datasets [OPTIONS]
+Usage: pubweb-cli list-datasets [OPTIONS]
 
   List available datasets
 
