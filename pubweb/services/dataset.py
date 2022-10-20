@@ -98,7 +98,8 @@ class DatasetService(FileEnabledService):
         """
         Checks if process file types are met for a list of files
         """
-        file_mapping_rules = ProcessService(self._api_client, self._file_service).get_process(process_id).file_mapping_rules
+        file_mapping_rules = ProcessService(self._api_client, self._file_service).get_process(
+            process_id).file_mapping_rules
 
         def match_non_glob(files, rule):
             pattern = rule['glob']
@@ -107,12 +108,12 @@ class DatasetService(FileEnabledService):
                 pattern = [pattern.replace(f'{{{braces}}}', s) for s in braces.split(',')]
             else:
                 pattern = [pattern]
-                
+
             for p in pattern:
                 if fnmatch.filter(files, p):
                     return True
             return False
-            
+
         if False in map(functools.partial(match_non_glob, files), file_mapping_rules):
             raise RuntimeWarning("Files do not match dataset type. Expected file type requirements: \n" +
                                  "\n".join([f" {rule['description']}: {rule['glob']}" for rule in file_mapping_rules]))
