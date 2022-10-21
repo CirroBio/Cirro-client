@@ -1,7 +1,9 @@
 from pubweb import PubWeb
 from pubweb.auth import UsernameAndPasswordAuth
 from pubweb.cli.interactive.auth_args import gather_login
-from pubweb.cli.interactive.download_args import gather_download_arguments, gather_download_arguments_dataset, gather_download_arguments_dataset_files
+from pubweb.cli.interactive.download_args import gather_download_arguments
+from pubweb.cli.interactive.download_args import gather_download_arguments_dataset
+from pubweb.cli.interactive.download_args import gather_download_arguments_dataset_files
 from pubweb.cli.interactive.list_dataset_args import gather_list_arguments
 from pubweb.cli.interactive.upload_args import gather_upload_arguments
 from pubweb.cli.interactive.utils import get_id_from_name

@@ -145,6 +145,7 @@ def gather_download_arguments_dataset(input_params: DownloadArguments, datasets:
     input_params['data_directory'] = ask_directory(input_params.get('data_directory'))
     return input_params
 
+
 def gather_download_arguments_dataset_files(input_params: DownloadArguments, files: List[File]):
     input_params['files'] = ask_dataset_files(input_params, files)
     return input_params
