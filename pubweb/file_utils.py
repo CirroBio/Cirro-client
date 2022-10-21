@@ -112,4 +112,4 @@ def check_dataset_files(files: List[str], file_mapping_rules: List[str]):
 
     if False in map(functools.partial(match_regex, files), file_mapping_rules):
         raise RuntimeWarning("Files do not match dataset type. Expected file type requirements: \n" +
-                            "\n".join([f" {rule['description']}: {rule['glob']}" for rule in file_mapping_rules]))
+                             "\n".join([f" {rule['description']}: {rule['glob']}" for rule in file_mapping_rules]))
