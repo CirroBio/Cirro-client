@@ -1,4 +1,6 @@
+import functools
 from pathlib import Path, PurePath
+import re
 from typing import List, Union
 
 from boto3.exceptions import S3UploadFailedError
@@ -96,3 +98,18 @@ def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRA
     transfer_time_seconds = (data_size_gb * 8 * 1000) / speed_mbps
     transfer_time_hours = transfer_time_seconds / 60 / 60
     return max(round(transfer_time_hours), 1)
+
+
+def check_dataset_files(files: List[str], file_mapping_rules: List[str]):
+    """
+    Checks if process file types are met for a list of files
+    """
+    def match_regex(files, rule):
+        regex_pattern = rule['sampleMatchingPattern']
+        if any([re.match(regex_pattern, file) for file in files]):
+            return True
+        return False
+
+    if False in map(functools.partial(match_regex, files), file_mapping_rules):
+        raise RuntimeWarning("Files do not match dataset type. Expected file type requirements: \n" +
+                            "\n".join([f" {rule['description']}: {rule['glob']}" for rule in file_mapping_rules]))
