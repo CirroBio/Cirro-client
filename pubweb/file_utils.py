@@ -105,9 +105,9 @@ def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRA
 def check_samplesheet(files: List[str], samplesheet: str):
     """
     Check all files in samplesheet are unique and the list of files in the samplesheet
-    and the files to be uploaded are the same
+    and all the files in the samplesheet must be in the upload list
     :param files: files to check against the samplesheet, not including the samplesheet.csv file
-    :param samplesheet: path and filename of sameplesheet.csv file
+    :param samplesheet: path and filename of samplesheet.csv file
     """
     df = pd.read_csv(samplesheet)
     cols = re.findall(r"fastq_[1|2]|file_\d+", ' '.join(df.columns))
@@ -116,28 +116,21 @@ def check_samplesheet(files: List[str], samplesheet: str):
     if len(samplesheet_files) > len(set(samplesheet_files)):
         raise ValueError('The files in samplesheet.csv are not unique. Samplesheet is not valid.')
 
-    if set(samplesheet_files) != set(files):
-        missing_samplesheet = set(files).difference(set(samplesheet_files))
-        missing_upload = set(samplesheet_files).difference(set(files))
-        msg = "There is a discrepancy between the files in the samplesheet.csv file and the files to be uploaded."
-        msg += "\nThe following files are missing from the uploaded file list: \n" +\
-               chr(10).join(missing_upload) if missing_upload else ""
-        msg += "\nThe following files are missing from the samplesheet.csv file: \n" +\
-               chr(10).join(missing_samplesheet) if missing_samplesheet else ""
-        raise FileNotFoundError(msg)
+    missing_upload = set(samplesheet_files).difference(set(files))
+    if missing_upload:
+        raise FileNotFoundError("There are files in the samplesheet.csv file that are not included in the " +
+                                "uploaded files. The following files are missing from the uploaded file list: \n" +
+                                "\n".join(missing_upload))
 
 
-def check_dataset_files(files: List[str], file_mapping_rules: Union[List[dict], None], directory: str = ""):
+def check_dataset_files(files: List[str], file_mapping_rules: List[dict], directory: str = ""):
     """
     Checks if process file mapping rules are met for a list of files
     :param files: files to check
     :param file_mapping_rules: glob or sampleMatchingPattern (regex) rules to match against
     :param directory: path to directory containing files
     """
-    if file_mapping_rules is None:
-        return None
-
-    if True in ['samplesheet.csv' in file.lower() for file in files]:
+    if 'samplesheet.csv' in [file.lower() for file in files]:
         samplesheet_path = [file for file in files if 'samplesheet.csv' in file.lower()][0]
         files.remove(samplesheet_path)
         check_samplesheet(files, os.path.join(directory, samplesheet_path))

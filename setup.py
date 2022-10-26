@@ -26,7 +26,6 @@ install_requires = [
 ]
 
 install_analysis_requires = [
-    "pytest",
     "s3fs==2022.8.2"
 ]
 

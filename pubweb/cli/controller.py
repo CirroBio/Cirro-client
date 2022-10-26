@@ -58,12 +58,12 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         raise RuntimeWarning("No files to upload, exiting")
 
     process_id = get_id_from_name(processes, input_params['process'])
-    file_mapping_rules = getattr(pubweb.process.get_process(process_id), 'file_mapping_rules', None)
+    file_mapping_rules = pubweb.process.get_process(process_id).file_mapping_rules
     check_dataset_files(files, file_mapping_rules, directory)
 
     create_request = CreateIngestDatasetInput(
         project_id=get_id_from_name(projects, input_params['project']),
-        process_id=get_id_from_name(processes, input_params['process']),
+        process_id=process_id,
         name=input_params['name'],
         description=input_params['description'],
         files=files
