@@ -73,8 +73,6 @@ class DatasetService(FileEnabledService):
         """
         logger.info(f"Creating dataset {create_request.name}")
 
-        self.check_dataset_files(create_request.files, create_request.process_id)
-
         if self._api_client.has_iam_creds:
             return self._write_dataset_manifest(create_request)
 

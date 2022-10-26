@@ -1,9 +1,11 @@
 import functools
-from pathlib import Path, PurePath
+import os
+from pathlib import Path, PurePath, PurePosixPath
 import re
 from typing import List, Union
 
 from boto3.exceptions import S3UploadFailedError
+import pandas as pd
 
 from pubweb.clients import S3Client
 from pubweb.models.file import DirectoryStatistics, File
@@ -100,16 +102,55 @@ def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRA
     return max(round(transfer_time_hours), 1)
 
 
-def check_dataset_files(files: List[str], file_mapping_rules: List[str]):
+def check_samplesheet(files: List[str], samplesheet: str):
     """
-    Checks if process file types are met for a list of files
+    Check all files in samplesheet are unique and the list of files in the samplesheet
+    and the files to be uploaded are the same
+    :param files: files to check against the samplesheet, not including the samplesheet.csv file
+    :param samplesheet: path and filename of sameplesheet.csv file
     """
-    def match_regex(files, rule):
-        regex_pattern = rule['sampleMatchingPattern']
-        if any([re.match(regex_pattern, file) for file in files]):
+    df = pd.read_csv(samplesheet)
+    cols = re.findall(r"fastq_[1|2]|file_\d+", ' '.join(df.columns))
+    samplesheet_files = df[cols].values.flatten()
+
+    if len(samplesheet_files) > len(set(samplesheet_files)):
+        raise ValueError('The files in samplesheet.csv are not unique. Samplesheet is not valid.')
+
+    if set(samplesheet_files) != set(files):
+        missing_samplesheet = set(files).difference(set(samplesheet_files))
+        missing_upload = set(samplesheet_files).difference(set(files))
+        msg = "There is a discrepancy between the files in the samplesheet.csv file and the files to be uploaded."
+        msg += "\nThe following files are missing from the uploaded file list: \n" +\
+               chr(10).join(missing_upload) if missing_upload else ""
+        msg += "\nThe following files are missing from the samplesheet.csv file: \n" +\
+               chr(10).join(missing_samplesheet) if missing_samplesheet else ""
+        raise FileNotFoundError(msg)
+
+
+def check_dataset_files(files: List[str], file_mapping_rules: Union[List[dict], None], directory: str = ""):
+    """
+    Checks if process file mapping rules are met for a list of files
+    :param files: files to check
+    :param file_mapping_rules: glob or sampleMatchingPattern (regex) rules to match against
+    :param directory: path to directory containing files
+    """
+    if file_mapping_rules is None:
+        return None
+
+    if True in ['samplesheet.csv' in file.lower() for file in files]:
+        samplesheet_path = [file for file in files if 'samplesheet.csv' in file.lower()][0]
+        files.remove(samplesheet_path)
+        check_samplesheet(files, os.path.join(directory, samplesheet_path))
+        return None
+
+    def match_pattern(files, rule):
+        matches_regex = any([re.match(rule['sampleMatchingPattern'], file) for file in files]) \
+            if rule.get('sampleMatchingPattern') else False
+        matches_glob = any([PurePosixPath(file).match(rule['glob']) for file in files]) if rule.get('glob') else False
+        if matches_regex or matches_glob:
             return True
         return False
 
-    if False in map(functools.partial(match_regex, files), file_mapping_rules):
-        raise RuntimeWarning("Files do not match dataset type. Expected file type requirements: \n" +
-                             "\n".join([f" {rule['description']}: {rule['glob']}" for rule in file_mapping_rules]))
+    if False in map(functools.partial(match_pattern, files), file_mapping_rules):
+        raise ValueError("Files do not match dataset type. Expected file type requirements: \n" + "\n".join(
+            [f"Regex: {rule.get('sampleMatchingPattern')} | Glob: {rule.get('glob')}" for rule in file_mapping_rules]))
