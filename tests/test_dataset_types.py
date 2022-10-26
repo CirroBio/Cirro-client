@@ -5,7 +5,7 @@ import pytest
 from pubweb.file_utils import check_dataset_files
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-DATA_PATH = os.path.join(__location__, 'data')
+DATA_PATH = os.path.join(__location__, 'data', 'dataset_types')
 
 file_mapping_rules_list = [
     [{"glob": "*_*.{R1,R2}.fastq.gz",
@@ -38,10 +38,9 @@ def test_samplesheet():
     Test that samplesheet can be used to correct mismatched file names. Using MADDD-seq (FASTQ) rule.
     """
     file_mapping_rules = [{"glob": "*.fastq.gz", "min": 1, "description": "FASTQs"}]
-    directory = DATA_PATH + '/simple_upload'
-    files = ['file1.fastq.gz',
-             'file2.fastq.gz',
+    files = ['file1.gz',
+             'file2.gz',
              'sampleSheet.csv'
              ]
 
-    assert check_dataset_files(files, file_mapping_rules, directory) is None
+    assert check_dataset_files(files, file_mapping_rules, directory=DATA_PATH) is None
