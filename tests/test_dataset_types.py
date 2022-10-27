@@ -9,8 +9,7 @@ DATA_PATH = os.path.join(__location__, 'data', 'dataset_types')
 file_mapping_rules_list = [
     ("Glob & Regex", [{"glob": "*_*.{R1,R2}.fastq.gz",
       "sampleMatchingPattern": "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz"}]),
-    ("Glob Only", [{"glob": "*_*.{R1,R2}.fastq.gz"}]),
-    ("Regex Only", [{"sampleMatchingPattern": "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz"}])
+    ("Glob Only", [{"glob": "*_*.{R1,R2}.fastq.gz"}])
 ]
 
 
@@ -23,8 +22,6 @@ class TestDatasetTypes(unittest.TestCase):
             with self.assertRaises(ValueError) as context:
               check_dataset_files(files=["badmatch.fastq.gz"], file_mapping_rules=file_mapping_rules)
             self.assertTrue("Files do not match dataset type." in str(context.exception))
-            if test_name == "Glob":
-              assert 0
 
     def test_no_file_mapping_rules(self):
         """Test that function doesn't error when no file mapping rules are available"""

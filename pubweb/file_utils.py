@@ -146,4 +146,4 @@ def check_dataset_files(files: List[str], file_mapping_rules: List[dict], direct
 
     if False in map(functools.partial(match_pattern, files), file_mapping_rules):
         raise ValueError("Files do not match dataset type. Expected file type requirements: \n" + "\n".join(
-            [f"Regex: {rule.get('sampleMatchingPattern')} | Glob: {rule.get('glob')}" for rule in file_mapping_rules]))
+            [f"{rule.get('glob')}" for rule in file_mapping_rules]))
