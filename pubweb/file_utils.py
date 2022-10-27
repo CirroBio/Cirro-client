@@ -125,11 +125,15 @@ def check_samplesheet(files: List[str], samplesheet: str):
 
 def check_dataset_files(files: List[str], file_mapping_rules: List[dict], directory: str = ""):
     """
-    Checks if process file mapping rules are met for a list of files
+    Checks if at least one of the file mapping rules for a process are met by at least one file
+    in the list of files
     :param files: files to check
     :param file_mapping_rules: glob or sampleMatchingPattern (regex) rules to match against
     :param directory: path to directory containing files
     """
+    if len(file_mapping_rules) == 0:
+        return None
+
     if 'samplesheet.csv' in [file.lower() for file in files]:
         samplesheet_path = [file for file in files if 'samplesheet.csv' in file.lower()][0]
         files.remove(samplesheet_path)
@@ -144,6 +148,6 @@ def check_dataset_files(files: List[str], file_mapping_rules: List[dict], direct
             return True
         return False
 
-    if False in map(functools.partial(match_pattern, files), file_mapping_rules):
+    if not any(map(functools.partial(match_pattern, files), file_mapping_rules)):
         raise ValueError("Files do not match dataset type. Expected file type requirements: \n" + "\n".join(
-            [f"{rule.get('glob')}" for rule in file_mapping_rules]))
+            [f"{rule.get('description', '')} {rule.get('glob')}" for rule in file_mapping_rules]))

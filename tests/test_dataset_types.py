@@ -8,19 +8,24 @@ DATA_PATH = os.path.join(__location__, 'data', 'dataset_types')
 
 file_mapping_rules_list = [
     ("Glob & Regex", [{"glob": "*_*.{R1,R2}.fastq.gz",
-      "sampleMatchingPattern": "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz"}]),
+                       "sampleMatchingPattern":
+                       "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz"}]),
     ("Glob Only", [{"glob": "*_*.{R1,R2}.fastq.gz"}])
 ]
 
 
 class TestDatasetTypes(unittest.TestCase):
     def test_file_mapping_rules(self):
+        """Checks if process file mapping rules are met for a list of files"""
+        check_dataset_files(files=["good_match.R1.fastq.gz"], file_mapping_rules=file_mapping_rules_list[0][1])
+
+    def test_file_mapping_rules_bad_match(self):
         """Test that errors are raised when files don't match the dataset type's rules, when
         the file_mapping_rules include both regex and glob, only regex, and only glob."""
         for test_name, file_mapping_rules in file_mapping_rules_list:
-          with self.subTest(test_name):
-            with self.assertRaises(ValueError) as context:
-              check_dataset_files(files=["badmatch.fastq.gz"], file_mapping_rules=file_mapping_rules)
+            with self.subTest(test_name):
+                with self.assertRaises(ValueError) as context:
+                    check_dataset_files(files=["badmatch.fastq.gz"], file_mapping_rules=file_mapping_rules)
             self.assertTrue("Files do not match dataset type." in str(context.exception))
 
     def test_no_file_mapping_rules(self):
