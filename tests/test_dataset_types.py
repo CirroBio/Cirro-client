@@ -7,27 +7,28 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 DATA_PATH = os.path.join(__location__, 'data', 'dataset_types')
 
 file_mapping_rules_list = [
-    [{"glob": "*_*.{R1,R2}.fastq.gz",
-      "sampleMatchingPattern": "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz",
-      "description": "test"}],
-    [{"glob": "*_*.{R1,R2}.fastq.gz",
-      "description": "test"}],
-    [{"sampleMatchingPattern": "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz",
-      "description": "test"}]
+    ("Glob & Regex", [{"glob": "*_*.{R1,R2}.fastq.gz",
+      "sampleMatchingPattern": "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz"}]),
+    ("Glob Only", [{"glob": "*_*.{R1,R2}.fastq.gz"}]),
+    ("Regex Only", [{"sampleMatchingPattern": "(?P<sampleName>\\S*)_(?P<replicate>\\S*)\\.R(?P<read>\\S*)\\.fastq\\.gz"}])
 ]
 
 
 class TestDatasetTypes(unittest.TestCase):
     def test_file_mapping_rules(self):
-        """Test that errors are raised when files don't match the dataset type's rules"""
-        for file_mapping_rules in file_mapping_rules_list:
+        """Test that errors are raised when files don't match the dataset type's rules, when
+        the file_mapping_rules include both regex and glob, only regex, and only glob."""
+        for test_name, file_mapping_rules in file_mapping_rules_list:
+          with self.subTest(test_name):
             with self.assertRaises(ValueError) as context:
-                check_dataset_files(files=["badmatch.fastq.gz"], file_mapping_rules=file_mapping_rules)
+              check_dataset_files(files=["badmatch.fastq.gz"], file_mapping_rules=file_mapping_rules)
             self.assertTrue("Files do not match dataset type." in str(context.exception))
+            if test_name == "Glob":
+              assert 0
 
     def test_no_file_mapping_rules(self):
         """Test that function doesn't error when no file mapping rules are available"""
-        assert check_dataset_files(["test_test.R1.fastq.gz"], file_mapping_rules=[]) is None
+        self.assertIsNone(check_dataset_files(["test_test.R1.fastq.gz"], file_mapping_rules=[]))
 
     def test_samplesheet(self):
         """
@@ -39,7 +40,7 @@ class TestDatasetTypes(unittest.TestCase):
                  "file2.gz",
                  "sampleSheet.csv"
                  ]
-        assert check_dataset_files(files, file_mapping_rules, directory=DATA_PATH) is None
+        self.assertIsNone(check_dataset_files(files, file_mapping_rules, directory=DATA_PATH))
 
 
 if __name__ == '__main__':
