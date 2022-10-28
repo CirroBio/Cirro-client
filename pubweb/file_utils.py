@@ -123,7 +123,7 @@ def check_samplesheet(files: List[str], samplesheet: str):
                                 "\n".join(missing_upload))
 
 
-def check_dataset_files(files: List[str], file_mapping_rules: List[dict], directory: str = ""):
+def check_dataset_files(files: List[str], file_mapping_rules: Union[List[dict], None], directory: str = ""):
     """
     Checks if at least one of the file mapping rules for a process are met by at least one file
     in the list of files
@@ -131,7 +131,7 @@ def check_dataset_files(files: List[str], file_mapping_rules: List[dict], direct
     :param file_mapping_rules: glob or sampleMatchingPattern (regex) rules to match against
     :param directory: path to directory containing files
     """
-    if len(file_mapping_rules) == 0:
+    if not file_mapping_rules or len(file_mapping_rules) == 0:
         return None
 
     if 'samplesheet.csv' in [file.lower() for file in files]:

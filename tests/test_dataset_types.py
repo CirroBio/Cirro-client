@@ -31,6 +31,7 @@ class TestDatasetTypes(unittest.TestCase):
     def test_no_file_mapping_rules(self):
         """Test that function doesn't error when no file mapping rules are available"""
         self.assertIsNone(check_dataset_files(["test_test.R1.fastq.gz"], file_mapping_rules=[]))
+        self.assertIsNone(check_dataset_files(["test_test.R1.fastq.gz"], file_mapping_rules=None))
 
     def test_samplesheet(self):
         """
