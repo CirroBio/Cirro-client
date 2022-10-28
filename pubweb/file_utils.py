@@ -144,9 +144,7 @@ def check_dataset_files(files: List[str], file_mapping_rules: List[dict], direct
         matches_regex = any([re.match(rule['sampleMatchingPattern'], file) for file in files]) \
             if rule.get('sampleMatchingPattern') else False
         matches_glob = any([PurePosixPath(file).match(rule['glob']) for file in files]) if rule.get('glob') else False
-        if matches_regex or matches_glob:
-            return True
-        return False
+        return matches_regex or matches_glob
 
     if not any(map(functools.partial(match_pattern, files), file_mapping_rules)):
         raise ValueError("Files do not match dataset type. Expected file type requirements: \n" + "\n".join(
