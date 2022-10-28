@@ -13,7 +13,7 @@ from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_addi
 from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
 from pubweb.config import AuthConfig, save_config, load_config
-from pubweb.file_utils import get_files_in_directory
+from pubweb.file_utils import get_files_in_directory, check_dataset_files
 from pubweb.helpers import WorkflowConfigBuilder
 from pubweb.models.dataset import CreateIngestDatasetInput
 from pubweb.models.file import FileAccessContext
@@ -59,9 +59,13 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     if len(files) == 0:
         raise RuntimeWarning("No files to upload, exiting")
 
+    process_id = get_id_from_name(processes, input_params['process'])
+    file_mapping_rules = pubweb.process.get_process(process_id).file_mapping_rules
+    check_dataset_files(files, file_mapping_rules, directory)
+
     create_request = CreateIngestDatasetInput(
         project_id=get_id_from_name(projects, input_params['project']),
-        process_id=get_id_from_name(processes, input_params['process']),
+        process_id=process_id,
         name=input_params['name'],
         description=input_params['description'],
         files=files
