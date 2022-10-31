@@ -11,6 +11,7 @@ class TestNotebookAutomation(unittest.TestCase):
     def test_form_setup(self):
 
         # Run the notebook as it would be run in interactive mode
+        os.system("pip install nbconvert")
         os.system("jupyter nbconvert --to notebook --execute example_notebook_form/example_notebook.ipynb --inplace")
 
         # Get the output provided by the user in the notebook itself
