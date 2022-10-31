@@ -20,6 +20,7 @@ install_requires = [
     "requests_aws4auth==1.1.2",
     "pycognito==2022.8.0",
     "tqdm==4.62.3",
+    "pandas>=1.4.0,<1.5.0",
     "pygithub>=1.55",
     "jsonschema==4.6.1",
     "pandas>=1.4.0,<1.5.0",
@@ -29,7 +30,7 @@ install_requires = [
 
 setup(
     name='pubweb',
-    version='0.3.8',
+    version='0.3.9',
     author='Fred Hutch',
     license='MIT',
     author_email='viz@fredhutch.org',
@@ -38,5 +39,6 @@ setup(
     install_requires=install_requires,
     url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points,
-    long_description=long_description
+    long_description=long_description,
+    long_description_content_type="text/markdown"
 )

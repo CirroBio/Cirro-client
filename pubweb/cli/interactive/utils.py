@@ -2,6 +2,11 @@ import questionary
 from questionary import prompt
 
 
+class InputError(Exception):
+    """Errors detected from user input"""
+    pass
+
+
 def prompt_wrapper(questions):
     answers = prompt(questions)
     # Prompt catches KeyboardInterrupt and sends back an empty dictionary
