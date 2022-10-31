@@ -24,7 +24,7 @@ install_requires = [
     "pygithub>=1.55",
     "jsonschema==4.6.1",
     "pandas>=1.4.0,<1.5.0",
-    "s3fs==2022.8.2",
+    "s3fs",
     "fsspec"
 ]
 
