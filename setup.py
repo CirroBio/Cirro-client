@@ -20,10 +20,9 @@ install_requires = [
     "requests_aws4auth>=1.1.2",
     "pycognito>=2022.8.0",
     "tqdm>=4.62.3",
-    "pandas>=1.4.0,<1.5.0",
+    "pandas>=1.4.0",
     "pygithub>=1.55",
     "jsonschema>=4.6.1",
-    "pandas>=1.4.0,<1.5.0",
     "s3fs",
     "fsspec"
 ]
