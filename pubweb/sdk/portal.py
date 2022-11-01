@@ -329,7 +329,9 @@ class DataPortalDataset:
         notifications_emails=[]
     ) -> str:
         """
-        Runs an analysis on a dataset, returns the ID of the new dataset
+        Runs an analysis on a dataset, returns the ID of the new dataset.
+        The process can be provided as either a DataPortalProcess object,
+        or a string which corresponds to the name or ID of the process.
         """
 
         if name is None:
@@ -345,7 +347,20 @@ class DataPortalDataset:
 
             # Try to parse it as a name
             try:
-                process = portal.get_process_by_name
+                process = portal.get_process_by_name(process)
+            except DataPortalAssetNotFound:
+                pass
+
+            # If that didn't work
+            if isinstance(process, str):
+
+                # Try to parse it as an ID
+                try:
+                    process = portal.get_process_by_id(process)
+                except DataPortalAssetNotFound:
+
+                    # Raise an error indicating that the process couldn't be parsed
+                    raise DataPortalInputError(f"Could not parse process name or id: '{process}'")
 
         return self.client.process.run_analysis(
             RunAnalysisCommand(
