@@ -1,6 +1,7 @@
 import fnmatch
 import gzip
 from io import BytesIO, StringIO
+from typing import Union
 import pandas as pd
 from pubweb import PubWeb
 from pubweb.file_utils import get_files_in_directory
@@ -11,6 +12,16 @@ from pubweb.models.dataset import Dataset, CreateIngestDatasetInput
 from pubweb.models.file import File
 from pubweb.models.reference import Reference, ReferenceType
 from time import sleep
+
+
+class DataPortalAssetNotFound(Exception):
+    """Exception raised when a Data Poral Asset cannot be found."""
+    pass
+
+
+class DataPortalInputError(Exception):
+    """Exception raised invalid inputs are provided to the Data Poral."""
+    pass
 
 
 class DataPortalAsset:
@@ -45,30 +56,36 @@ class DataPortalAssets(list):
     def get_by_name(self, name: str):
         """Return the item which matches with name attribute."""
 
-        assert name is not None, f"Must provide name to identify {self.asset_name}"
+        if name is None:
+            raise DataPortalInputError(f"Must provide name to identify {self.asset_name}")
 
         # Get the items which have a matching name
         matching_queries = [i for i in self if i.name == name]
 
         # Error if no items are found
         msg = '\n'.join([f"No {self.asset_name} found with name '{name}'.", self.description()])
-        assert len(matching_queries) > 0, msg
+        if len(matching_queries) == 0:
+            raise DataPortalAssetNotFound(msg)
 
         # Error if multiple projects are found
         msg = f"Multiple {self.asset_name} items found with name '{name}', use ID instead.\n{self.description()}"
-        assert len(matching_queries) == 1, msg
+        if len(matching_queries) > 1:
+            raise DataPortalAssetNotFound(msg)
 
         return matching_queries[0]
 
     def get_by_id(self, id: str):
-        assert id is not None, f"Must provide id to identify {self.asset_name}"
+
+        if id is None:
+            raise DataPortalInputError(f"Must provide id to identify {self.asset_name}")
 
         # Get the items which have a matching ID
         matching_queries = [i for i in self if i.id == id]
 
         # Error if no items are found
         msg = '\n'.join([f"No {self.asset_name} found with id '{id}'.", self.description()])
-        assert len(matching_queries) > 0, msg
+        if len(matching_queries) == 0:
+            raise DataPortalAssetNotFound(msg)
 
         return matching_queries[0]
 
@@ -183,7 +200,8 @@ class DataPortalFile:
         else:
 
             # Only gzip-compression is supported currently
-            assert compression == "gzip", "compression may be 'gzip' or None"
+            if not compression == "gzip":
+                raise DataPortalInputError("compression may be 'gzip' or None")
 
             with gzip.open(
                 BytesIO(
@@ -197,7 +215,9 @@ class DataPortalFile:
     def download(self, download_location: str = None):
         """Download the file to a local directory."""
 
-        assert download_location is not None, "Must provide download location"
+        if download_location is None:
+            raise DataPortalInputError("Must provide download location")
+
         self.client.file.download_files(
             self.file.access_context,
             download_location,
@@ -304,7 +324,7 @@ class DataPortalDataset:
         self,
         name: str = None,
         description: str = "",
-        process: DataPortalProcess = None,
+        process: Union[DataPortalProcess, str] = None,
         params={},
         notifications_emails=[]
     ) -> str:
@@ -312,8 +332,20 @@ class DataPortalDataset:
         Runs an analysis on a dataset, returns the ID of the new dataset
         """
 
-        assert name is not None, "Must specify 'name' for run_analysis"
-        assert process is not None, "Must specify 'process' for run_analysis"
+        if name is None:
+            raise DataPortalInputError("Must specify 'name' for run_analysis")
+        if process is None:
+            raise DataPortalInputError("Must specify 'process' for run_analysis")
+
+        # If the process is a string, try to parse it as a process name or ID
+        if isinstance(process, str):
+
+            # Make a Portal object
+            portal = DataPortal(self.client)
+
+            # Try to parse it as a name
+            try:
+                process = portal.get_process_by_name
 
         return self.client.process.run_analysis(
             RunAnalysisCommand(
@@ -436,7 +468,9 @@ class DataPortalProject:
         # If a particular name was specified
         if reference_type is not None:
             references = references.filter_by_pattern(reference_type)
-            assert len(references) > 0, f"Could not find any reference types with the name {reference_type}"
+            if len(references) == 0:
+                msg = f"Could not find any reference types with the name {reference_type}"
+                raise DataPortalAssetNotFound(msg)
 
         return DataPortalReferences(
             [
@@ -452,7 +486,8 @@ class DataPortalProject:
     def get_reference_by_name(self, name: str = None, reftype: str = None) -> DataPortalReference:
         """Return the reference of a particular type with the specified name."""
 
-        assert name is not None, "Must specify the reference name"
+        if name is None:
+            raise DataPortalInputError("Must specify the reference name")
 
         return self.list_references(reftype).get_by_name(name)
 
@@ -468,9 +503,12 @@ class DataPortalProject:
         Upload a set of files to the Data Portal, creating a new dataset.
         """
 
-        assert name is not None, "Must provide name for new dataset"
-        assert process is not None, "Must provide the process which is used for ingest"
-        assert upload_folder is not None, "Must provide upload_folder -- folder containing files to upload"
+        if name is None:
+            raise DataPortalInputError("Must provide name for new dataset")
+        if process is None:
+            raise DataPortalInputError("Must provide the process which is used for ingest")
+        if upload_folder is None:
+            raise DataPortalInputError("Must provide upload_folder -- folder containing files to upload")
 
         # If no files were provided
         if files is None:
