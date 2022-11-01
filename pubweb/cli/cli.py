@@ -13,6 +13,7 @@ def check_required_args(args):
 
 
 @click.group(help="PubWeb CLI - Tool for interacting with datasets")
+@click.version_option()
 def run():
     pass  # Print out help text, nothing to do
 
