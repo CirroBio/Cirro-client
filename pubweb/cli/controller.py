@@ -1,4 +1,4 @@
-from pubweb import PubWeb
+from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.auth import UsernameAndPasswordAuth
 from pubweb.cli.interactive.auth_args import gather_login
 from pubweb.cli.interactive.download_args import gather_download_arguments
@@ -24,8 +24,8 @@ from pubweb.utils import print_credentials
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
 
-    # Instantiate the PubWeb client
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    # Instantiate the PubWeb Data Portal client
+    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
 
     # If the user provided the --interactive flag
     if interactive:
@@ -47,7 +47,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
     projects = pubweb.project.list()
     processes = pubweb.process.list(process_type=Executor.INGEST)
 
@@ -93,7 +93,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
 
     projects = pubweb.project.list()
     if interactive:
@@ -119,7 +119,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
 def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
-    pubweb = PubWeb(UsernameAndPasswordAuth(*load_config()))
+    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
     process_options = pubweb.process.list(process_type=Executor.NEXTFLOW)
     resources_folder, repo_prefix = get_output_resources_path()
 
