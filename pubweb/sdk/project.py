@@ -4,6 +4,7 @@ from pubweb.api.models.project import Project
 from pubweb.api.models.dataset import CreateIngestDatasetInput
 from pubweb.sdk.dataset import DataPortalDataset, DataPortalDatasets
 from pubweb.sdk.asset import DataPortalAssets
+from pubweb.sdk.helpers import parse_process_name_or_id
 from pubweb.sdk.process import DataPortalProcess
 from pubweb.sdk.reference import DataPortalReference, DataPortalReferences
 from pubweb.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
@@ -121,7 +122,7 @@ class DataPortalProject:
         # Create the ingest process request
         dataset_create_request = CreateIngestDatasetInput(
             project_id=self.id,
-            process_id=process.id,
+            process_id=parse_process_name_or_id(process, self._client).id,
             name=name,
             description=description,
             files=files
@@ -143,7 +144,7 @@ class DataPortalProject:
         for attempt in range(max_attempts):
             try:
                 return self.get_dataset_by_id(create_response['datasetId'])
-            except Exception as e:
+            except (Exception, DataPortalAssetNotFound) as e:
                 if attempt == max_attempts - 1:
                     raise e
                 else:
