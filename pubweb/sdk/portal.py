@@ -116,8 +116,8 @@ class DataPortalFile:
         # Inherit all of the other attributes
         self.relative_path = file.relative_path
         self.size = file.size
-        self.access_context = file.access_context
-        self.client = client
+        self._access_context = file.access_context
+        self._client = client
 
         # Attach the file object
         self.file = file
@@ -128,7 +128,7 @@ class DataPortalFile:
     def get(self) -> str:
         """Internal method to call client.file.get_file"""
 
-        return self.client.file.get_file(self.file)
+        return self._client.file.get_file(self.file)
 
     def read_csv(self, compression='infer', encoding='utf-8', **kwargs):
         """
@@ -209,7 +209,7 @@ class DataPortalFile:
         if download_location is None:
             raise DataPortalInputError("Must provide download location")
 
-        self.client.file.download_files(
+        self._client.file.download_files(
             self.file.access_context,
             download_location,
             [self.relative_path]
@@ -243,7 +243,7 @@ class DataPortalProcess:
         self.sample_sheet_path = process.sample_sheet_path
         self.file_requirements_message = process.file_requirements_message
         self.file_mapping_rules = process.file_mapping_rules
-        self.client = client
+        self._client = client
 
     def __str__(self):
         return '\n'.join([
@@ -255,7 +255,7 @@ class DataPortalProcess:
         """
         Gets a specification used to describe the parameters used in the process
         """
-        return self.client.process.get_parameter_spec(self.id)
+        return self._client.process.get_parameter_spec(self.id)
 
 
 class DataPortalProcesses(DataPortalAssets):
@@ -281,7 +281,7 @@ class DataPortalDataset:
         self.info = dataset.info
         self.params = dataset.params
         self.created_at = dataset.created_at
-        self.client = client
+        self._client = client
 
     def __str__(self):
         return '\n'.join([
@@ -296,9 +296,9 @@ class DataPortalDataset:
             [
                 DataPortalFile(
                     f,
-                    client=self.client
+                    client=self._client
                 )
-                for f in self.client.dataset.get_dataset_files(
+                for f in self._client.dataset.get_dataset_files(
                     project_id=self.project_id,
                     dataset_id=self.id
                 )
@@ -334,7 +334,7 @@ class DataPortalDataset:
         if isinstance(process, str):
 
             # Make a Portal object
-            portal = DataPortal(self.client)
+            portal = DataPortal(self._client)
 
             # Try to parse it as a name
             try:
@@ -353,7 +353,7 @@ class DataPortalDataset:
                     # Raise an error indicating that the process couldn't be parsed
                     raise DataPortalInputError(f"Could not parse process name or id: '{process}'")
 
-        return self.client.process.run_analysis(
+        return self._client.process.run_analysis(
             RunAnalysisCommand(
                 name=name,
                 description=description,
@@ -378,9 +378,9 @@ class DataPortalReference:
 
     def __init__(self, ref: Reference):
         self.name = ref.name
-        self.access_context = ref.access_context
+        self._access_context = ref.access_context
         self.relative_path = ref.relative_path
-        self.absolute_path = f'{self.access_context.domain}/{self.relative_path.strip("/")}'
+        self.absolute_path = f'{self._access_context.domain}/{self.relative_path.strip("/")}'
 
     def __str__(self):
         return self.name
@@ -427,7 +427,7 @@ class DataPortalProject:
         self.id = proj.id
         self.name = proj.name
         self.description = proj.description
-        self.client = client
+        self._client = client
 
     def __str__(self):
         """Control how the Project is rendered as a string."""
@@ -442,8 +442,8 @@ class DataPortalProject:
 
         return DataPortalDatasets(
             [
-                DataPortalDataset(d, self.client)
-                for d in self.client.dataset.find_by_project(self.id)
+                DataPortalDataset(d, self._client)
+                for d in self._client.dataset.find_by_project(self.id)
             ]
         )
 
@@ -467,7 +467,7 @@ class DataPortalProject:
         references = DataPortalReferenceTypes(
             [
                 DataPortalReferenceType(ref)
-                for ref in self.client.common.get_references_types()
+                for ref in self._client.common.get_references_types()
             ]
         )
 
@@ -482,7 +482,7 @@ class DataPortalProject:
             [
                 DataPortalReference(ref)
                 for reference_type in references
-                for ref in self.client.project.get_references(
+                for ref in self._client.project.get_references(
                     self.id,
                     reference_type.directory
                 )
@@ -532,10 +532,10 @@ class DataPortalProject:
         )
 
         # Get the response
-        create_response = self.client.dataset.create(dataset_create_request)
+        create_response = self._client.dataset.create(dataset_create_request)
 
         # Upload the files
-        self.client.dataset.upload_files(
+        self._client.dataset.upload_files(
             project_id=self.id,
             dataset_id=create_response['datasetId'],
             directory=upload_folder,
@@ -572,21 +572,21 @@ class DataPortal:
         if client is not None:
 
             # Attach it
-            self.client = client
+            self._client = client
 
         # If the user did not provide their own client
         else:
 
             # Set up a client
-            self.client = PubWeb()
+            self._client = PubWeb()
 
     def list_projects(self) -> DataPortalProjects:
         """List all of the projects available in the Data Portal."""
 
         return DataPortalProjects(
             [
-                DataPortalProject(proj, self.client)
-                for proj in self.client.project.list()
+                DataPortalProject(proj, self._client)
+                for proj in self._client.project.list()
             ]
         )
 
@@ -609,8 +609,8 @@ class DataPortal:
 
         return DataPortalProcesses(
             [
-                DataPortalProcess(p, self.client)
-                for p in self.client.process.list()
+                DataPortalProcess(p, self._client)
+                for p in self._client.process.list()
                 if (p.executor.name == "INGEST") == ingest
             ]
         )
@@ -631,6 +631,6 @@ class DataPortal:
         return DataPortalReferenceTypes(
             [
                 DataPortalReferenceType(ref)
-                for ref in self.client.common.get_references_types()
+                for ref in self._client.common.get_references_types()
             ]
         )
