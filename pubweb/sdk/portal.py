@@ -270,12 +270,12 @@ class DataPortalDataset:
     an analysis pipeline or notebook.
     """
 
-    def __init__(self, dataset: Dataset, project_id: str, client: PubWeb):
+    def __init__(self, dataset: Dataset, client: PubWeb):
         self.id = dataset.id
         self.name = dataset.name
         self.description = dataset.description
         self.process_id = dataset.process_id
-        self.project_id = project_id
+        self.project_id = dataset.project_id
         self.status = dataset.status
         self.source_dataset_ids = dataset.source_dataset_ids
         self.info = dataset.info
@@ -442,7 +442,7 @@ class DataPortalProject:
 
         return DataPortalDatasets(
             [
-                DataPortalDataset(d, self.id, self.client)
+                DataPortalDataset(d, self.client)
                 for d in self.client.dataset.find_by_project(self.id)
             ]
         )
