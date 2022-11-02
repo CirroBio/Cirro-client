@@ -11,17 +11,8 @@ from pubweb.models.process import RunAnalysisCommand, Process
 from pubweb.models.dataset import Dataset, CreateIngestDatasetInput
 from pubweb.models.file import File
 from pubweb.models.reference import Reference, ReferenceType
+from pubweb.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
 from time import sleep
-
-
-class DataPortalAssetNotFound(Exception):
-    """Exception raised when a Data Poral Asset cannot be found."""
-    pass
-
-
-class DataPortalInputError(Exception):
-    """Exception raised invalid inputs are provided to the Data Poral."""
-    pass
 
 
 class DataPortalAsset:
