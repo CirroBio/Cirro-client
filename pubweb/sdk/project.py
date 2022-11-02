@@ -1,4 +1,5 @@
 from time import sleep
+from pubweb.file_utils import check_dataset_files
 from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.models.project import Project
 from pubweb.api.models.dataset import CreateIngestDatasetInput
@@ -10,6 +11,7 @@ from pubweb.sdk.reference import DataPortalReference, DataPortalReferences
 from pubweb.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
 from pubweb.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
 from pubweb.file_utils import get_files_in_directory
+
 
 class DataPortalProject:
     """
@@ -113,16 +115,22 @@ class DataPortalProject:
         if upload_folder is None:
             raise DataPortalInputError("Must provide upload_folder -- folder containing files to upload")
 
+        # Parse the process provided by the user
+        process = parse_process_name_or_id(process, self._client)
+
         # If no files were provided
         if files is None:
 
             # Get the list of files in the upload folder
             files = get_files_in_directory(upload_folder)
 
+        # Make sure that the files match the expected pattern
+        check_dataset_files(files, process.file_mapping_rules, upload_folder)
+
         # Create the ingest process request
         dataset_create_request = CreateIngestDatasetInput(
             project_id=self.id,
-            process_id=parse_process_name_or_id(process, self._client).id,
+            process_id=process.id,
             name=name,
             description=description,
             files=files
