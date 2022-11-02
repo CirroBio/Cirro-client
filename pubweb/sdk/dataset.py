@@ -39,8 +39,6 @@ class DataPortalDataset:
     def list_files(self) -> DataPortalFiles:
         """Return the list of files which make up the dataset."""
 
-        print(self.project_id)
-        print(self.id)
         return DataPortalFiles(
             [
                 DataPortalFile(
