@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from pathlib import PurePath
 from typing import Dict, Any, List, Optional
+from pubweb.api.models.exceptions import DataPortalModelException
 
 from pubweb.api.models.file import File
 from pubweb.utils import safe_load_json
@@ -15,6 +16,8 @@ class ReferenceType:
 
     @classmethod
     def from_record(cls, record):
+        if record is None:
+            raise DataPortalModelException("Cannot construct Dataset from null object.")
         validation = safe_load_json(record['validation'])
         return cls(record['name'], record['description'], record['directory'], validation)
 

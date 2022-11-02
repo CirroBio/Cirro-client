@@ -1,5 +1,6 @@
 from typing import Union
 from pubweb.api.clients.portal import DataPortalClient
+from pubweb.api.models.exceptions import DataPortalModelException
 from pubweb.sdk.exceptions import DataPortalInputError
 from pubweb.sdk.process import DataPortalProcess
 from gql.transport.exceptions import TransportQueryError
@@ -24,7 +25,7 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Dat
         return DataPortalProcess(process, client)
 
     # Catch the error if no dataset is found
-    except TransportQueryError:
+    except (TransportQueryError, DataPortalModelException):
         pass
 
     # If that didn't work, try to parse it as a name
@@ -33,7 +34,7 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Dat
         return DataPortalProcess(process, client)
 
     # Catch the error if no dataset is found
-    except TransportQueryError:
+    except (TransportQueryError, DataPortalModelException):
         pass
 
     # If that didn't work, raise an error indicating that the process couldn't be parsed

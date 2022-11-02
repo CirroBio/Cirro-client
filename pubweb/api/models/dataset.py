@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import TypedDict, List, Any, Dict
 
 from pubweb import config
+from pubweb.api.models.exceptions import DataPortalModelException
 from pubweb.utils import parse_json_date, safe_load_json
 
 
@@ -44,6 +45,8 @@ class Dataset:
 
     @classmethod
     def from_record(cls, record):
+        if record is None:
+            raise DataPortalModelException("Cannot construct Dataset from null object.")
         return cls(
             record.get('id'),
             record.get('name'),

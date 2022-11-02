@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import NamedTuple, Dict, Any, TypedDict, List, Optional
 
+from pubweb.api.models.exceptions import DataPortalModelException
+
 
 class Executor(Enum):
     UNKNOWN = 'UNKNOWN'
@@ -21,6 +23,8 @@ class ProcessCode:
 
     @classmethod
     def from_record(cls, record: Dict):
+        if record is None:
+            raise DataPortalModelException("Cannot construct Dataset from null object.")
         if not record:
             return None
         return cls(**record)
@@ -49,6 +53,8 @@ class Process:
 
     @classmethod
     def from_record(cls, record: 'ProcessRecord'):
+        if record is None:
+            raise DataPortalModelException("Cannot construct Dataset from null object.")
         return cls(
             record.get('id'),
             record.get('name'),
