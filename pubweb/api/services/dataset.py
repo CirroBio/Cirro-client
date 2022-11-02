@@ -34,6 +34,7 @@ class DatasetService(FileEnabledService):
             ) {
               items {
                 id
+                project
                 status
                 name
                 desc

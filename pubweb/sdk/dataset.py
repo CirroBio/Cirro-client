@@ -3,10 +3,10 @@ from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.models.dataset import Dataset
 from pubweb.api.models.process import RunAnalysisCommand
 from pubweb.sdk.asset import DataPortalAssets
-from pubweb.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
+from pubweb.sdk.exceptions import DataPortalInputError
 from pubweb.sdk.file import DataPortalFile, DataPortalFiles
-from pubweb.sdk.portal import DataPortal
 from pubweb.sdk.process import DataPortalProcess
+from pubweb.sdk.helpers import parse_process_name_or_id
 
 
 class DataPortalDataset:
@@ -17,6 +17,7 @@ class DataPortalDataset:
     """
 
     def __init__(self, dataset: Dataset, client: DataPortalClient):
+        assert dataset.project_id is not None, "Must provide dataset with project_id attribute"
         self.id = dataset.id
         self.name = dataset.name
         self.description = dataset.description
@@ -38,6 +39,8 @@ class DataPortalDataset:
     def list_files(self) -> DataPortalFiles:
         """Return the list of files which make up the dataset."""
 
+        print(self.project_id)
+        print(self.id)
         return DataPortalFiles(
             [
                 DataPortalFile(
@@ -77,27 +80,7 @@ class DataPortalDataset:
             raise DataPortalInputError("Must specify 'process' for run_analysis")
 
         # If the process is a string, try to parse it as a process name or ID
-        if isinstance(process, str):
-
-            # Make a Portal object
-            portal = DataPortal(self._client)
-
-            # Try to parse it as a name
-            try:
-                process = portal.get_process_by_name(process)
-            except DataPortalAssetNotFound:
-                pass
-
-            # If that didn't work
-            if isinstance(process, str):
-
-                # Try to parse it as an ID
-                try:
-                    process = portal.get_process_by_id(process)
-                except DataPortalAssetNotFound:
-
-                    # Raise an error indicating that the process couldn't be parsed
-                    raise DataPortalInputError(f"Could not parse process name or id: '{process}'")
+        process = parse_process_name_or_id(process, self._client)
 
         return self._client.process.run_analysis(
             RunAnalysisCommand(

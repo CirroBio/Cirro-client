@@ -19,7 +19,6 @@ class DataPortalFile:
         self.name = file.relative_path
         self.id = file.relative_path
         self.absolute_path = file.absolute_path
-        self.abs_path = file.absolute_path
 
         # Inherit all of the other attributes
         self.relative_path = file.relative_path
