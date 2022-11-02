@@ -7,7 +7,7 @@ def read(fp):
     return Path(fp).read_text()
 
 
-class TestNotebookAutomation(unittest.TestCase):
+class IntegrationTestNotebookAutomation(unittest.TestCase):
     def test_form_setup(self):
 
         # Run the notebook as it would be run in interactive mode
