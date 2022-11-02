@@ -1,6 +1,7 @@
 from pubweb.api.models.reference import ReferenceType
 from pubweb.sdk.asset import DataPortalAssets
 
+
 class DataPortalReferenceType:
     """
     Reference data is organized by project, categorized by type.
@@ -22,5 +23,3 @@ class DataPortalReferenceType:
 class DataPortalReferenceTypes(DataPortalAssets):
     asset_name = "reference type"
     asset_class = DataPortalReferenceType
-
-
