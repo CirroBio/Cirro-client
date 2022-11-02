@@ -1,6 +1,6 @@
 from abc import ABC
 
-from pubweb.clients import ApiClient
+from pubweb.api.clients import ApiClient
 
 
 class BaseService(ABC):

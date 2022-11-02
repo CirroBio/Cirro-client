@@ -6,8 +6,8 @@ import boto3
 from pycognito import AWSSRP
 from requests.auth import AuthBase
 
-from pubweb.auth.base import AuthInfo
-from pubweb.config import config
+from pubweb.api.auth.base import AuthInfo
+from pubweb.api.config import config
 
 logger = logging.getLogger()
 

@@ -3,7 +3,7 @@ from pathlib import PurePath
 from typing import Literal, TypedDict, Optional
 
 from pubweb import config
-from pubweb.models.api import ApiQuery
+from pubweb.api.models.api import ApiQuery
 
 AccessType = Literal['PROJECT', 'CHART', 'DATASET', 'RESOURCES']
 FileOperation = Literal['UPLOAD', 'DOWNLOAD']

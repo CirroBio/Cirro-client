@@ -1,11 +1,11 @@
 from typing import List, Optional
 
-from pubweb.clients.utils import filter_deleted
-from pubweb.models.file import FileAccessContext
-from pubweb.models.form_specification import ParameterSpecification
-from pubweb.models.process import Executor, RunAnalysisCommand, Process
-from pubweb.models.s3_path import S3Path
-from pubweb.services.file import FileEnabledService
+from pubweb.api.clients.utils import filter_deleted
+from pubweb.api.models.file import FileAccessContext
+from pubweb.api.models.form_specification import ParameterSpecification
+from pubweb.api.models.process import Executor, RunAnalysisCommand, Process
+from pubweb.api.models.s3_path import S3Path
+from pubweb.api.services.file import FileEnabledService
 
 
 class ProcessService(FileEnabledService):
@@ -24,9 +24,28 @@ class ProcessService(FileEnabledService):
             listProcesses(filter: $filter, limit: $limit, nextToken: $nextToken) {
               items {
                 id
+                childProcessIds
                 name
                 desc
                 executor
+                documentationUrl
+                code {
+                  repository
+                  uri
+                  script
+                  version
+                }
+                paramMapJson
+                formJson
+                fileRequirementsMessage
+                fileMappingRules {
+                  glob
+                  min
+                  max
+                  description
+                  isSample
+                  sampleMatchingPattern
+                }
                 _deleted
               }
             }
@@ -69,6 +88,7 @@ class ProcessService(FileEnabledService):
                 isSample
                 sampleMatchingPattern
               }
+              _deleted
             }
           }
         '''

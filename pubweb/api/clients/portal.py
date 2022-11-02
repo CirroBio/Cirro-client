@@ -1,12 +1,12 @@
 from typing import Optional
 
-from pubweb.auth import AuthInfo, UsernameAndPasswordAuth
-from pubweb.clients import ApiClient
-from pubweb.config import load_config
-from pubweb.services import DatasetService, ProcessService, ProjectService, FileService, CommonService
+from pubweb.api.auth import AuthInfo, UsernameAndPasswordAuth
+from pubweb.api.clients import ApiClient
+from pubweb.api.config import load_config
+from pubweb.api.services import DatasetService, ProcessService, ProjectService, FileService, CommonService
 
 
-class PubWeb:
+class DataPortalClient:
     def __init__(self, auth_info: Optional[AuthInfo] = None):
         # Default to use username auth from config
         if not auth_info:

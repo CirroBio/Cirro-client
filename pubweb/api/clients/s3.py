@@ -8,7 +8,7 @@ from botocore.credentials import RefreshableCredentials
 from botocore.session import get_session
 from tqdm import tqdm
 
-from pubweb.models.auth import Creds
+from pubweb.api.models.auth import Creds
 from pubweb.utils import parse_json_date
 
 

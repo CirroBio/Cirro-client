@@ -1,11 +1,11 @@
 from typing import List, Optional
 
-from pubweb.clients.utils import filter_deleted
+from pubweb.api.clients.utils import filter_deleted
 from pubweb.file_utils import filter_files_by_pattern
-from pubweb.models.file import FileAccessContext
-from pubweb.models.project import Project
-from pubweb.models.reference import Reference, References
-from pubweb.services.file import FileEnabledService
+from pubweb.api.models.file import FileAccessContext
+from pubweb.api.models.project import Project
+from pubweb.api.models.reference import Reference, References
+from pubweb.api.services.file import FileEnabledService
 
 
 class ProjectService(FileEnabledService):

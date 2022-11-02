@@ -4,9 +4,9 @@ from fnmatch import fnmatch
 from pubweb.cli.interactive.common_args import ask_project
 from pubweb.cli.interactive.utils import prompt_wrapper, InputError
 from pubweb.cli.models import DownloadArguments
-from pubweb.models.dataset import Dataset
-from pubweb.models.file import File
-from pubweb.models.project import Project
+from pubweb.api.models.dataset import Dataset
+from pubweb.api.models.file import File
+from pubweb.api.models.project import Project
 from pubweb.utils import format_date
 
 

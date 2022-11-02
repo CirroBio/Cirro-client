@@ -2,11 +2,11 @@ import json
 from functools import partial
 from typing import List
 
-from pubweb.clients import ApiClient, S3Client
+from pubweb.api.clients import ApiClient, S3Client
 from pubweb.file_utils import upload_directory, download_directory
-from pubweb.models.auth import Creds
-from pubweb.models.file import FileAccessContext, File
-from pubweb.services.base import BaseService
+from pubweb.api.models.auth import Creds
+from pubweb.api.models.file import FileAccessContext, File
+from pubweb.api.services.base import BaseService
 
 
 class FileService(BaseService):

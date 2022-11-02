@@ -1,7 +1,7 @@
 from typing import List
 
 from pubweb.cli.interactive.utils import prompt_wrapper
-from pubweb.models.project import Project
+from pubweb.api.models.project import Project
 
 
 def ask_project(projects: List[Project], input_value: str) -> str:

@@ -4,8 +4,8 @@ from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
 from pubweb import config
-from pubweb.auth.base import AuthInfo
-from pubweb.auth.iam import IAMAuth
+from pubweb.api.auth.base import AuthInfo
+from pubweb.api.auth.iam import IAMAuth
 
 HEADERS = {
     'Accept': 'application/json',

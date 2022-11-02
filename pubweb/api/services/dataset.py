@@ -3,10 +3,10 @@ import logging
 import uuid
 from typing import List, Union
 
-from pubweb.clients.utils import filter_deleted
-from pubweb.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse, Dataset
-from pubweb.models.file import FileAccessContext, File
-from pubweb.services.file import FileEnabledService
+from pubweb.api.clients.utils import filter_deleted
+from pubweb.api.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse, Dataset
+from pubweb.api.models.file import FileAccessContext, File
+from pubweb.api.services.file import FileEnabledService
 
 logger = logging.getLogger()
 

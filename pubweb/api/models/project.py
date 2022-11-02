@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from pubweb.config import config
+from pubweb.api.config import config
 
 
 @dataclass(frozen=True)

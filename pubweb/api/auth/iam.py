@@ -3,8 +3,8 @@ from requests.auth import AuthBase
 from requests_aws4auth import AWS4Auth
 
 from pubweb import config
-from pubweb.auth.base import AuthInfo
-from pubweb.models.auth import Creds
+from pubweb.api.auth.base import AuthInfo
+from pubweb.api.models.auth import Creds
 
 
 class IAMAuth(AuthInfo):

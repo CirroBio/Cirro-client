@@ -1,6 +1,6 @@
 from typing import NamedTuple, List, Optional, Dict, TypedDict
 
-from pubweb.models.process import ProcessRecord
+from pubweb.api.models.process import ProcessRecord
 
 
 class ProcessConfig(TypedDict):

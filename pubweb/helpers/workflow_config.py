@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import List, Dict
 
 from pubweb.helpers.constants import PROCESSES_PATH_S3
-from pubweb.models.process import ProcessRecord, Executor
-from pubweb.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
+from pubweb.api.models.process import ProcessRecord, Executor
+from pubweb.api.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
 
 
 class WorkflowConfigBuilder:

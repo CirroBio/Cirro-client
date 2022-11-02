@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import PurePath
 from typing import Dict, Any, List, Optional
 
-from pubweb.models.file import File
+from pubweb.api.models.file import File
 from pubweb.utils import safe_load_json
 
 

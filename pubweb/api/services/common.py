@@ -1,7 +1,7 @@
 from typing import List
 
-from pubweb.models.reference import ReferenceType
-from pubweb.services.base import BaseService
+from pubweb.api.models.reference import ReferenceType
+from pubweb.api.services.base import BaseService
 
 
 class CommonService(BaseService):

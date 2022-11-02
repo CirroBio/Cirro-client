@@ -1,6 +1,6 @@
 from requests.auth import AuthBase
 
-from pubweb.auth import AuthInfo
+from pubweb.api.auth import AuthInfo
 
 
 # TODO: Possible method of authenticating with API Keys
