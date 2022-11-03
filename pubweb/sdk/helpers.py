@@ -32,7 +32,7 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Dat
 
     # If that didn't work, try to parse it as a name
     try:
-        process = client.process.find_by_name(process)
+        process = client.process.find_by_name(process) or process
         if isinstance(process, Process):
             return DataPortalProcess(process, client)
 
