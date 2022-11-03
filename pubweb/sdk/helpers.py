@@ -1,5 +1,6 @@
 from typing import Union
 from pubweb.api.clients.portal import DataPortalClient
+from pubweb.api.models.process import Process
 from pubweb.api.models.exceptions import DataPortalModelException
 from pubweb.sdk.exceptions import DataPortalInputError
 from pubweb.sdk.process import DataPortalProcess
@@ -22,7 +23,8 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Dat
     # Try to get the process by ID
     try:
         process = client.process.get_process(process)
-        return DataPortalProcess(process, client)
+        if isinstance(process, Process):
+            return DataPortalProcess(process, client)
 
     # Catch the error if no dataset is found
     except (TransportQueryError, DataPortalModelException):
@@ -31,7 +33,8 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Dat
     # If that didn't work, try to parse it as a name
     try:
         process = client.process.find_by_name(process)
-        return DataPortalProcess(process, client)
+        if isinstance(process, Process):
+            return DataPortalProcess(process, client)
 
     # Catch the error if no dataset is found
     except (TransportQueryError, DataPortalModelException):
