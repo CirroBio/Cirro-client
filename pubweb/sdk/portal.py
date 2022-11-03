@@ -6,12 +6,12 @@ from pubweb.sdk.reference_type import DataPortalReferenceType, DataPortalReferen
 
 class DataPortal:
     """
-    Helper functions for exploring the projects, datasets, samples, and files
-    available in the PubWeb Data Portal.
+    Helper functions for exploring the Projects, Datasets, Samples, and Files
+    available in the Data Portal.
     """
 
     def __init__(self, client: DataPortalClient = None):
-        """Set up the DataPortal object, establishing a connection with the PubWeb Data Portal."""
+        """Set up the DataPortal object, establishing an authenticated connection."""
 
         # If the user provided their own client to get information from PubWeb
         if client is not None:

@@ -9,7 +9,7 @@ from pubweb.sdk.asset import DataPortalAssets
 
 class DataPortalFile:
     """
-    Datasets are made up of a collection of File objects in the Data Portal
+    Datasets are made up of a collection of File objects in the Data Portal.
     """
 
     def __init__(self, file: File, client: DataPortalClient):
@@ -32,7 +32,7 @@ class DataPortalFile:
     def __str__(self):
         return f"{self.relative_path} ({self.size} bytes)"
 
-    def get(self) -> str:
+    def _get(self) -> str:
         """Internal method to call client.file.get_file"""
 
         return self._client.file.get_file(self.file)
@@ -64,9 +64,9 @@ class DataPortalFile:
                 compression = None
 
         if compression is not None:
-            handle = BytesIO(self.get())
+            handle = BytesIO(self._get())
         else:
-            handle = StringIO(self.get().decode(encoding))
+            handle = StringIO(self._get().decode(encoding))
 
         df = pd.read_csv(
             handle,
@@ -89,7 +89,7 @@ class DataPortalFile:
         """Read the file contents as text."""
 
         # Get the raw file contents
-        cont = self.get()
+        cont = self._get()
 
         # If the file is uncompressed
         if compression is None:
@@ -124,6 +124,7 @@ class DataPortalFile:
 
 
 class DataPortalFiles(DataPortalAssets):
+    """Collection of DataPortalFile objects."""
     asset_name = "file"
     asset_class = DataPortalFile
 

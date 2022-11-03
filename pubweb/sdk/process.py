@@ -30,11 +30,12 @@ class DataPortalProcess:
 
     def get_parameter_spec(self) -> ParameterSpecification:
         """
-        Gets a specification used to describe the parameters used in the process
+        Gets a specification used to describe the parameters used in the process.
         """
         return self._client.process.get_parameter_spec(self.id)
 
 
 class DataPortalProcesses(DataPortalAssets):
+    """Collection of DataPortalProcess objects."""
     asset_name = "process"
     asset_class = DataPortalProcess

@@ -3,13 +3,15 @@ from pubweb.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
 
 
 class DataPortalAsset:
-    """Dummy class"""
+    """Base class used for all Data Portal Assets"""
     def __init__(self):
         pass
 
 
 class DataPortalAssets(list):
-    """Generic class of assets (projects, datasets, etc.) in the Data Portal."""
+    """
+    Generic class with helper functions for any group of assets (projects, datasets, etc.) in the Data Portal.
+    """
 
     # Overridden by child classes
     asset_name = 'asset'
@@ -53,6 +55,7 @@ class DataPortalAssets(list):
         return matching_queries[0]
 
     def get_by_id(self, id: str):
+        """Return the item which matches by id attribute."""
 
         if id is None:
             raise DataPortalInputError(f"Must provide id to identify {self.asset_name}")

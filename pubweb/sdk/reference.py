@@ -18,5 +18,6 @@ class DataPortalReference:
 
 
 class DataPortalReferences(DataPortalAssets):
+    """Collection of DataPortalReference objects."""
     asset_name = "reference"
     asset_class = DataPortalReference

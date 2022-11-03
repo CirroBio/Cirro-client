@@ -94,5 +94,6 @@ class DataPortalDataset:
 
 
 class DataPortalDatasets(DataPortalAssets):
+    """Collection of multiple DataPortalDataset objects."""
     asset_name = "dataset"
     asset_class = DataPortalDataset

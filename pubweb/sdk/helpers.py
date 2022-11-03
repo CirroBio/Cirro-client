@@ -8,7 +8,7 @@ from gql.transport.exceptions import TransportQueryError
 
 def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: DataPortalClient):
     """
-    If the process is a string, try to parse it as a process name or ID
+    If the process is a string, try to parse it as a process name or ID.
     """
 
     # If the process object is already a DataPortalProcess object
