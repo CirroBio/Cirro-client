@@ -1,4 +1,5 @@
 from time import sleep
+from typing import Union
 
 from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.models.dataset import CreateIngestDatasetInput
@@ -102,12 +103,14 @@ class DataPortalProject(DataPortalAsset):
         self,
         name: str = None,
         description='',
-        process: DataPortalProcess = None,
+        process: Union[DataPortalProcess, str] = None,
         upload_folder: str = None,
         files: list = None
     ):
         """
         Upload a set of files to the Data Portal, creating a new dataset.
+
+        If the files parameter is not provided, it will upload all files in the upload folder
         """
 
         if name is None:
