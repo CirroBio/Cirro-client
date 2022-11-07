@@ -2,8 +2,8 @@ import boto3
 from requests.auth import AuthBase
 from requests_aws4auth import AWS4Auth
 
-from pubweb.api import config
 from pubweb.api.auth.base import AuthInfo
+from pubweb.api.config import config
 from pubweb.api.models.auth import Creds
 
 

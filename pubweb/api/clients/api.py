@@ -3,9 +3,9 @@ from typing import Dict
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
-from pubweb.api import config
 from pubweb.api.auth.base import AuthInfo
 from pubweb.api.auth.iam import IAMAuth
+from pubweb.api.config import config
 
 HEADERS = {
     'Accept': 'application/json',
