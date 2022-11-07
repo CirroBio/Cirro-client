@@ -1,14 +1,6 @@
-from collections import OrderedDict
-from enum import Enum
-import os
 import json
-
-
-class PARAM_TYPES(Enum):
-    string = 'string'
-    integer = 'integer'
-    boolean = 'boolean'
-    number = 'number'
+import os
+from collections import OrderedDict
 
 
 class FormBuilder:
