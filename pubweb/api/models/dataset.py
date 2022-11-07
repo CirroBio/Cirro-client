@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TypedDict, List, Any, Dict
 
-from pubweb import config
+from pubweb.api import config
 from pubweb.api.models.exceptions import DataPortalModelException
 from pubweb.utils import parse_json_date, safe_load_json
 
