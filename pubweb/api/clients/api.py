@@ -7,7 +7,6 @@ from gql.transport.requests import RequestsHTTPTransport
 
 from pubweb.api.auth.base import AuthInfo
 from pubweb.api.auth.iam import IAMAuth
-from pubweb.api.config import config
 
 try:
     sdk_version = pkg_resources.get_distribution("pubweb").version

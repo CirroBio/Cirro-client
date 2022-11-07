@@ -36,10 +36,10 @@ class DataPortal:
 
         return self.list_projects().get_by_name(name)
 
-    def get_project_by_id(self, id: str = None) -> DataPortalProject:
+    def get_project_by_id(self, _id: str = None) -> DataPortalProject:
         """Return the project with the specified id."""
 
-        return self.list_projects().get_by_id(id)
+        return self.list_projects().get_by_id(_id)
 
     def list_processes(self, ingest=False) -> DataPortalProcesses:
         """

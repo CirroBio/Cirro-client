@@ -1,6 +1,9 @@
 from pubweb.api.clients.portal import DataPortalClient
-from pubweb.api.auth import UsernameAndPasswordAuth
-from pubweb.cli.interactive.auth_args import gather_login
+from pubweb.api.config import UserConfig, save_user_config
+from pubweb.api.models.dataset import CreateIngestDatasetInput
+from pubweb.api.models.file import FileAccessContext
+from pubweb.api.models.process import Executor
+from pubweb.cli.interactive.auth_args import gather_auth_config
 from pubweb.cli.interactive.download_args import gather_download_arguments
 from pubweb.cli.interactive.download_args import gather_download_arguments_dataset
 from pubweb.cli.interactive.download_args import gather_download_arguments_dataset_files
@@ -12,13 +15,9 @@ from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_addi
     get_repository, get_description, get_output_resources_path
 from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
-from pubweb.api.config import AuthConfig, UserConfig, save_user_config
-from pubweb.file_utils import get_files_in_directory, check_dataset_files
+from pubweb.file_utils import check_dataset_files
 from pubweb.file_utils import get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
-from pubweb.api.models.dataset import CreateIngestDatasetInput
-from pubweb.api.models.file import FileAccessContext
-from pubweb.api.models.process import Executor
 from pubweb.utils import print_credentials
 
 
