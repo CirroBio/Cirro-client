@@ -1,11 +1,12 @@
 from pubweb.api.models.reference import Reference
-from pubweb.sdk.asset import DataPortalAssets
+from pubweb.sdk.asset import DataPortalAssets, DataPortalAsset
 
 
-class DataPortalReference:
+class DataPortalReference(DataPortalAsset):
     """
     Reference data is organized by project, categorized by type.
     """
+    name = None
 
     def __init__(self, ref: Reference):
         self.name = ref.name
@@ -17,7 +18,9 @@ class DataPortalReference:
         return self.name
 
 
-class DataPortalReferences(DataPortalAssets):
+class DataPortalReferences(DataPortalAssets[DataPortalReference]):
     """Collection of DataPortalReference objects."""
     asset_name = "reference"
-    asset_class = DataPortalReference
+
+    def get_by_id(self, _id: str) -> DataPortalReference:
+        raise NotImplementedError("Filtering by ID is not supported, use get_by_name")

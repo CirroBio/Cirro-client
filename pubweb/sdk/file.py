@@ -1,16 +1,19 @@
 import gzip
 from io import BytesIO, StringIO
+
 import pandas as pd
+
 from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.models.file import File
+from pubweb.sdk.asset import DataPortalAssets, DataPortalAsset
 from pubweb.sdk.exceptions import DataPortalInputError
-from pubweb.sdk.asset import DataPortalAssets
 
 
-class DataPortalFile:
+class DataPortalFile(DataPortalAsset):
     """
     Datasets are made up of a collection of File objects in the Data Portal.
     """
+    name = None
 
     def __init__(self, file: File, client: DataPortalClient):
 
@@ -32,7 +35,7 @@ class DataPortalFile:
     def __str__(self):
         return f"{self.relative_path} ({self.size} bytes)"
 
-    def _get(self) -> str:
+    def _get(self) -> bytes:
         """Internal method to call client.file.get_file"""
 
         return self._client.file.get_file(self.file)
@@ -98,7 +101,7 @@ class DataPortalFile:
         else:
 
             # Only gzip-compression is supported currently
-            if not compression == "gzip":
+            if compression != "gzip":
                 raise DataPortalInputError("compression may be 'gzip' or None")
 
             with gzip.open(
@@ -123,10 +126,9 @@ class DataPortalFile:
         )
 
 
-class DataPortalFiles(DataPortalAssets):
+class DataPortalFiles(DataPortalAssets[DataPortalFile]):
     """Collection of DataPortalFile objects."""
     asset_name = "file"
-    asset_class = DataPortalFile
 
     def download(self, download_location: str = None) -> None:
         """Download the collection of files to a local directory."""

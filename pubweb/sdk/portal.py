@@ -1,6 +1,7 @@
 from pubweb.api.clients.portal import DataPortalClient
-from pubweb.sdk.project import DataPortalProject, DataPortalProjects
+from pubweb.api.models.process import Executor
 from pubweb.sdk.process import DataPortalProcess, DataPortalProcesses
+from pubweb.sdk.project import DataPortalProject, DataPortalProjects
 from pubweb.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
 
 
@@ -13,16 +14,11 @@ class DataPortal:
     def __init__(self, client: DataPortalClient = None):
         """Set up the DataPortal object, establishing an authenticated connection."""
 
-        # If the user provided their own client to get information from PubWeb
         if client is not None:
-
-            # Attach it
             self._client = client
 
-        # If the user did not provide their own client
+        # Set up default client if not provided
         else:
-
-            # Set up a client
             self._client = DataPortalClient()
 
     def list_projects(self) -> DataPortalProjects:
@@ -65,12 +61,12 @@ class DataPortal:
 
         return self.list_processes(ingest=ingest).get_by_name(name)
 
-    def get_process_by_id(self, id: str, ingest=False) -> DataPortalProcess:
+    def get_process_by_id(self, _id: str, ingest=False) -> DataPortalProcess:
         """Return the process with the specified id."""
 
-        return self.list_processes(ingest=ingest).get_by_id(id)
+        return self.list_processes(ingest=ingest).get_by_id(_id)
 
-    def list_reference_types(self):
+    def list_reference_types(self) -> DataPortalReferenceTypes:
         """Return the list of all available reference types."""
 
         return DataPortalReferenceTypes(

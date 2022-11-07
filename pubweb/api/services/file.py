@@ -3,10 +3,10 @@ from functools import partial
 from typing import List
 
 from pubweb.api.clients import ApiClient, S3Client
-from pubweb.file_utils import upload_directory, download_directory
 from pubweb.api.models.auth import Creds
 from pubweb.api.models.file import FileAccessContext, File
 from pubweb.api.services.base import BaseService
+from pubweb.file_utils import upload_directory, download_directory
 
 
 class FileService(BaseService):
@@ -19,13 +19,13 @@ class FileService(BaseService):
         credentials_response = self._api_client.query(*access_context.get_token_query)
         return credentials_response['getFileAccessToken']
 
-    def get_file(self, file: File) -> str:
+    def get_file(self, file: File) -> bytes:
         """
         Gets the contents of a file
         """
         return self.get_file_from_path(file.access_context, file.relative_path)
 
-    def get_file_from_path(self, access_context: FileAccessContext, file_path: str) -> str:
+    def get_file_from_path(self, access_context: FileAccessContext, file_path: str) -> bytes:
         """
         Gets the contents of a file by providing the path, used internally
         """

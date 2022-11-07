@@ -1,11 +1,12 @@
 from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.models.form_specification import ParameterSpecification
 from pubweb.api.models.process import Process
-from pubweb.sdk.asset import DataPortalAssets
+from pubweb.sdk.asset import DataPortalAssets, DataPortalAsset
 
 
-class DataPortalProcess:
+class DataPortalProcess(DataPortalAsset):
     """Helper functions for interacting with analysis processes."""
+    name = None
 
     def __init__(self, process: Process, client: DataPortalClient):
 
@@ -35,7 +36,6 @@ class DataPortalProcess:
         return self._client.process.get_parameter_spec(self.id)
 
 
-class DataPortalProcesses(DataPortalAssets):
+class DataPortalProcesses(DataPortalAssets[DataPortalProcess]):
     """Collection of DataPortalProcess objects."""
     asset_name = "process"
-    asset_class = DataPortalProcess

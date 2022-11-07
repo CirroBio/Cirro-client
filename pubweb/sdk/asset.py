@@ -1,26 +1,32 @@
 import fnmatch
+from abc import abstractmethod
+from typing import List, TypeVar
+
 from pubweb.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
 
 
 class DataPortalAsset:
     """Base class used for all Data Portal Assets"""
-    def __init__(self):
+
+    @property
+    @abstractmethod
+    def name(self):
         pass
 
 
-class DataPortalAssets(list):
+T = TypeVar('T', bound=DataPortalAsset)
+
+
+class DataPortalAssets(List[T]):
     """
     Generic class with helper functions for any group of assets (projects, datasets, etc.) in the Data Portal.
     """
 
     # Overridden by child classes
     asset_name = 'asset'
-    asset_class = DataPortalAsset
 
-    def __init__(self, input_list):
-
-        # Add all of the items from the input list
-        self.extend(input_list)
+    def __init__(self, input_list: List[T]):
+        super().__init__(input_list)
 
     def __str__(self):
         return "\n\n".join([str(i) for i in self])
@@ -33,7 +39,7 @@ class DataPortalAssets(list):
             for i in self
         ])
 
-    def get_by_name(self, name: str):
+    def get_by_name(self, name: str) -> T:
         """Return the item which matches with name attribute."""
 
         if name is None:
@@ -54,23 +60,23 @@ class DataPortalAssets(list):
 
         return matching_queries[0]
 
-    def get_by_id(self, id: str):
+    def get_by_id(self, _id: str) -> T:
         """Return the item which matches by id attribute."""
 
-        if id is None:
+        if _id is None:
             raise DataPortalInputError(f"Must provide id to identify {self.asset_name}")
 
         # Get the items which have a matching ID
-        matching_queries = [i for i in self if i.id == id]
+        matching_queries = [i for i in self if i.id == _id]
 
         # Error if no items are found
-        msg = '\n'.join([f"No {self.asset_name} found with id '{id}'.", self.description()])
+        msg = '\n'.join([f"No {self.asset_name} found with id '{_id}'.", self.description()])
         if len(matching_queries) == 0:
             raise DataPortalAssetNotFound(msg)
 
         return matching_queries[0]
 
-    def filter_by_pattern(self, pattern: str) -> 'DataPortalAssets':
+    def filter_by_pattern(self, pattern: str) -> 'DataPortalAssets[T]':
         """Filter the items to just those whose name attribute matches the pattern."""
 
         # Get a list of the names to search against

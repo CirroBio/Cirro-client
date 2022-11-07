@@ -1,24 +1,26 @@
 from time import sleep
-from pubweb.file_utils import check_dataset_files
+
 from pubweb.api.clients.portal import DataPortalClient
-from pubweb.api.models.project import Project
 from pubweb.api.models.dataset import CreateIngestDatasetInput
+from pubweb.api.models.project import Project
+from pubweb.file_utils import check_dataset_files
+from pubweb.file_utils import get_files_in_directory
+from pubweb.sdk.asset import DataPortalAssets, DataPortalAsset
 from pubweb.sdk.dataset import DataPortalDataset, DataPortalDatasets
-from pubweb.sdk.asset import DataPortalAssets
+from pubweb.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
 from pubweb.sdk.helpers import parse_process_name_or_id
 from pubweb.sdk.process import DataPortalProcess
 from pubweb.sdk.reference import DataPortalReference, DataPortalReferences
 from pubweb.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
-from pubweb.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
-from pubweb.file_utils import get_files_in_directory
 
 
-class DataPortalProject:
+class DataPortalProject(DataPortalAsset):
     """
     Projects in the Data Portal contain collections of Datasets.
     Users are granted permissions at the project-level, allowing them
     to view and/or modify all of the datasets in that collection.
     """
+    name = None
 
     def __init__(self, proj: Project, client: DataPortalClient):
         """Initialize the Project from the base PubWeb model."""
@@ -51,10 +53,10 @@ class DataPortalProject:
 
         return self.list_datasets().get_by_name(name)
 
-    def get_dataset_by_id(self, id: str = None) -> DataPortalDataset:
+    def get_dataset_by_id(self, _id: str = None) -> DataPortalDataset:
         """Return the dataset with the specified id."""
 
-        return self.list_datasets().get_by_id(id)
+        return self.list_datasets().get_by_id(_id)
 
     def list_references(self, reference_type: str = None) -> DataPortalReferences:
         """
@@ -88,13 +90,13 @@ class DataPortalProject:
             ]
         )
 
-    def get_reference_by_name(self, name: str = None, reftype: str = None) -> DataPortalReference:
+    def get_reference_by_name(self, name: str = None, ref_type: str = None) -> DataPortalReference:
         """Return the reference of a particular type with the specified name."""
 
         if name is None:
             raise DataPortalInputError("Must specify the reference name")
 
-        return self.list_references(reftype).get_by_name(name)
+        return self.list_references(ref_type).get_by_name(name)
 
     def upload_dataset(
         self,
@@ -152,13 +154,12 @@ class DataPortalProject:
         for attempt in range(max_attempts):
             try:
                 return self.get_dataset_by_id(create_response['datasetId'])
-            except (Exception, DataPortalAssetNotFound) as e:
+            except DataPortalAssetNotFound as e:
                 if attempt == max_attempts - 1:
                     raise e
                 else:
                     sleep(1)
 
 
-class DataPortalProjects(DataPortalAssets):
+class DataPortalProjects(DataPortalAssets[DataPortalProject]):
     asset_name = "project"
-    asset_class = DataPortalProject

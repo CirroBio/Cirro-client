@@ -1,20 +1,22 @@
 from typing import Union
+
 from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.models.dataset import Dataset
 from pubweb.api.models.process import RunAnalysisCommand
-from pubweb.sdk.asset import DataPortalAssets
+from pubweb.sdk.asset import DataPortalAssets, DataPortalAsset
 from pubweb.sdk.exceptions import DataPortalInputError
 from pubweb.sdk.file import DataPortalFile, DataPortalFiles
-from pubweb.sdk.process import DataPortalProcess
 from pubweb.sdk.helpers import parse_process_name_or_id
+from pubweb.sdk.process import DataPortalProcess
 
 
-class DataPortalDataset:
+class DataPortalDataset(DataPortalAsset):
     """
     Datasets in the Data Portal are collections of files which have
     either been uploaded directly, or which have been output by
     an analysis pipeline or notebook.
     """
+    name = None
 
     def __init__(self, dataset: Dataset, client: DataPortalClient):
         assert dataset.project_id is not None, "Must provide dataset with project_id attribute"
@@ -93,7 +95,6 @@ class DataPortalDataset:
         )
 
 
-class DataPortalDatasets(DataPortalAssets):
+class DataPortalDatasets(DataPortalAssets[DataPortalDataset]):
     """Collection of multiple DataPortalDataset objects."""
     asset_name = "dataset"
-    asset_class = DataPortalDataset
