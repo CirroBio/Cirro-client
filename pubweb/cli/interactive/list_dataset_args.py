@@ -2,7 +2,7 @@ from typing import List
 
 from pubweb.cli.interactive.common_args import ask_project
 from pubweb.cli.models import ListArguments
-from pubweb.models.project import Project
+from pubweb.api.models.project import Project
 
 
 def gather_list_arguments(input_params: ListArguments, projects: List[Project]):

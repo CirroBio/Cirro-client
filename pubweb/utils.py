@@ -2,7 +2,7 @@ import json
 from datetime import timezone, datetime
 from typing import Optional, Union
 
-from pubweb.models.auth import Creds
+from pubweb.api.models.auth import Creds
 
 
 def parse_json_date(json_date: str) -> Optional[datetime]:

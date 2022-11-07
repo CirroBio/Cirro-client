@@ -7,8 +7,8 @@ from typing import List, Union
 from boto3.exceptions import S3UploadFailedError
 import pandas as pd
 
-from pubweb.clients import S3Client
-from pubweb.models.file import DirectoryStatistics, File
+from pubweb.api.clients import S3Client
+from pubweb.api.models.file import DirectoryStatistics, File
 
 DEFAULT_TRANSFER_SPEED = 160
 

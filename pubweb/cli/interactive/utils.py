@@ -73,7 +73,11 @@ def ask_yes_no(msg):
 
 
 def get_id_from_name(items, name_or_id: str) -> str:
+    return get_item_from_name_or_id(items, name_or_id).id
+
+
+def get_item_from_name_or_id(items, name_or_id: str):
     matched = next((p for p in items if p.id == name_or_id), None)
     if matched:
-        return matched.id
-    return next(p for p in items if p.name == name_or_id).id
+        return matched
+    return next(p for p in items if p.name == name_or_id)
