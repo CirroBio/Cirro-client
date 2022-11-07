@@ -13,6 +13,7 @@ def check_required_args(args):
 
 
 @click.group(help="PubWeb CLI - Tool for interacting with datasets")
+@click.version_option()
 def run():
     pass  # Print out help text, nothing to do
 
@@ -20,7 +21,7 @@ def run():
 @run.command(help='List datasets', no_args_is_help=True)
 @click.option('--project',
               help='Name or ID of the project')
-@click.option('--interactive',
+@click.option('-i', '--interactive',
               help='Gather arguments interactively',
               is_flag=True, default=False)
 def list_datasets(**kwargs):
@@ -35,7 +36,7 @@ def list_datasets(**kwargs):
               help='ID of the dataset')
 @click.option('--data-directory',
               help='Directory to store the files')
-@click.option('--interactive',
+@click.option('-i', '--interactive',
               help='Gather arguments interactively',
               is_flag=True, default=False)
 def download(**kwargs):
@@ -55,7 +56,7 @@ def download(**kwargs):
               help='Name or ID of the ingest process')
 @click.option('--data-directory',
               help='Directory you wish to upload')
-@click.option('--interactive',
+@click.option('-i', '--interactive',
               help='Gather arguments interactively',
               is_flag=True, default=False)
 @click.option('--use-third-party-tool',

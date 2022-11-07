@@ -8,47 +8,23 @@ A Python 3.8+ library for the PubWeb platform.
 
 ## Installation
 
-You can install PubWeb using pip
+You can install PubWeb using pip:
 
 `pip install pubweb`
 
-or by cloning the repo and running
+or by cloning the repository and running:
 
 `python setup.py install`
 
-## Usage
+## Set Up
+Run a one-time configuration of your login credentials in the command line using:
 
-### CLI Usage
+`pubweb-cli configure`
 
-Run `pubweb-cli configure` to configure your login credentials.
-
-Specify the `--interactive` flag to gather the command arguments interactively. 
-
-Example:
-
-```bash
-$ pubweb-cli upload --interactive
-? What project is this dataset associated with?  Test project
-? Enter the full path of the data directory  /shared/biodata/test
-? Please confirm that you wish to upload 20 files (0.630 GB)  Yes
-? What type of files?  Illumina Sequencing Run
-? What is the name of this dataset?  test
-? Enter a description of the dataset (optional)
-```
+ This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
 
 
-#### Listing datasets:
-```bash
-Usage: pubweb-cli list_datasets [OPTIONS]
-
-  List available datasets
-
-Options:
-  --project TEXT         ID of the project
-  --interactive          Gather arguments interactively
-  --help                 Show this message and exit.
-```
-
+## Command Line Usage
 
 #### Downloading a dataset:
 ```bash
@@ -81,13 +57,50 @@ Options:
   --help                  Show this message and exit.
 ```
 
-### SDK Usage
+#### Listing datasets:
+```bash
+Usage: pubweb-cli list-datasets [OPTIONS]
 
-| Sample                                                               | Description                   |
-|----------------------------------------------------------------------|-------------------------------|
-| [01_Intro](samples/01_Intro.ipynb)                                   | Authenticating and installing |
-| [02_Uploading_a_dataset](samples/02_Uploading_a_dataset.ipynb)       |                               |
-| [03_Downloading_a_dataset](samples/03_Downloading_a_dataset.ipynb)   |                               |
-| [04_Interacting_with_files](samples/04_Interacting_with_files.ipynb) |                               |
-| [05_Analyzing_a_dataset](samples/05_Analyzing_a_dataset.ipynb)       |                               |
-| [06_Using_references](samples/06_Using_references.ipynb)             | Managing reference data       |
+  List available datasets
+
+Options:
+  --project TEXT         ID of the project
+  --interactive          Gather arguments interactively
+  --help                 Show this message and exit.
+```
+
+### Interactive Commands
+
+When running a command, you can specify the `--interactive` flag to gather the command arguments interactively.
+
+Example:
+
+```bash
+$ pubweb-cli upload --interactive
+? What project is this dataset associated with?  Test project
+? Enter the full path of the data directory  /shared/biodata/test
+? Please confirm that you wish to upload 20 files (0.630 GB)  Yes
+? What type of files?  Illumina Sequencing Run
+? What is the name of this dataset?  test
+? Enter a description of the dataset (optional)
+? How would you like to upload or download your data? PubWeb CLI
+```
+
+## Python Usage
+
+See the following set of Jupyter notebooks that contain examples on the following topics:
+
+| Jupyter Notebook                                                    | Topic                            
+|---------------------------------------------------------------------|----------------------------------|
+| [Introduction](samples/Getting_started.ipynb)                       | Installing and authenticating    |
+| [Uploading a dataset](samples/Uploading_a_dataset.ipynb)            | Uploading data                   |
+| [Downloading a dataset](samples/Downloading_a_dataset.ipynb)        | Downloading data                 |
+| [Interacting with a dataset](samples/Interacting_with_files.ipynb)  | Calling data and reading into tables |
+| [Analyzing a dataset](samples/Analyzing_a_dataset.ipynb)            | Running analysis pipelines       |
+| [Using references](samples/Using_references.ipynb)                  | Managing reference data          |
+
+## R Usage
+
+| Jupyter Notebook                                    | Topic               |
+| --------------------------------------------------- | ------------------- |
+| [Downloading a dataset in R](samples/Using-R.ipynb) | Reading data with R |

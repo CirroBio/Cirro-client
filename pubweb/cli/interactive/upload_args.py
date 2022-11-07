@@ -9,8 +9,8 @@ from pubweb.cli.interactive.common_args import ask_project, ask_use_third_party_
 from pubweb.cli.interactive.utils import prompt_wrapper
 from pubweb.cli.models import UploadArguments
 from pubweb.file_utils import get_directory_stats
-from pubweb.models.process import Process
-from pubweb.models.project import Project
+from pubweb.api.models.process import Process
+from pubweb.api.models.project import Project
 
 
 class DataDirectoryValidator(Validator):

@@ -1,5 +1,5 @@
-from pubweb.pubweb import PubWeb
+from pubweb.sdk import DataPortal
 
 __all__ = [
-    'PubWeb'
+    'DataPortal'
 ]

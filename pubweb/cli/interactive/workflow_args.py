@@ -8,7 +8,7 @@ from github.GitRelease import GitRelease
 from github.Repository import Repository
 
 from pubweb.cli.interactive.utils import ask, ask_yes_no
-from pubweb.models.workflow_models import OptimizedOutput, Column, WorkflowRepository
+from pubweb.api.models.workflow_models import OptimizedOutput, Column, WorkflowRepository
 
 
 def get_output_resources_path():
