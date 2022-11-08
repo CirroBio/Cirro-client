@@ -3,6 +3,7 @@ from functools import partial
 from typing import List
 
 from pubweb.api.clients import ApiClient, S3Client
+from pubweb.api.config import AppConfig
 from pubweb.api.models.auth import Creds
 from pubweb.api.models.file import FileAccessContext, File
 from pubweb.api.services.base import BaseService

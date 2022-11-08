@@ -1,6 +1,6 @@
 from typing import Tuple, Dict
 
-from pubweb.auth import ClientAuth, UsernameAndPasswordAuth, IAMAuth
+from pubweb.api.auth import ClientAuth, UsernameAndPasswordAuth, IAMAuth
 from pubweb.cli.interactive.utils import ask, ask_yes_no
 
 

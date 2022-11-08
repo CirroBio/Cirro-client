@@ -4,9 +4,8 @@ from pubweb.api.models.dataset import CreateIngestDatasetInput
 from pubweb.api.models.file import FileAccessContext
 from pubweb.api.models.process import Executor
 from pubweb.cli.interactive.auth_args import gather_auth_config
-from pubweb.cli.interactive.download_args import gather_download_arguments
+from pubweb.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from pubweb.cli.interactive.download_args import gather_download_arguments_dataset
-from pubweb.cli.interactive.download_args import gather_download_arguments_dataset_files
 from pubweb.cli.interactive.list_dataset_args import gather_list_arguments
 from pubweb.cli.interactive.upload_args import gather_upload_arguments
 from pubweb.cli.interactive.utils import get_id_from_name, get_item_from_name_or_id
@@ -109,14 +108,15 @@ def run_download(input_params: DownloadArguments, interactive=False):
         print("No projects available")
         return
 
+    files_to_download = None
     if interactive:
         input_params = gather_download_arguments(input_params, projects)
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
         datasets = pubweb.dataset.find_by_project(input_params['project'])
         input_params = gather_download_arguments_dataset(input_params, datasets)
-        files = pubweb.dataset.get_dataset_files(input_params['project'], input_params['dataset'])
-        input_params = gather_download_arguments_dataset_files(input_params, files)
+        dataset_files = pubweb.dataset.get_dataset_files(input_params['project'], input_params['dataset'])
+        files_to_download = ask_dataset_files(dataset_files)
 
     dataset_params = {
         'project': get_id_from_name(projects, input_params['project']),
@@ -126,7 +126,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
     pubweb.dataset.download_files(project_id=dataset_params['project'],
                                   dataset_id=dataset_params['dataset'],
                                   download_location=input_params['data_directory'],
-                                  files=input_params.get('files'))
+                                  files=files_to_download)
 
 
 def run_configure_workflow():
