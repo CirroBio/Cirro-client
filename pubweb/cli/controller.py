@@ -14,8 +14,7 @@ from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_addi
     get_repository, get_description, get_output_resources_path
 from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
-from pubweb.file_utils import check_dataset_files
-from pubweb.file_utils import get_files_in_directory
+from pubweb.file_utils import check_dataset_files, get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
 from pubweb.utils import print_credentials
 

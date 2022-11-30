@@ -25,7 +25,7 @@ install_requires = [
     "pygithub>=1.56",
     "jsonschema>=4.6.1",
     "s3fs==0.4.2",
-    "fsspec==2022.10.0",
+    "fsspec>=2022.10.0",
     "pyjwt==2.4.0",
     "msal-extensions==1.0.0"
 ]
