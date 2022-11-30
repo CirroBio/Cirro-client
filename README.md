@@ -90,19 +90,19 @@ $ pubweb-cli upload --interactive
 
 See the following set of Jupyter notebooks that contain examples on the following topics:
 
-| Jupyter Notebook                                                    | Topic                            
-|---------------------------------------------------------------------|----------------------------------|
-| [Introduction](samples/Getting_started.ipynb)                       | Installing and authenticating    |
-| [Uploading a dataset](samples/Uploading_a_dataset.ipynb)            | Uploading data                   |
-| [Downloading a dataset](samples/Downloading_a_dataset.ipynb)        | Downloading data                 |
-| [Interacting with a dataset](samples/Interacting_with_files.ipynb)  | Calling data and reading into tables |
-| [Analyzing a dataset](samples/Analyzing_a_dataset.ipynb)            | Running analysis pipelines       |
-| [Using references](samples/Using_references.ipynb)                  | Managing reference data          |
+| Jupyter Notebook                                                   | Topic                                |
+|--------------------------------------------------------------------|--------------------------------------|
+| [Introduction](samples/Getting_started.ipynb)                      | Installing and authenticating        |
+| [Uploading a dataset](samples/Uploading_a_dataset.ipynb)           | Uploading data                       |
+| [Downloading a dataset](samples/Downloading_a_dataset.ipynb)       | Downloading data                     |
+| [Interacting with a dataset](samples/Interacting_with_files.ipynb) | Calling data and reading into tables |
+| [Analyzing a dataset](samples/Analyzing_a_dataset.ipynb)           | Running analysis pipelines           |
+| [Using references](samples/Using_references.ipynb)                 | Managing reference data              |
 
 ## R Usage
 
 | Jupyter Notebook                                    | Topic               |
-| --------------------------------------------------- | ------------------- |
+|-----------------------------------------------------|---------------------|
 | [Downloading a dataset in R](samples/Using-R.ipynb) | Reading data with R |
 
 ## Advanced Usage
@@ -113,3 +113,14 @@ See the following set of Jupyter notebooks that contain examples on the followin
 |-------------|-------------------------------|--------------|
 | PW_HOME     | Local configuration directory | ~/.pubweb    |
 | PW_BASE_URL | Base URL of the data portal   | pubweb.cloud |
+
+### Configuration
+
+The `pubweb-cli configure` command creates a file in `PW_HOME` called `config.ini`.
+
+You can set the `base_url` property in the config file rather than using the environment variable. 
+
+```ini
+[General]
+base_url = pubweb.cloud
+```
