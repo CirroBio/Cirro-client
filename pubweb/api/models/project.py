@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from pubweb.api.config import config
 from pubweb.api.models.exceptions import DataPortalModelException
 
 
@@ -19,5 +18,5 @@ class Project:
                    record['desc'])
 
     @property
-    def url(self):
-        return f'{config.base_url}/projects/{self.id}'
+    def relative_url(self):
+        return f'projects/{self.id}'

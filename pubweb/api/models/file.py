@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from pathlib import PurePath
 from typing import Literal, TypedDict, Optional
 
-from pubweb.api.config import config
 from pubweb.api.models.api import ApiQuery
 
 AccessType = Literal['PROJECT', 'CHART', 'DATASET', 'RESOURCES']
@@ -99,14 +98,14 @@ class FileAccessContext:
         )
 
     @classmethod
-    def resources(cls):
+    def resources(cls, resources_bucket):
         return cls(
             {
                 'accessType': 'RESOURCES', 'operation': 'DOWNLOAD',
                 'projectId': None, 'datasetId': None,
                 'tokenLifetimeHours': None
             },
-            config.resources_bucket,
+            resources_bucket,
             ''
         )
 

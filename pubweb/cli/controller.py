@@ -1,9 +1,11 @@
 from pubweb.api.clients.portal import DataPortalClient
-from pubweb.api.auth import UsernameAndPasswordAuth
-from pubweb.cli.interactive.auth_args import gather_login
-from pubweb.cli.interactive.download_args import gather_download_arguments
+from pubweb.api.config import UserConfig, save_user_config
+from pubweb.api.models.dataset import CreateIngestDatasetInput
+from pubweb.api.models.file import FileAccessContext
+from pubweb.api.models.process import Executor
+from pubweb.cli.interactive.auth_args import gather_auth_config
+from pubweb.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from pubweb.cli.interactive.download_args import gather_download_arguments_dataset
-from pubweb.cli.interactive.download_args import gather_download_arguments_dataset_files
 from pubweb.cli.interactive.list_dataset_args import gather_list_arguments
 from pubweb.cli.interactive.upload_args import gather_upload_arguments
 from pubweb.cli.interactive.utils import get_id_from_name, get_item_from_name_or_id
@@ -12,12 +14,8 @@ from pubweb.cli.interactive.workflow_args import get_preprocess_script, get_addi
     get_repository, get_description, get_output_resources_path
 from pubweb.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from pubweb.cli.models import ListArguments, UploadArguments, DownloadArguments
-from pubweb.api.config import AuthConfig, save_config, load_config
-from pubweb.file_utils import get_files_in_directory, check_dataset_files
+from pubweb.file_utils import check_dataset_files, get_files_in_directory
 from pubweb.helpers import WorkflowConfigBuilder
-from pubweb.api.models.dataset import CreateIngestDatasetInput
-from pubweb.api.models.file import FileAccessContext
-from pubweb.api.models.process import Executor
 from pubweb.utils import print_credentials
 
 
@@ -25,13 +23,17 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
 
     # Instantiate the PubWeb Data Portal client
-    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
+    pubweb = DataPortalClient()
 
     # If the user provided the --interactive flag
     if interactive:
 
         # Get the list of projects available to the user
         projects = pubweb.project.list()
+
+        if len(projects) == 0:
+            print("No projects available")
+            return
 
         # Prompt the user for the project
         input_params = gather_list_arguments(input_params, projects)
@@ -47,9 +49,13 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
-    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
+    pubweb = DataPortalClient()
     projects = pubweb.project.list()
     processes = pubweb.process.list(process_type=Executor.INGEST)
+
+    if len(projects) == 0:
+        print("No projects available")
+        return
 
     if interactive:
         input_params = gather_upload_arguments(input_params, projects, processes)
@@ -93,17 +99,23 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
-    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
+    pubweb = DataPortalClient()
 
     projects = pubweb.project.list()
+
+    if len(projects) == 0:
+        print("No projects available")
+        return
+
+    files_to_download = None
     if interactive:
         input_params = gather_download_arguments(input_params, projects)
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
         datasets = pubweb.dataset.find_by_project(input_params['project'])
         input_params = gather_download_arguments_dataset(input_params, datasets)
-        files = pubweb.dataset.get_dataset_files(input_params['project'], input_params['dataset'])
-        input_params = gather_download_arguments_dataset_files(input_params, files)
+        dataset_files = pubweb.dataset.get_dataset_files(input_params['project'], input_params['dataset'])
+        files_to_download = ask_dataset_files(dataset_files)
 
     dataset_params = {
         'project': get_id_from_name(projects, input_params['project']),
@@ -113,13 +125,13 @@ def run_download(input_params: DownloadArguments, interactive=False):
     pubweb.dataset.download_files(project_id=dataset_params['project'],
                                   dataset_id=dataset_params['dataset'],
                                   download_location=input_params['data_directory'],
-                                  files=input_params.get('files'))
+                                  files=files_to_download)
 
 
 def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
 
-    pubweb = DataPortalClient(UsernameAndPasswordAuth(*load_config()))
+    pubweb = DataPortalClient()
     process_options = pubweb.process.list(process_type=Executor.NEXTFLOW)
     resources_folder, repo_prefix = get_output_resources_path()
 
@@ -172,6 +184,7 @@ def run_configure_workflow():
 
 
 def run_configure():
-    username, password = gather_login()
-    auth_config = AuthConfig(username, password)
-    save_config(auth_config)
+    auth_method, auth_method_config = gather_auth_config()
+    save_user_config(UserConfig(auth_method=auth_method,
+                                auth_method_config=auth_method_config,
+                                base_url=None))

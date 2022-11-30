@@ -1,12 +1,13 @@
+from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
-from fnmatch import fnmatch
-from pubweb.cli.interactive.common_args import ask_project
-from pubweb.cli.interactive.utils import prompt_wrapper, InputError
-from pubweb.cli.models import DownloadArguments
+
 from pubweb.api.models.dataset import Dataset
 from pubweb.api.models.file import File
 from pubweb.api.models.project import Project
+from pubweb.cli.interactive.common_args import ask_project
+from pubweb.cli.interactive.utils import prompt_wrapper, InputError
+from pubweb.cli.models import DownloadArguments
 from pubweb.utils import format_date
 
 
@@ -34,7 +35,7 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     raise InputError("User must select a dataset to download")
 
 
-def ask_dataset_files(input_params: DownloadArguments, files: List[File]) -> List[File]:
+def ask_dataset_files(files: List[File]) -> List[File]:
     """Get the list of files which the user would like to download from the dataset."""
 
     choices = [
@@ -143,9 +144,4 @@ def gather_download_arguments(input_params: DownloadArguments, projects: List[Pr
 def gather_download_arguments_dataset(input_params: DownloadArguments, datasets: List[Dataset]):
     input_params['dataset'] = ask_dataset(datasets, input_params.get('dataset'))
     input_params['data_directory'] = ask_directory(input_params.get('data_directory'))
-    return input_params
-
-
-def gather_download_arguments_dataset_files(input_params: DownloadArguments, files: List[File]):
-    input_params['files'] = ask_dataset_files(input_params, files)
     return input_params

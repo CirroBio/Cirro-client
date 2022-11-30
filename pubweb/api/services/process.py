@@ -122,7 +122,7 @@ class ProcessService(FileEnabledService):
         """
         Gets a specification used to describe the parameters used in the process
         """
-        access_context = FileAccessContext.resources()
+        access_context = FileAccessContext.resources(self._configuration.resources_bucket)
         process = self.get_process(process_id)
         path = S3Path(process.form_spec_json)
         if path.valid:

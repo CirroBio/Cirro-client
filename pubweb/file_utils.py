@@ -75,7 +75,8 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
             except S3UploadFailedError as e:
 
                 # Report the error
-                print(f"Encountered error:\n{str(e)}\nRetrying ({max_retries - (retry + 1)} attempts remaining)")
+                print(f"Encountered error:\n{str(e)}\n"
+                      f"Retrying ({max_retries - (retry + 1)} attempts remaining)")
 
             if success:
                 break
