@@ -130,7 +130,7 @@ class DataPortalProject(DataPortalAsset):
             files = get_files_in_directory(upload_folder)
 
         # Make sure that the files match the expected pattern
-        check_dataset_files(files, process.file_mapping_rules, upload_folder)
+        check_dataset_files(files, process.id, self._api_client, upload_folder)
 
         # Create the ingest process request
         dataset_create_request = CreateIngestDatasetInput(

@@ -1,14 +1,12 @@
-import functools
+import json
 import os
 from pathlib import Path, PurePath, PurePosixPath
-import re
 from typing import List, Union
 
 from boto3.exceptions import S3UploadFailedError
-import pandas as pd
 
-from pubweb.api.clients import S3Client
-from pubweb.api.models.file import DirectoryStatistics, File
+from pubweb.api.clients import S3Client, ApiClient
+from pubweb.api.models.file import DirectoryStatistics, File, CheckDataTypesInput
 
 DEFAULT_TRANSFER_SPEED = 160
 
@@ -102,50 +100,40 @@ def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRA
     return max(round(transfer_time_hours), 1)
 
 
-def check_samplesheet(files: List[str], samplesheet: str):
+def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient, directory: str = ""):
     """
-    Check all files in samplesheet are unique and the list of files in the samplesheet
-    and all the files in the samplesheet must be in the upload list
-    :param files: files to check against the samplesheet, not including the samplesheet.csv file
-    :param samplesheet: path and filename of samplesheet.csv file
-    """
-    df = pd.read_csv(samplesheet)
-    cols = re.findall(r"fastq_[1|2]|file_\d+", ' '.join(df.columns))
-    samplesheet_files = df[cols].values.flatten()
-
-    if len(samplesheet_files) > len(set(samplesheet_files)):
-        raise ValueError('The files in samplesheet.csv are not unique. Samplesheet is not valid.')
-
-    missing_upload = set(samplesheet_files).difference(set(files))
-    if missing_upload:
-        raise FileNotFoundError("There are files in the samplesheet.csv file that are not included in the " +
-                                "uploaded files. The following files are missing from the uploaded file list: \n" +
-                                "\n".join(missing_upload))
-
-
-def check_dataset_files(files: List[str], file_mapping_rules: Union[List[dict], None], directory: str = ""):
-    """
-    Checks if at least one of the file mapping rules for a process are met by at least one file
-    in the list of files
+    Checks if the file mapping rules for a process are met by the list of files
     :param files: files to check
-    :param file_mapping_rules: glob or sampleMatchingPattern (regex) rules to match against
+    :param process_id: ID for the process containing the file mapping rules
+    :param api_client: api client
     :param directory: path to directory containing files
     """
-    if not file_mapping_rules or len(file_mapping_rules) == 0:
-        return None
+    # add path to samplesheet in order to read it in later 
+    files = [os.path.join(directory, file) if 'samplesheet.csv' in file else file for file in files]
 
-    if 'samplesheet.csv' in [file.lower() for file in files]:
-        samplesheet_path = [file for file in files if 'samplesheet.csv' in file.lower()][0]
-        files.remove(samplesheet_path)
-        check_samplesheet(files, os.path.join(directory, samplesheet_path))
-        return None
+    # Call pubweb function
+    data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id)
+    query = '''
+        query checkDataTypes($input: CheckDataTypesInput!) {
+        checkDataTypes(input: $input)
+        }
+    '''
+    resp = api_client.query(query, variables={'input': data_types_input})
+    reqs = resp['checkDataTypes']
 
-    def match_pattern(files, rule):
-        matches_regex = any([re.match(rule['sampleMatchingPattern'], file) for file in files]) \
-            if rule.get('sampleMatchingPattern') else False
-        matches_glob = any([PurePosixPath(file).match(rule['glob']) for file in files]) if rule.get('glob') else False
-        return matches_regex or matches_glob
+    # These will be samplesheet errors or no files errors
+    if reqs['errorMsg']:
+        raise ValueError(reqs['errorMsg'])
+    
+    # These will be error for missing files
+    allowed_data_types = json.loads(reqs['allowedDataTypes'])
+    all_errors = [entry['errorMsg'] for entry in allowed_data_types]
+    patterns = [' or '.join([e['exampleName'] for e in entry['allowedPatterns']]) 
+                for entry in allowed_data_types]
 
-    if not any(map(functools.partial(match_pattern, files), file_mapping_rules)):
-        raise ValueError("Files do not match dataset type. Expected file type requirements: \n" + "\n".join(
-            [f"{rule.get('description', '')} {rule.get('glob')}" for rule in file_mapping_rules]))
+    if any(all_errors):
+        raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +\
+                         "\n".join(patterns))
+
+    # TODO remove after testing
+    raise ValueError('safety check so files dont upload - no errors actually raised')
