@@ -39,12 +39,11 @@ class ProcessService(FileEnabledService):
                 formJson
                 fileRequirementsMessage
                 fileMappingRules {
-                  glob
                   min
                   max
                   description
                   isSample
-                  sampleMatchingPattern
+                  fileTypes
                 }
                 _deleted
               }
@@ -81,12 +80,11 @@ class ProcessService(FileEnabledService):
               formJson
               fileRequirementsMessage
               fileMappingRules {
-                glob
                 min
                 max
                 description
                 isSample
-                sampleMatchingPattern
+                fileTypes
               }
               _deleted
             }
