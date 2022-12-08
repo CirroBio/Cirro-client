@@ -3,7 +3,6 @@ from requests.auth import AuthBase
 from requests_aws4auth import AWS4Auth
 
 from pubweb.api.auth.base import AuthInfo
-from pubweb.api.config import config
 from pubweb.api.models.auth import Creds
 
 
@@ -12,7 +11,8 @@ class IAMAuth(AuthInfo):
     Uses AWS access tokens for authentication
     Note: this does not with any API calls at the moment
     """
-    def __init__(self, access_key: str, secret_key: str, token: str = None):
+    def __init__(self, region: str, access_key: str, secret_key: str, token: str = None):
+        self.region = region
         self.creds: Creds = {
             'AccessKeyId': access_key,
             'SecretAccessKey': secret_key,
@@ -31,7 +31,7 @@ class IAMAuth(AuthInfo):
     def get_request_auth(self) -> AuthBase:
         return AWS4Auth(self.creds['AccessKeyId'],
                         self.creds['SecretAccessKey'],
-                        config.region,
+                        self.region,
                         'appsync',
                         session_token=self.creds['SessionToken'])
 

@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import TypedDict, List, Any, Dict
 
-from pubweb.api.config import config
 from pubweb.api.models.exceptions import DataPortalModelException
 from pubweb.utils import parse_json_date, safe_load_json
 
@@ -61,5 +60,5 @@ class Dataset:
         )
 
     @property
-    def url(self):
-        return f'https://{config.base_url}/projects/{self.project_id}/dataset/{self.id}'
+    def relative_url(self):
+        return f'projects/{self.project_id}/dataset/{self.id}'
