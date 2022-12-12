@@ -120,7 +120,7 @@ def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient
     data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id, sampleSheet=samplesheet)
     query = '''
         query checkDataTypes($input: CheckDataTypesInput!) {
-        checkDataTypes(input: $input)
+        checkDataTypes(input: $input) {files, errorMsg, allowedDataTypes}
         }
     '''
     resp = api_client.query(query, variables={'input': data_types_input})
