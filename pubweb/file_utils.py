@@ -1,6 +1,6 @@
 import json
 import os
-from pathlib import Path, PurePath, PurePosixPath
+from pathlib import Path, PurePath
 from typing import List, Union
 
 from boto3.exceptions import S3UploadFailedError
@@ -129,13 +129,13 @@ def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient
     # These will be samplesheet errors or no files errors
     if reqs['errorMsg']:
         raise ValueError(reqs['errorMsg'])
-    
+
     # These will be error for missing files
     allowed_data_types = json.loads(reqs['allowedDataTypes'])
     all_errors = [entry['errorMsg'] for entry in allowed_data_types]
-    patterns = [' or '.join([e['exampleName'] for e in entry['allowedPatterns']]) 
+    patterns = [' or '.join([e['exampleName'] for e in entry['allowedPatterns']])
                 for entry in allowed_data_types]
 
     if any(all_errors):
-        raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +\
+        raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
                          "\n".join(patterns))
