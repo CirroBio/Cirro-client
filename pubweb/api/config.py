@@ -44,9 +44,7 @@ def load_user_config() -> Optional[UserConfig]:
         ini_config.read(str(Constants.config_path.absolute()))
         main_config = ini_config['General']
         auth_method = main_config.get('auth_method')
-        base_url = (os.environ.get('PW_BASE_URL') or
-                    main_config.get('base_url') or
-                    Constants.default_base_url)
+        base_url = main_config.get('base_url')
 
         if auth_method and ini_config.has_section(auth_method):
             auth_method_config = dict(ini_config[auth_method])
@@ -65,7 +63,10 @@ def load_user_config() -> Optional[UserConfig]:
 class AppConfig:
     def __init__(self, base_url: str = None):
         self.user_config = load_user_config()
-        self.base_url = base_url or self.user_config.base_url
+        self.base_url = (base_url or
+                         os.environ.get('PW_BASE_URL') or
+                         (self.user_config.base_url if self.user_config else None) or
+                         Constants.default_base_url)
         self._init_config()
 
     def _init_config(self):
