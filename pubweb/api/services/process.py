@@ -43,7 +43,11 @@ class ProcessService(FileEnabledService):
                   max
                   description
                   isSample
-                  fileTypes
+                  fileTypes {
+                    exampleName
+                    description
+                    sampleMatchingPattern
+                  }
                 }
                 _deleted
               }
@@ -84,7 +88,11 @@ class ProcessService(FileEnabledService):
                 max
                 description
                 isSample
-                fileTypes
+                fileTypes {
+                  exampleName
+                  description
+                  sampleMatchingPattern
+                }
               }
               _deleted
             }
