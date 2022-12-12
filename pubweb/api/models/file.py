@@ -39,6 +39,7 @@ class DirectoryStatistics(TypedDict):
 class CheckDataTypesInput(TypedDict):
     fileNames: List[str]
     processId: str
+    sampleSheet: str
 
 
 class FileAccessContext:

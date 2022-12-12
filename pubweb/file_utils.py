@@ -109,11 +109,15 @@ def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient
     :param api_client: api client
     :param directory: path to directory containing files
     """
-    # add path to samplesheet in order to read it in later 
-    files = [os.path.join(directory, file) if 'samplesheet.csv' in file else file for file in files]
+    # Parse samplesheet file if present
+    samplesheet = ''
+    samplesheets = [os.path.join(directory, file) for file in files if 'samplesheet.csv' in file]
+    if len(samplesheets) != 0:
+        with open(samplesheets[0]) as f:
+            samplesheet = f.read()
 
     # Call pubweb function
-    data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id)
+    data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id, sampleSheet=samplesheet)
     query = '''
         query checkDataTypes($input: CheckDataTypesInput!) {
         checkDataTypes(input: $input)
@@ -135,6 +139,3 @@ def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient
     if any(all_errors):
         raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +\
                          "\n".join(patterns))
-
-    # TODO remove after testing
-    raise ValueError('safety check so files dont upload - no errors actually raised')
