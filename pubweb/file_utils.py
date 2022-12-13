@@ -1,11 +1,10 @@
-import json
 from pathlib import Path, PurePath
 from typing import List, Union
 
 from boto3.exceptions import S3UploadFailedError
 
-from pubweb.api.clients import S3Client, ApiClient
-from pubweb.api.models.file import DirectoryStatistics, File, CheckDataTypesInput
+from pubweb.api.clients import S3Client
+from pubweb.api.models.file import DirectoryStatistics, File
 
 DEFAULT_TRANSFER_SPEED = 160
 
@@ -98,42 +97,3 @@ def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRA
     transfer_time_seconds = (data_size_gb * 8 * 1000) / speed_mbps
     transfer_time_hours = transfer_time_seconds / 60 / 60
     return max(round(transfer_time_hours), 1)
-
-
-def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient, directory: str):
-    """
-    Checks if the file mapping rules for a process are met by the list of files
-    :param files: files to check
-    :param process_id: ID for the process containing the file mapping rules
-    :param api_client: api client
-    :param directory: path to directory containing files
-    """
-    # Parse samplesheet file if present
-    samplesheet = None
-    samplesheet_file = Path(directory, 'samplesheet.csv')
-    if samplesheet_file.exists():
-        samplesheet = samplesheet_file.read_text()
-
-    # Call pubweb function
-    data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id, sampleSheet=samplesheet)
-    query = '''
-        query checkDataTypes($input: CheckDataTypesInput!) {
-        checkDataTypes(input: $input) {files, errorMsg, allowedDataTypes}
-        }
-    '''
-    resp = api_client.query(query, variables={'input': data_types_input})
-    reqs = resp['checkDataTypes']
-
-    # These will be samplesheet errors or no files errors
-    if reqs['errorMsg']:
-        raise ValueError(reqs['errorMsg'])
-
-    # These will be error for missing files
-    allowed_data_types = json.loads(reqs['allowedDataTypes'])
-    all_errors = [entry['errorMsg'] for entry in allowed_data_types if entry['errorMsg'] is not None]
-    patterns = [' or '.join([e['exampleName'] for e in entry['allowedPatterns']])
-                for entry in allowed_data_types]
-
-    if len(all_errors) != 0:
-        raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
-                         "\n".join(patterns))

@@ -4,7 +4,6 @@ from typing import Union
 from pubweb.api.clients.portal import DataPortalClient
 from pubweb.api.models.dataset import CreateIngestDatasetInput
 from pubweb.api.models.project import Project
-from pubweb.file_utils import check_dataset_files
 from pubweb.file_utils import get_files_in_directory
 from pubweb.sdk.asset import DataPortalAssets, DataPortalAsset
 from pubweb.sdk.dataset import DataPortalDataset, DataPortalDatasets
@@ -130,7 +129,7 @@ class DataPortalProject(DataPortalAsset):
             files = get_files_in_directory(upload_folder)
 
         # Make sure that the files match the expected pattern
-        check_dataset_files(files, process.id, self._client._api_client, upload_folder)
+        self._client.process.check_dataset_files(files, process.id, upload_folder)
 
         # Create the ingest process request
         dataset_create_request = CreateIngestDatasetInput(
