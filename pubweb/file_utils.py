@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path, PurePath
 from typing import List, Union
 
@@ -101,7 +100,7 @@ def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRA
     return max(round(transfer_time_hours), 1)
 
 
-def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient, directory: str = ""):
+def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient, directory: str):
     """
     Checks if the file mapping rules for a process are met by the list of files
     :param files: files to check
@@ -110,11 +109,10 @@ def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient
     :param directory: path to directory containing files
     """
     # Parse samplesheet file if present
-    samplesheet = ''
-    samplesheets = [os.path.join(directory, file) for file in files if 'samplesheet.csv' in file]
-    if len(samplesheets) != 0:
-        with open(samplesheets[0]) as f:
-            samplesheet = f.read()
+    samplesheet = None
+    samplesheet_file = Path(directory, 'samplesheet.csv')
+    if samplesheet_file.exists():
+        samplesheet = samplesheet_file.read_text()
 
     # Call pubweb function
     data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id, sampleSheet=samplesheet)
