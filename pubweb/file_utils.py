@@ -130,10 +130,10 @@ def check_dataset_files(files: List[str], process_id: str, api_client: ApiClient
 
     # These will be error for missing files
     allowed_data_types = json.loads(reqs['allowedDataTypes'])
-    all_errors = [entry['errorMsg'] for entry in allowed_data_types]
+    all_errors = [entry['errorMsg'] for entry in allowed_data_types if entry['errorMsg'] is not None]
     patterns = [' or '.join([e['exampleName'] for e in entry['allowedPatterns']])
                 for entry in allowed_data_types]
 
-    if any(all_errors):
+    if len(all_errors) != 0:
         raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
                          "\n".join(patterns))
