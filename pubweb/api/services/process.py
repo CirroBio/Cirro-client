@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 from typing import List, Optional
 
@@ -156,7 +155,19 @@ class ProcessService(FileEnabledService):
         data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id, sampleSheet=samplesheet)
         query = '''
             query checkDataTypes($input: CheckDataTypesInput!) {
-            checkDataTypes(input: $input) {files, errorMsg, allowedDataTypes}
+            checkDataTypes(input: $input) {
+              files
+              errorMsg
+              allowedDataTypes {
+                description
+                errorMsg
+                allowedPattens {
+                  exampleName
+                  description
+                  sampleMatchingPattern
+                  }
+                }
+              }
             }
         '''
         resp = self._api_client.query(query, variables={'input': data_types_input})
@@ -166,12 +177,11 @@ class ProcessService(FileEnabledService):
         if reqs['errorMsg']:
             raise ValueError(reqs['errorMsg'])
 
-        # These will be error for missing files
-        allowed_data_types = json.loads(reqs['allowedDataTypes'])
-        all_errors = [entry['errorMsg'] for entry in allowed_data_types if entry['errorMsg'] is not None]
+        # These will be errors for missing files
+        all_errors = [entry['errorMsg'] for entry in reqs['allowedDataTypes'] if entry['errorMsg'] is not None]
         patterns = [' or '.join([e['exampleName'] for e in entry['allowedPatterns']])
-                    for entry in allowed_data_types]
+                    for entry in reqs['allowedDataTypes']]
 
         if len(all_errors) != 0:
             raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
-                            "\n".join(patterns))
+                             "\n".join(patterns))
