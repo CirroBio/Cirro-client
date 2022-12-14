@@ -155,16 +155,16 @@ class ProcessService(FileEnabledService):
         data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id, sampleSheet=samplesheet)
         query = '''
             query checkDataTypes($input: CheckDataTypesInput!) {
-            checkDataTypes(input: $input) {
-              files
-              errorMsg
-              allowedDataTypes {
-                description
+              checkDataTypes(input: $input) {
+                files
                 errorMsg
-                allowedPattens {
-                  exampleName
+                allowedDataTypes {
                   description
-                  sampleMatchingPattern
+                  errorMsg
+                  allowedPattens {
+                    exampleName
+                    description
+                    sampleMatchingPattern
                   }
                 }
               }
