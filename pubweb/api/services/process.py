@@ -1,7 +1,8 @@
+from pathlib import Path
 from typing import List, Optional
 
 from pubweb.api.clients.utils import filter_deleted
-from pubweb.api.models.file import FileAccessContext
+from pubweb.api.models.file import FileAccessContext, CheckDataTypesInput
 from pubweb.api.models.form_specification import ParameterSpecification
 from pubweb.api.models.process import Executor, RunAnalysisCommand, Process
 from pubweb.api.models.s3_path import S3Path
@@ -39,12 +40,15 @@ class ProcessService(FileEnabledService):
                 formJson
                 fileRequirementsMessage
                 fileMappingRules {
-                  glob
                   min
                   max
                   description
                   isSample
-                  sampleMatchingPattern
+                  fileNamePatterns {
+                    exampleName
+                    description
+                    sampleMatchingPattern
+                  }
                 }
                 _deleted
               }
@@ -81,12 +85,15 @@ class ProcessService(FileEnabledService):
               formJson
               fileRequirementsMessage
               fileMappingRules {
-                glob
                 min
                 max
                 description
                 isSample
-                sampleMatchingPattern
+                fileNamePatterns {
+                  exampleName
+                  description
+                  sampleMatchingPattern
+                }
               }
               _deleted
             }
@@ -130,3 +137,51 @@ class ProcessService(FileEnabledService):
         else:
             form_spec_json = process.form_spec_json
         return ParameterSpecification.from_json(form_spec_json)
+
+    def check_dataset_files(self, files: List[str], process_id: str, directory: str):
+        """
+        Checks if the file mapping rules for a process are met by the list of files
+        :param files: files to check
+        :param process_id: ID for the process containing the file mapping rules
+        :param directory: path to directory containing files
+        """
+        # Parse samplesheet file if present
+        samplesheet = None
+        samplesheet_file = Path(directory, 'samplesheet.csv')
+        if samplesheet_file.exists():
+            samplesheet = samplesheet_file.read_text()
+
+        # Call pubweb function
+        data_types_input = CheckDataTypesInput(fileNames=files, processId=process_id, sampleSheet=samplesheet)
+        query = '''
+            query checkDataTypes($input: CheckDataTypesInput!) {
+              checkDataTypes(input: $input) {
+                files
+                errorMsg
+                allowedDataTypes {
+                  description
+                  errorMsg
+                  allowedPattens {
+                    exampleName
+                    description
+                    sampleMatchingPattern
+                  }
+                }
+              }
+            }
+        '''
+        resp = self._api_client.query(query, variables={'input': data_types_input})
+        reqs = resp['checkDataTypes']
+
+        # These will be samplesheet errors or no files errors
+        if reqs['errorMsg']:
+            raise ValueError(reqs['errorMsg'])
+
+        # These will be errors for missing files
+        all_errors = [entry['errorMsg'] for entry in reqs['allowedDataTypes'] if entry['errorMsg'] is not None]
+        patterns = [' or '.join([e['exampleName'] for e in entry['allowedPatterns']])
+                    for entry in reqs['allowedDataTypes']]
+
+        if len(all_errors) != 0:
+            raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
+                             "\n".join(patterns))

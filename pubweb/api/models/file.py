@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import PurePath
-from typing import Literal, TypedDict, Optional
+from typing import Literal, TypedDict, Optional, List
 
 from pubweb.api.models.api import ApiQuery
 
@@ -34,6 +34,12 @@ class DirectoryStatistics(TypedDict):
     size: float
     sizeFriendly: str
     numberOfFiles: int
+
+
+class CheckDataTypesInput(TypedDict):
+    fileNames: List[str]
+    processId: str
+    sampleSheet: str
 
 
 class FileAccessContext:
