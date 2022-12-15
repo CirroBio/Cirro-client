@@ -109,10 +109,10 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 ### Supported environment variables
 
-| Name        | Description                   | Default      |
-|-------------|-------------------------------|--------------|
-| PW_HOME     | Local configuration directory | ~/.pubweb    |
-| PW_BASE_URL | Base URL of the data portal   | pubweb.cloud |
+| Name        | Description                   | Default        |
+|-------------|-------------------------------|----------------|
+| PW_HOME     | Local configuration directory | ~/.pubweb      |
+| PW_BASE_URL | Base URL of the data portal   | data-portal.io |
 
 ### Configuration
 
@@ -122,5 +122,5 @@ You can set the `base_url` property in the config file rather than using the env
 
 ```ini
 [General]
-base_url = pubweb.cloud
+base_url = data-portal.io
 ```

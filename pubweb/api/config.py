@@ -10,7 +10,7 @@ from requests import HTTPError
 class Constants:
     home = os.environ.get('PW_HOME', '~/.pubweb')
     config_path = Path(home, 'config.ini').expanduser()
-    default_base_url = "pubweb.cloud"
+    default_base_url = "data-portal.io"
 
 
 class UserConfig(NamedTuple):
