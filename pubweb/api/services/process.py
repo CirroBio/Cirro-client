@@ -161,7 +161,7 @@ class ProcessService(FileEnabledService):
                 allowedDataTypes {
                   description
                   errorMsg
-                  allowedPattens {
+                  allowedPatterns {
                     exampleName
                     description
                     sampleMatchingPattern
