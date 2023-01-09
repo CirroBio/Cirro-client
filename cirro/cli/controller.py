@@ -93,9 +93,9 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
     else:
         cirro.dataset.upload_files(dataset_id=create_resp['datasetId'],
-                                    project_id=create_request.project_id,
-                                    directory=directory,
-                                    files=files)
+                                   project_id=create_request.project_id,
+                                   directory=directory,
+                                   files=files)
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
@@ -123,9 +123,9 @@ def run_download(input_params: DownloadArguments, interactive=False):
     }
 
     cirro.dataset.download_files(project_id=dataset_params['project'],
-                                  dataset_id=dataset_params['dataset'],
-                                  download_location=input_params['data_directory'],
-                                  files=files_to_download)
+                                 dataset_id=dataset_params['dataset'],
+                                 download_location=input_params['data_directory'],
+                                 files=files_to_download)
 
 
 def run_configure_workflow():
