@@ -19,7 +19,7 @@ _GET_FILE_ACCESS_TOKEN_QUERY = '''
 
 
 def get_project_bucket(project_id):
-    return f'z-{project_id}'
+    return f'project-{project_id}'
 
 
 class S3AuthorizerInput(TypedDict):
