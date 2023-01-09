@@ -30,7 +30,7 @@ jobs:
 
       - name: Run lint
         run: |
-          flake8 pubweb
+          flake8 cirro
 
       - name: Run Tests
         working-directory: tests

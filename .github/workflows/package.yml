@@ -33,7 +33,7 @@ jobs:
       - name: Test install
         run: |
           python setup.py install
-          pubweb-cli
+          cirro-cli
 
       - name: Build python package
         run: |

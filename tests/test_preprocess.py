@@ -1,9 +1,9 @@
-import unittest
 import os
+import unittest
 
 import pandas
 
-from pubweb.helpers.preprocess_dataset import PreprocessDataset
+from cirro.helpers.preprocess_dataset import PreprocessDataset
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 DATA_PATH = os.path.join(__location__, 'data')
