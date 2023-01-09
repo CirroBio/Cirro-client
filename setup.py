@@ -32,10 +32,10 @@ install_requires = [
 
 setup(
     name='pubweb',
-    version='0.4.0',
+    version='0.5.0',
     author='Fred Hutch',
     license='MIT',
-    author_email='viz@fredhutch.org',
+    author_email='hutchdatacore@fredhutch.org',
     description='CLI tool for interacting with the PubWeb platform',
     packages=find_packages(include=['pubweb*']),
     install_requires=install_requires,
