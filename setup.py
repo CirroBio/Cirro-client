@@ -7,7 +7,7 @@ long_description = (this_directory / "README.md").read_text()
 
 entry_points = {
     'console_scripts': [
-        'pubweb-cli = pubweb.cli.cli:main'
+        'cirro-cli = cirro.cli.cli:main'
     ]
 }
 
@@ -31,13 +31,13 @@ install_requires = [
 ]
 
 setup(
-    name='pubweb',
+    name='cirro',
     version='0.5.0',
     author='Fred Hutch',
     license='MIT',
     author_email='hutchdatacore@fredhutch.org',
     description='CLI tool for interacting with the PubWeb platform',
-    packages=find_packages(include=['pubweb*']),
+    packages=find_packages(include=['cirro*']),
     install_requires=install_requires,
     url='https://github.com/FredHutch/PubWeb-client',
     entry_points=entry_points,
