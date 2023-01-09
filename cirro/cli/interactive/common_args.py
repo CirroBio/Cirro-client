@@ -23,9 +23,9 @@ def ask_use_third_party_tool():
         'message': 'How would you like to upload or download your data?',
         'name': 'use_tool',
         'choices': [
-            "PubWeb CLI",
+            "Cirro CLI",
             "Third-party tool (using AWS credentials temporarily issued for download)"
         ]
     })
 
-    return answers['use_tool'] != 'PubWeb CLI'
+    return answers['use_tool'] != 'Cirro CLI'

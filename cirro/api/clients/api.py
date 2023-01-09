@@ -14,7 +14,7 @@ except (pkg_resources.RequirementParseError, TypeError):
     sdk_version = "Unknown"
 python_version = platform.python_version()
 headers = {
-    'User-Agent': f'PubWeb SDK {sdk_version} (Python {python_version})',
+    'User-Agent': f'Cirro SDK {sdk_version} (Python {python_version})',
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 }

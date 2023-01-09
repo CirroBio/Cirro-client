@@ -56,7 +56,7 @@ def _get_repo_folder():
 
     repo_folder = ask(
         "path",
-        "What folder contains a local copy of the PubWeb resources repository?",
+        "What folder contains a local copy of the Cirro resources repository?",
         default=Path.cwd(),
         only_directories=True
     )

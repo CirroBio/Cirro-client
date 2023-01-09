@@ -72,7 +72,7 @@ def _authenticate(client_id: str, auth_endpoint: str):
 
 class ClientAuth(AuthInfo):
     """
-    Authenticates to PubWeb by asking
+    Authenticates to Cirro by asking
      the user to enter a verification code on the portal website
 
     :param enable_cache: Optionally enable cache to avoid re-authentication

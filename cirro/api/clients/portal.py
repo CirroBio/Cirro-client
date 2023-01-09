@@ -8,7 +8,7 @@ from cirro.api.services import DatasetService, ProcessService, ProjectService, F
 
 class DataPortalClient:
     """
-    A client for interacting with the PubWeb platform
+    A client for interacting with the Cirro platform
     """
     def __init__(self, auth_info: Optional[AuthInfo] = None, base_url: str = None):
         self._configuration = AppConfig(base_url=base_url)

@@ -1,14 +1,14 @@
-# PubWeb Client
+# Cirro Client
 
-[![Build Python package](https://github.com/FredHutch/PubWeb-client/actions/workflows/package.yml/badge.svg)](https://github.com/FredHutch/PubWeb-client/actions/workflows/package.yml)
-[![Lint and run tests](https://github.com/FredHutch/PubWeb-client/actions/workflows/lint.yml/badge.svg)](https://github.com/FredHutch/PubWeb-client/actions/workflows/lint.yml)
+[![Build Python package](https://github.com/FredHutch/Cirro-client/actions/workflows/package.yml/badge.svg)](https://github.com/FredHutch/Cirro-client/actions/workflows/package.yml)
+[![Lint and run tests](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml/badge.svg)](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml)
 ![](https://img.shields.io/pypi/v/cirro.svg)
 
-A Python 3.8+ library for the PubWeb platform.
+A Python 3.8+ library for the Cirro platform.
 
 ## Installation
 
-You can install PubWeb using pip:
+You can install Cirro using pip:
 
 `pip install cirro`
 
@@ -83,7 +83,7 @@ $ cirro-cli upload --interactive
 ? What type of files?  Illumina Sequencing Run
 ? What is the name of this dataset?  test
 ? Enter a description of the dataset (optional)
-? How would you like to upload or download your data? PubWeb CLI
+? How would you like to upload or download your data? Cirro CLI
 ```
 
 ## Python Usage

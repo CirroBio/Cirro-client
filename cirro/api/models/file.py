@@ -44,7 +44,7 @@ class CheckDataTypesInput(TypedDict):
 
 class FileAccessContext:
     """
-    Context holder for accessing various files in PubWeb and abstracting out their location
+    Context holder for accessing various files in Cirro and abstracting out their location
     Prefer to use the class methods to instantiate
     """
     def __init__(self,

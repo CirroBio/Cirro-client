@@ -36,10 +36,10 @@ setup(
     author='Fred Hutch',
     license='MIT',
     author_email='hutchdatacore@fredhutch.org',
-    description='CLI tool for interacting with the PubWeb platform',
+    description='CLI tool for interacting with the Cirro platform',
     packages=find_packages(include=['cirro*']),
     install_requires=install_requires,
-    url='https://github.com/FredHutch/PubWeb-client',
+    url='https://github.com/FredHutch/Cirro-client',
     entry_points=entry_points,
     long_description=long_description,
     long_description_content_type="text/markdown"

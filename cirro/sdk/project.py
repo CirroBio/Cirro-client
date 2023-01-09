@@ -23,7 +23,7 @@ class DataPortalProject(DataPortalAsset):
     name = None
 
     def __init__(self, proj: Project, client: DataPortalClient):
-        """Initialize the Project from the base PubWeb model."""
+        """Initialize the Project from the base Cirro model."""
 
         self.id = proj.id
         self.name = proj.name

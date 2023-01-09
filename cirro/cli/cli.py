@@ -12,7 +12,7 @@ def check_required_args(args):
         ctx.exit()
 
 
-@click.group(help="PubWeb CLI - Tool for interacting with datasets")
+@click.group(help="Cirro CLI - Tool for interacting with datasets")
 @click.version_option()
 def run():
     pass  # Print out help text, nothing to do

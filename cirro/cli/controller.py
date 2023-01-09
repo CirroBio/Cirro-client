@@ -22,7 +22,7 @@ from cirro.utils import print_credentials
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
 
-    # Instantiate the PubWeb Data Portal client
+    # Instantiate the Cirro Data Portal client
     cirro = DataPortalClient()
 
     # If the user provided the --interactive flag
