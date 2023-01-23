@@ -36,7 +36,7 @@ def get_auth_info_from_config(app_config: AppConfig):
         return ClientAuth(region=app_config.region,
                           client_id=app_config.client_id,
                           auth_endpoint=app_config.auth_endpoint,
-                          **auth_config)
+                          enable_cache=auth_config.get('enable_cache') == 'True')
 
     if matched_auth_method == IAMAuth and auth_config.get('load_current'):
         return IAMAuth.load_current()

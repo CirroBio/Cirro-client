@@ -83,6 +83,8 @@ class ClientAuth(AuthInfo):
     def __init__(self, client_id: str, region: str, auth_endpoint: str, enable_cache=True):
         self.client_id = client_id
         self.region = region
+        self._token_info = None
+        self._persistence = None
 
         if enable_cache:
             self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=False)
