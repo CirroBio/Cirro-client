@@ -32,7 +32,7 @@ install_requires = [
 
 setup(
     name='cirro',
-    version='0.6.0',
+    version='0.6.1',
     author='Fred Hutch',
     license='MIT',
     author_email='hutchdatacore@fredhutch.org',
