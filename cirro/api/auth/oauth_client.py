@@ -11,8 +11,7 @@ import boto3
 import jwt
 import requests
 from botocore.exceptions import ClientError
-from msal_extensions import FilePersistence, FilePersistenceWithDataProtection, \
-    KeychainPersistence, LibsecretPersistence
+from msal_extensions import FilePersistence
 from requests.auth import AuthBase
 
 from cirro.api.auth.base import AuthInfo, RequestAuthWrapper
@@ -26,16 +25,19 @@ TOKEN_PATH = Path(Constants.home, '.token.dat').expanduser()
 def _build_token_persistence(location, fallback_to_plaintext=False):
     try:
         if sys.platform.startswith('win'):
+            from msal_extensions import FilePersistenceWithDataProtection
             return FilePersistenceWithDataProtection(location)
         if sys.platform.startswith('darwin'):
+            from msal_extensions import KeychainPersistence
             return KeychainPersistence(location, service_name='cirro-client')
         if sys.platform.startswith('linux'):
+            from msal_extensions import LibsecretPersistence
             return LibsecretPersistence(location)
         raise RuntimeError(f"Unsupported platform: {sys.platform}")
     except Exception:
         if not fallback_to_plaintext:
             raise
-        logger.warning("Encryption unavailable. Opting in to plain text.")
+        logger.debug("Encryption unavailable. Opting in to plain text.")
         return FilePersistence(location)
 
 
@@ -87,7 +89,7 @@ class ClientAuth(AuthInfo):
         self._persistence = None
 
         if enable_cache:
-            self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=False)
+            self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=True)
             self._token_info = self._load_token_info()
 
         if not self._token_info:

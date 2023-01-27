@@ -32,10 +32,10 @@ install_requires = [
 
 setup(
     name='cirro',
-    version='0.6.1',
+    version='0.6.2',
     author='Fred Hutch',
     license='MIT',
-    author_email='hutchdatacore@fredhutch.org',
+    author_email='cirro@fredhutch.org',
     description='CLI tool for interacting with the Cirro platform',
     packages=find_packages(include=['cirro*']),
     install_requires=install_requires,

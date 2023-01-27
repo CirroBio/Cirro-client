@@ -89,16 +89,18 @@ class PreprocessDataset:
         with Path(local_path).open(mode="wt") as handle:
             return json.dump(dat, handle, indent=indent)
 
-    def add_param(self, name: str, value, overwrite=False):
+    def add_param(self, name: str, value, overwrite=False, log=True):
         """Add a parameter to the dataset."""
 
         assert overwrite or name not in self.params, \
             f"Cannot add parameter {name}, already exists (and overwrite=False)"
 
-        self.logger.info(f"Adding parameter {name} = {value}")
+        if log:
+            self.logger.info(f"Adding parameter {name} = {value}")
         self.params[name] = value
 
-        self.logger.info("Saving parameters")
+        if log:
+            self.logger.info("Saving parameters")
         self._write_json(self.params, "nextflow.json")
 
     def remove_param(self, name: str, force=False):
@@ -126,11 +128,11 @@ class PreprocessDataset:
             handle.write(compute)
 
     def wide_samplesheet(
-        self,
-        index=["sampleIndex", "sample", "lane"],
-        columns="read",
-        values="file",
-        column_prefix="fastq_"
+            self,
+            index=["sampleIndex", "sample", "lane"],
+            columns="read",
+            values="file",
+            column_prefix="fastq_"
     ):
         """Format a wide samplesheet with each read-pair on a row."""
 
