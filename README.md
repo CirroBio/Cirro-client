@@ -109,10 +109,10 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 ### Supported environment variables
 
-| Name        | Description                   | Default        |
-|-------------|-------------------------------|----------------|
-| PW_HOME     | Local configuration directory | ~/.cirro      |
-| PW_BASE_URL | Base URL of the data portal   | data-portal.io |
+| Name        | Description                   | Default         |
+|-------------|-------------------------------|-----------------|
+| PW_HOME     | Local configuration directory | ~/.cirro        |
+| PW_BASE_URL | Base URL of the data portal   | data-portal.io  |
 
 ### Configuration
 

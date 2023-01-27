@@ -35,7 +35,7 @@ def _build_token_persistence(location, fallback_to_plaintext=False):
     except Exception:
         if not fallback_to_plaintext:
             raise
-        logger.warning("Encryption unavailable. Opting in to plain text.")
+        logger.debug("Encryption unavailable. Opting in to plain text.")
         return FilePersistence(location)
 
 
@@ -87,7 +87,7 @@ class ClientAuth(AuthInfo):
         self._persistence = None
 
         if enable_cache:
-            self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=False)
+            self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=True)
             self._token_info = self._load_token_info()
 
         if not self._token_info:
