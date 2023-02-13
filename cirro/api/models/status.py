@@ -1,0 +1,13 @@
+from enum import Enum
+
+
+class Status(Enum):
+    PENDING = 'PENDING'
+    RUNNING = 'RUNNING'
+    DELETE = 'DELETE'
+    DELETING = 'DELETING'
+    FAILED = 'FAILED'
+    COMPLETED = 'COMPLETED'
+    ARCHIVED = 'ARCHIVED'
+    DELETED = 'DELETED'
+    SUSPENDED = 'SUSPENDED'

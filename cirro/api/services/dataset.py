@@ -6,6 +6,7 @@ from typing import List, Union
 from cirro.api.clients.utils import filter_deleted
 from cirro.api.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse, Dataset
 from cirro.api.models.file import FileAccessContext, File
+from cirro.api.models.status import Status
 from cirro.api.services.file import FileEnabledService
 
 logger = logging.getLogger()
@@ -44,7 +45,6 @@ class DatasetService(FileEnabledService):
                 process
                 createdAt
                 updatedAt
-                _deleted
               }
               nextToken
               startedAt
@@ -55,7 +55,7 @@ class DatasetService(FileEnabledService):
             'project': project_id,
             'filter': {
                 'status': {
-                    'eq': 'COMPLETED'
+                    'eq': Status.COMPLETED.value
                 }
             },
             # TODO: Implement pagination

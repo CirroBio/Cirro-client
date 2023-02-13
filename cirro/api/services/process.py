@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Optional
 
-from cirro.api.clients.utils import filter_deleted
 from cirro.api.models.file import FileAccessContext, CheckDataTypesInput
 from cirro.api.models.form_specification import ParameterSpecification
 from cirro.api.models.process import Executor, RunAnalysisCommand, Process
@@ -50,7 +49,6 @@ class ProcessService(FileEnabledService):
                     sampleMatchingPattern
                   }
                 }
-                _deleted
               }
             }
           }
@@ -59,8 +57,7 @@ class ProcessService(FileEnabledService):
         if process_type:
             item_filter['executor'] = {'eq': process_type.value}
         resp = self._api_client.query(query, variables={'filter': item_filter})['listProcesses']
-        not_deleted = filter_deleted(resp['items'])
-        return [Process.from_record(p) for p in not_deleted]
+        return [Process.from_record(p) for p in resp['items']]
 
     def get_process(self, process_id: str) -> Process:
         """
@@ -95,7 +92,6 @@ class ProcessService(FileEnabledService):
                   sampleMatchingPattern
                 }
               }
-              _deleted
             }
           }
         '''
