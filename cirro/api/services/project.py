@@ -57,5 +57,5 @@ class ProjectService(FileEnabledService):
         access_context = FileAccessContext.download_project_resources(project_id)
         resources = self._file_service.get_file_listing(access_context)
         reference_files = filter_files_by_pattern(resources, f'data/references/{reference_directory}/*/*')
-        references = [Reference.of(file) for file in reference_files]
+        references = [*set(Reference.of(file) for file in reference_files)]
         return References(references)

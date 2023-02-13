@@ -39,6 +39,12 @@ class Reference(File):
     def __str__(self):
         return self.name
 
+    def __eq__(self, other):
+        return isinstance(other, type(self)) and self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)
+
 
 class References(List[Reference]):
     def find_by_name(self, name: str) -> Optional[Reference]:
