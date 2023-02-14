@@ -1,5 +1,7 @@
 import gzip
 from io import BytesIO, StringIO
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import pandas as pd
 
@@ -31,6 +33,7 @@ class DataPortalFile(DataPortalAsset):
 
         # Attach the file object
         self.file = file
+        self.temp_file = None
 
     def __str__(self):
         return f"{self.relative_path} ({self.size} bytes)"
@@ -124,6 +127,27 @@ class DataPortalFile(DataPortalAsset):
             download_location,
             [self.relative_path]
         )
+
+    def local_file(self) -> str:
+        if self.temp_file:
+            return self.temp_file.name
+
+        path = Path(self.name)
+
+        with NamedTemporaryFile(prefix=path.stem,
+                                mode='w+b',
+                                delete=False,
+                                suffix=path.suffix) as file_handle:
+            file_handle.write(self._get())
+            file_handle.flush()
+            self.temp_file = file_handle
+            return self.temp_file.name
+
+    def purge(self):
+        if not self.temp_file:
+            return
+
+        self.temp_file.delete()
 
 
 class DataPortalFiles(DataPortalAssets[DataPortalFile]):
