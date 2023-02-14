@@ -47,7 +47,6 @@ class DatasetService(FileEnabledService):
                 updatedAt
               }
               nextToken
-              startedAt
             }
           }
         '''
