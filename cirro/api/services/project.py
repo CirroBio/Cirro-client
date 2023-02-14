@@ -24,7 +24,7 @@ class ProjectService(FileEnabledService):
                 id
                 name
                 desc
-                _deleted
+                status
               }
             }
           }

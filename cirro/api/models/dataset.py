@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import TypedDict, List, Any, Dict
 
 from cirro.api.models.exceptions import DataPortalModelException
+from cirro.api.models.status import Status
 from cirro.utils import parse_json_date, safe_load_json
 
 
@@ -36,7 +37,7 @@ class Dataset:
     description: str
     process_id: str
     project_id: str
-    status: str
+    status: Status
     source_dataset_ids: List[str]
     info: Dict[str, Any]
     params: Dict[str, Any]
@@ -52,7 +53,7 @@ class Dataset:
             record.get('desc'),
             record.get('process'),
             record.get('project'),
-            record.get('status'),
+            Status[record.get('status')],
             record.get('sourceDatasets'),
             safe_load_json(record.get('infoJson')),
             safe_load_json(record.get('paramJson')),
