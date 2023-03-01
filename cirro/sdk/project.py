@@ -160,7 +160,7 @@ class DataPortalProject(DataPortalAsset):
                 if attempt == max_attempts - 1:
                     raise e
                 else:
-                    sleep(1)
+                    sleep(2)
 
 
 class DataPortalProjects(DataPortalAssets[DataPortalProject]):
