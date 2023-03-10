@@ -51,12 +51,18 @@ class DataPortalProject(DataPortalAsset):
     def get_dataset_by_name(self, name: str = None) -> DataPortalDataset:
         """Return the dataset with the specified name."""
 
-        return self.list_datasets().get_by_name(name)
+        dataset = next(iter(self._client.dataset.find_by_project(self.id, name=name)), None)
+        if dataset is None:
+            raise DataPortalAssetNotFound(f'Dataset with name {name} not found')
+        return DataPortalDataset(dataset, self._client)
 
     def get_dataset_by_id(self, _id: str = None) -> DataPortalDataset:
         """Return the dataset with the specified id."""
 
-        return self.list_datasets().get_by_id(_id)
+        dataset = self._client.dataset.get_from_id(_id=_id)
+        if dataset is None:
+            raise DataPortalAssetNotFound(f'Dataset with ID {_id} not found')
+        return DataPortalDataset(dataset, self._client)
 
     def list_references(self, reference_type: str = None) -> DataPortalReferences:
         """
