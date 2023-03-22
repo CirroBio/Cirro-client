@@ -1,12 +1,13 @@
 import json
 import logging
 import uuid
-from typing import List, Union
+from typing import List, Union, Optional
 
 from cirro.api.clients.utils import filter_deleted
 from cirro.api.models.dataset import CreateIngestDatasetInput, DatasetCreateResponse, Dataset
 from cirro.api.models.file import FileAccessContext, File
 from cirro.api.models.status import Status
+from cirro.api.services.base import fetch_all_items
 from cirro.api.services.file import FileEnabledService
 
 logger = logging.getLogger()
@@ -56,16 +57,39 @@ class DatasetService(FileEnabledService):
                 'status': {
                     'eq': Status.COMPLETED.value
                 }
-            },
-            # TODO: Implement pagination
-            'limit': 10000
+            }
         }
         if name:
             variables['filter']['name'] = {'eq': name}
 
-        resp = self._api_client.query(query, variables=variables)['datasetsByProject']
-        not_deleted = filter_deleted(resp['items'])
+        items = fetch_all_items(self._api_client, query, variables)
+        not_deleted = filter_deleted(items)
         return [Dataset.from_record(item) for item in not_deleted]
+
+    def get_from_id(self, _id: str) -> Optional[Dataset]:
+        query = '''
+             query GetDataset($id: ID!) {
+                getDataset(id: $id) {
+                  id
+                  status
+                  name
+                  desc
+                  sourceDatasets
+                  paramJson
+                  infoJson
+                  process
+                  project
+                  createdAt
+                  updatedAt
+                }
+              }
+              '''
+
+        item = self._api_client.query(query, variables={'id': _id})['getDataset']
+        if not item:
+            return
+
+        return Dataset.from_record(item)
 
     def create(self, create_request: CreateIngestDatasetInput) -> DatasetCreateResponse:
         """
