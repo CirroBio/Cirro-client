@@ -1,7 +1,6 @@
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.config import UserConfig, save_user_config
 from cirro.api.models.dataset import CreateIngestDatasetInput
-from cirro.api.models.file import FileAccessContext
 from cirro.api.models.process import Executor
 from cirro.cli.interactive.auth_args import gather_auth_config
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
@@ -16,7 +15,6 @@ from cirro.cli.interactive.workflow_form_args import prompt_user_inputs, get_nex
 from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
 from cirro.file_utils import get_files_in_directory
 from cirro.helpers import WorkflowConfigBuilder
-from cirro.utils import print_credentials
 
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
