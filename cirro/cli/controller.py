@@ -1,7 +1,6 @@
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.config import UserConfig, save_user_config
 from cirro.api.models.dataset import CreateIngestDatasetInput
-from cirro.api.models.file import FileAccessContext
 from cirro.api.models.process import Executor
 from cirro.cli.interactive.auth_args import gather_auth_config
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
@@ -16,7 +15,6 @@ from cirro.cli.interactive.workflow_form_args import prompt_user_inputs, get_nex
 from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
 from cirro.file_utils import get_files_in_directory
 from cirro.helpers import WorkflowConfigBuilder
-from cirro.utils import print_credentials
 
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
@@ -78,24 +76,10 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
     create_resp = cirro.dataset.create(create_request)
 
-    if input_params['use_third_party_tool']:
-        token_lifetime = 1  # TODO: Max token lifetime is 1 hour?
-        access_context = FileAccessContext.upload_dataset(project_id=create_request.project_id,
-                                                          dataset_id=create_resp['datasetId'],
-                                                          token_lifetime_override=token_lifetime)
-        creds = cirro.file.get_access_credentials(access_context)
-        print()
-        print("Please use the following information in your tool:")
-        print(f"Bucket: {access_context.bucket}")
-        print(f"Data path: {create_resp['dataPath']}")
-        print()
-        print_credentials(creds)
-
-    else:
-        cirro.dataset.upload_files(dataset_id=create_resp['datasetId'],
-                                   project_id=create_request.project_id,
-                                   directory=directory,
-                                   files=files)
+    cirro.dataset.upload_files(dataset_id=create_resp['datasetId'],
+                               project_id=create_request.project_id,
+                               directory=directory,
+                               files=files)
 
 
 def run_download(input_params: DownloadArguments, interactive=False):

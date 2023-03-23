@@ -7,7 +7,7 @@ from prompt_toolkit.validation import Validator, ValidationError
 
 from cirro.api.models.process import Process
 from cirro.api.models.project import Project
-from cirro.cli.interactive.common_args import ask_project, ask_use_third_party_tool
+from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import prompt_wrapper
 from cirro.cli.models import UploadArguments
 from cirro.file_utils import get_directory_stats
@@ -101,6 +101,4 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
     default_name = input_params.get('name') or data_directory_name
     input_params['name'] = ask_name(default_name)
     input_params['description'] = ask_description(input_params.get('description'))
-
-    input_params['use_third_party_tool'] = ask_use_third_party_tool()
     return input_params
