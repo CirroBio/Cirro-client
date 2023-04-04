@@ -8,7 +8,8 @@ from cirro.api.clients import S3Client
 from cirro.api.models.file import DirectoryStatistics, File
 
 if os.name == 'nt':
-    import win32api, win32con
+    import win32api
+    import win32con
 
 DEFAULT_TRANSFER_SPEED = 160
 
