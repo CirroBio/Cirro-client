@@ -15,17 +15,3 @@ def ask_project(projects: List[Project], input_value: str) -> str:
     }
     answers = prompt_wrapper(project_prompt)
     return answers['project']
-
-
-def ask_use_third_party_tool():
-    answers = prompt_wrapper({
-        'type': 'list',
-        'message': 'How would you like to upload or download your data?',
-        'name': 'use_tool',
-        'choices': [
-            "Cirro CLI",
-            "Third-party tool (using AWS credentials temporarily issued for download)"
-        ]
-    })
-
-    return answers['use_tool'] != 'Cirro CLI'

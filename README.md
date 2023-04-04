@@ -36,7 +36,7 @@ Options:
   --project TEXT         Name or ID of the project
   --dataset TEXT         ID of the dataset
   --data-directory TEXT  Directory to store the files
-  --interactive          Gather arguments interactively
+  -i, --interactive      Gather arguments interactively
   --help                 Show this message and exit.
 ```
 
@@ -52,8 +52,7 @@ Options:
   --project TEXT          Name or ID of the project
   --process TEXT          Name or ID of the ingest process
   --data-directory TEXT   Directory you wish to upload
-  --interactive           Gather arguments interactively
-  --use-third-party-tool  Use third party tool for upload (Generate manifest and one-time upload authentication token)
+  -i, --interactive       Gather arguments interactively
   --help                  Show this message and exit.
 ```
 
@@ -65,7 +64,7 @@ Usage: cirro-cli list-datasets [OPTIONS]
 
 Options:
   --project TEXT         ID of the project
-  --interactive          Gather arguments interactively
+  -i, --interactive      Gather arguments interactively
   --help                 Show this message and exit.
 ```
 
@@ -83,7 +82,6 @@ $ cirro-cli upload --interactive
 ? What type of files?  Illumina Sequencing Run
 ? What is the name of this dataset?  test
 ? Enter a description of the dataset (optional)
-? How would you like to upload or download your data? Cirro CLI
 ```
 
 ## Python Usage

@@ -31,6 +31,9 @@ def get_files_in_directory(directory) -> List[str]:
     for file_path in path.rglob("*"):
         if file_path.is_dir():
             continue
+        if file_path.name.startswith('.'):
+            continue
+
         str_file_path = str(file_path.as_posix())
         str_file_path = str_file_path.replace(f'{path_posix}/', "")
         paths.append(str_file_path)
