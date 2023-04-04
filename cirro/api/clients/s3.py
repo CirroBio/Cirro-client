@@ -88,7 +88,7 @@ class S3Client:
     def get_file_stats(self, bucket: str, key: str):
         return self._client.head_object(Bucket=bucket, Key=key)
 
-    def _build_session_client(self, region: str):
+    def _build_session_client(self, region_name: str):
         creds = self._creds_getter()
 
         if creds['Expiration']:
@@ -105,7 +105,7 @@ class S3Client:
                 aws_secret_access_key=creds['SecretAccessKey'],
                 aws_session_token=creds['SessionToken']
             )
-        return session.client('s3', region_name=region)
+        return session.client('s3', region_name=region_name)
 
     def _refresh_credentials(self):
         new_creds = self._creds_getter()
