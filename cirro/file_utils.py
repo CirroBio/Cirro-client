@@ -1,3 +1,4 @@
+import os
 from pathlib import Path, PurePath
 from typing import List, Union
 
@@ -5,6 +6,10 @@ from boto3.exceptions import S3UploadFailedError
 
 from cirro.api.clients import S3Client
 from cirro.api.models.file import DirectoryStatistics, File
+
+if os.name == 'nt':
+    import win32api
+    import win32con
 
 DEFAULT_TRANSFER_SPEED = 160
 
@@ -22,6 +27,15 @@ def filter_files_by_pattern(files: Union[List[File], List[str]], pattern: str) -
     ]
 
 
+def _is_hidden_file(file_path: Path):
+    # Remove hidden files from listing, desktop.ini .DS_Store, etc.
+    if os.name == 'nt':
+        attributes = win32api.GetFileAttributes(str(file_path))
+        return attributes & (win32con.FILE_ATTRIBUTE_HIDDEN | win32con.FILE_ATTRIBUTE_SYSTEM)
+    else:
+        return file_path.name.startswith('.')
+
+
 def get_files_in_directory(directory) -> List[str]:
     path = Path(directory)
     path_posix = str(path.as_posix())
@@ -31,7 +45,8 @@ def get_files_in_directory(directory) -> List[str]:
     for file_path in path.rglob("*"):
         if file_path.is_dir():
             continue
-        if file_path.name.startswith('.'):
+
+        if _is_hidden_file(file_path):
             continue
 
         str_file_path = str(file_path.as_posix())
