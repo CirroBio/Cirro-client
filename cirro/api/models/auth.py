@@ -24,4 +24,6 @@ class OAuthTokenResponse(TypedDict):
     id_token: str
     token_type: str
     expires_in: int
+    refresh_expires_in: int
+    client_id: str
     message: Optional[str]
