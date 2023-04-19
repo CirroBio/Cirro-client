@@ -118,7 +118,11 @@ The `cirro-cli configure` command creates a file in `PW_HOME` called `config.ini
 
 You can set the `base_url` property in the config file rather than using the environment variable. 
 
+The `transfer_max_retries` configuration property specifies the maximum number of times to attempt uploading a file to Cirro in the event of a transfer failure. 
+When uploading files to Cirro, network issues or temporary outages can occasionally cause a transfer to fail.
+
 ```ini
 [General]
 base_url = data-portal.io
+transfer_max_retries = 15
 ```
