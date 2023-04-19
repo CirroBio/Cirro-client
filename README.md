@@ -120,6 +120,7 @@ You can set the `base_url` property in the config file rather than using the env
 
 The `transfer_max_retries` configuration property specifies the maximum number of times to attempt uploading a file to Cirro in the event of a transfer failure. 
 When uploading files to Cirro, network issues or temporary outages can occasionally cause a transfer to fail.
+It will pause for an increasing amount of time for each retry attempt.
 
 ```ini
 [General]
