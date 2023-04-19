@@ -93,14 +93,16 @@ class ClientAuth(AuthInfo):
             self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=True)
             self._token_info = self._load_token_info()
 
-        # Check saved token for endpoint and refresh expiry
-        if self._token_info:
-            if self._token_info.get('client_id') != client_id:
-                logger.debug('Different client ID found, clearing saved token info')
-                self._clear_token_info()
+        # Check saved token for change in endpoint
+        if self._token_info and self._token_info.get('client_id') != client_id:
+            logger.debug('Different client ID found, clearing saved token info')
+            self._clear_token_info()
 
-            refresh_expiry = datetime.fromtimestamp(self._token_info.get('refresh_expires_in'))
-            if refresh_expiry < datetime.now() - timedelta(hours=12):
+        # Check saved token for refresh token expiry
+        if self._token_info and self._token_info.get('refresh_expires_in'):
+            refresh_expiry_threshold = datetime.fromtimestamp(self._token_info.get('refresh_expires_in'))\
+                                       - timedelta(hours=12)
+            if refresh_expiry_threshold < datetime.now():
                 logger.debug('Refresh token expiry is too soon, re-authenticating')
                 self._clear_token_info()
 
