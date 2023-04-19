@@ -54,7 +54,8 @@ class FileService(BaseService):
         :return:
         """
         s3_client = S3Client(partial(self.get_access_credentials, access_context), self._configuration.region)
-        upload_directory(directory, files, s3_client, access_context.bucket, access_context.path_prefix)
+        upload_directory(directory, files, s3_client, access_context.bucket, access_context.path_prefix,
+                         max_retries=self._configuration.user_config.transfer_max_retries)
 
     def download_files(self, access_context: FileAccessContext, directory: str, files: List[str]):
         """

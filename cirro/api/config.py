@@ -11,12 +11,14 @@ class Constants:
     home = os.environ.get('PW_HOME', '~/.cirro')
     config_path = Path(home, 'config.ini').expanduser()
     default_base_url = "data-portal.io"
+    default_max_retries = 10
 
 
 class UserConfig(NamedTuple):
     auth_method: str
     auth_method_config: Dict  # This needs to match the init params of the auth method
     base_url: Optional[str]
+    transfer_max_retries: Optional[int]
 
 
 def save_user_config(user_config: UserConfig):
@@ -24,7 +26,8 @@ def save_user_config(user_config: UserConfig):
     ini_config = configparser.SafeConfigParser()
     ini_config['General'] = {
         'auth_method': user_config.auth_method,
-        'base_url': Constants.default_base_url
+        'base_url': Constants.default_base_url,
+        'transfer_max_retries': Constants.default_max_retries
     }
     if original_user_config:
         ini_config['General']['base_url'] = original_user_config.base_url
@@ -45,6 +48,7 @@ def load_user_config() -> Optional[UserConfig]:
         main_config = ini_config['General']
         auth_method = main_config.get('auth_method')
         base_url = main_config.get('base_url')
+        transfer_max_retries = main_config.getint('transfer_max_retries', Constants.default_max_retries)
 
         if auth_method and ini_config.has_section(auth_method):
             auth_method_config = dict(ini_config[auth_method])
@@ -54,7 +58,8 @@ def load_user_config() -> Optional[UserConfig]:
         return UserConfig(
             auth_method=auth_method,
             auth_method_config=auth_method_config,
-            base_url=base_url
+            base_url=base_url,
+            transfer_max_retries=transfer_max_retries
         )
     except Exception:
         raise RuntimeError('Configuration load error, please re-run configuration')

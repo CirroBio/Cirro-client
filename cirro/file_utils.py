@@ -1,8 +1,11 @@
 import os
+import random
+import time
 from pathlib import Path, PurePath
 from typing import List, Union
 
 from boto3.exceptions import S3UploadFailedError
+from botocore.exceptions import ConnectionError
 
 from cirro.api.clients import S3Client
 from cirro.api.models.file import DirectoryStatistics, File
@@ -86,11 +89,12 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
                 success = True
 
             # Catch the upload error
-            except S3UploadFailedError as e:
-
+            except (S3UploadFailedError, ConnectionError) as e:
+                delay = random.uniform(0, 60) + retry * 60
                 # Report the error
                 print(f"Encountered error:\n{str(e)}\n"
-                      f"Retrying ({max_retries - (retry + 1)} attempts remaining)")
+                      f"Retrying in {delay:.0f} seconds ({max_retries - (retry + 1)} attempts remaining)")
+                time.sleep(delay)
 
             if success:
                 break
