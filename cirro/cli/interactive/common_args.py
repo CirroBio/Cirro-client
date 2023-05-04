@@ -5,7 +5,7 @@ from cirro.cli.interactive.utils import ask
 
 
 def ask_project(projects: List[Project], input_value: str) -> str:
-    project_names = sorted([project.name for project in projects])[:9]
+    project_names = sorted([project.name for project in projects])
     if len(project_names) <= 10:
         return ask(
             'select',
