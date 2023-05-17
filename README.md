@@ -28,6 +28,7 @@ cirro-cli configure
 ? Would you like to cache your login? Yes
 ```
 
+Upon first use, it will give you a link to authenticate through the web browser.
 
 ## Command Line Usage
 
