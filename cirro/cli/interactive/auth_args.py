@@ -1,7 +1,6 @@
 from typing import Tuple, Dict
 
-from cirro.api.auth import ClientAuth, UsernameAndPasswordAuth, IAMAuth
-from cirro.cli.interactive.utils import ask, ask_yes_no
+from cirro.cli.interactive.utils import ask_yes_no
 
 
 def gather_auth_config() -> Tuple[str, Dict]:
