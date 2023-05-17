@@ -102,7 +102,7 @@ class ClientAuth(AuthInfo):
         if self._token_info and self._token_info.get('refresh_expires_in'):
             refresh_expiry_threshold = datetime.fromtimestamp(self._token_info.get('refresh_expires_in'))\
                                        - timedelta(hours=12)
-            if refresh_expiry_threshold < datetime.now().astimezone():
+            if refresh_expiry_threshold < datetime.now():
                 logger.debug('Refresh token expiry is too soon, re-authenticating')
                 self._clear_token_info()
 
