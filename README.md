@@ -16,19 +16,11 @@ or by cloning the repository and running:
 
 `python setup.py install`
 
-## Set Up
+## Authentication
 
-The Cirro client can save your login tokens securely, so you don't have to re-authenticate every time you use the CLI.
+Upon first use, the Cirro client will ask if you would like to save your login information and give you a link to authenticate through the web browser.
 
-To set this up, run:
-
-```
-cirro-cli configure
-
-? Would you like to cache your login? Yes
-```
-
-Upon first use, it will give you a link to authenticate through the web browser.
+If you need to change your credentials after this point, and you've opted to save your login, please see the [clearing saved login](#clearing-saved-login) section.
 
 ## Command Line Usage
 
@@ -133,3 +125,8 @@ It will pause for an increasing amount of time for each retry attempt.
 base_url = data-portal.io
 transfer_max_retries = 15
 ```
+
+### Clearing saved login
+
+You can clear your saved login information by removing the `~/.cirro/token.dat` file from your system or
+by running `cirro-cli configure` and selecting **No** when it asks if you'd like to save your login information.
