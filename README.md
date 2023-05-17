@@ -17,11 +17,16 @@ or by cloning the repository and running:
 `python setup.py install`
 
 ## Set Up
-Run a one-time configuration of your login credentials in the command line using:
 
-`cirro-cli configure`
+The Cirro client can save your login tokens securely, so you don't have to re-authenticate every time you use the CLI.
 
- This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
+To set this up, run:
+
+```
+cirro-cli configure
+
+? Would you like to cache your login? Yes
+```
 
 
 ## Command Line Usage
