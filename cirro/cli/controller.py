@@ -1,5 +1,5 @@
 from cirro.api.clients.portal import DataPortalClient
-from cirro.api.config import UserConfig, save_user_config
+from cirro.api.config import UserConfig, save_user_config, load_user_config
 from cirro.api.models.dataset import CreateIngestDatasetInput
 from cirro.api.models.process import Executor
 from cirro.cli.interactive.auth_args import gather_auth_config
@@ -19,8 +19,7 @@ from cirro.helpers import WorkflowConfigBuilder
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
-
-    # Instantiate the Cirro Data Portal client
+    _check_configure()
     cirro = DataPortalClient()
 
     # If the user provided the --interactive flag
@@ -47,6 +46,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
+    _check_configure()
     cirro = DataPortalClient()
     projects = cirro.project.list()
     processes = cirro.process.list(process_type=Executor.INGEST)
@@ -83,6 +83,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
+    _check_configure()
     cirro = DataPortalClient()
 
     projects = cirro.project.list()
@@ -114,7 +115,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
 
 def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
-
+    _check_configure()
     cirro = DataPortalClient()
     process_options = cirro.process.list(process_type=Executor.NEXTFLOW)
     resources_folder, repo_prefix = get_output_resources_path()
@@ -171,4 +172,15 @@ def run_configure():
     auth_method, auth_method_config = gather_auth_config()
     save_user_config(UserConfig(auth_method=auth_method,
                                 auth_method_config=auth_method_config,
-                                base_url=None))
+                                base_url=None,
+                                transfer_max_retries=None))
+
+
+def _check_configure():
+    """
+    Prompts the user to do initial configuration if needed
+    """
+    if load_user_config() is not None:
+        return
+
+    run_configure()

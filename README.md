@@ -16,13 +16,11 @@ or by cloning the repository and running:
 
 `python setup.py install`
 
-## Set Up
-Run a one-time configuration of your login credentials in the command line using:
+## Authentication
 
-`cirro-cli configure`
+Upon first use, the Cirro client will ask if you would like to save your login information and give you a link to authenticate through the web browser.
 
- This will ask you to select an authentication method. If you are a member of Fred Hutch or the University of Washington, select the default method which will give you a link to use to log through the browser. If you are not a member of those institutions, select the non-institutional authentication method and enter your Data Portal username and password into the command line when prompted.
-
+If you need to change your credentials after this point, and you've opted to save your login, please see the [clearing saved login](#clearing-saved-login) section.
 
 ## Command Line Usage
 
@@ -127,3 +125,8 @@ It will pause for an increasing amount of time for each retry attempt.
 base_url = data-portal.io
 transfer_max_retries = 15
 ```
+
+### Clearing saved login
+
+You can clear your saved login information by removing the `~/.cirro/token.dat` file from your system or
+by running `cirro-cli configure` and selecting **No** when it asks if you'd like to save your login information.
