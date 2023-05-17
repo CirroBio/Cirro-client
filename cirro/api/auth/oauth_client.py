@@ -59,7 +59,7 @@ def _authenticate(client_id: str, auth_endpoint: str):
     auth_status = 'authorization_pending'
     while auth_status == 'authorization_pending':
         time.sleep(flow['interval'])
-        if device_expiry < datetime.now():
+        if device_expiry < datetime.now().astimezone():
             raise RuntimeError('Authentication timed out')
 
         resp = requests.post(f'{auth_endpoint}/token', params=params)
