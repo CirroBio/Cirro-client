@@ -73,6 +73,8 @@ class AppConfig:
                          os.environ.get('PW_BASE_URL') or
                          (self.user_config.base_url if self.user_config else None) or
                          Constants.default_base_url)
+        self.transfer_max_retries = self.user_config.transfer_max_retries\
+            if self.user_config else Constants.default_max_retries
         self._init_config()
 
     def _init_config(self):
