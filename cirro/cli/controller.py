@@ -171,4 +171,5 @@ def run_configure():
     auth_method, auth_method_config = gather_auth_config()
     save_user_config(UserConfig(auth_method=auth_method,
                                 auth_method_config=auth_method_config,
-                                base_url=None))
+                                base_url=None,
+                                transfer_max_retries=None))

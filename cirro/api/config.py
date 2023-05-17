@@ -31,6 +31,7 @@ def save_user_config(user_config: UserConfig):
     }
     if original_user_config:
         ini_config['General']['base_url'] = original_user_config.base_url
+        ini_config['General']['transfer_max_retries'] = str(original_user_config.transfer_max_retries)
 
     ini_config[user_config.auth_method] = user_config.auth_method_config
     Constants.config_path.parent.mkdir(exist_ok=True)
