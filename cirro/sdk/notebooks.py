@@ -4,6 +4,8 @@ from pathlib import Path
 import re
 
 from typing import Any
+from cirro import DataPortal
+from cirro.sdk.dataset import DataPortalDataset
 from cirro.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
 
 
@@ -40,10 +42,10 @@ def expose_param(
 
     # Check to see if there is a value provided in .cirro/params.json
     # (which would indicate that this notebook is running in headless mode)
-    if _load_param(id) is not None:
+    if _load_param(id, param_type) is not None:
         
         # Use the value from that file
-        return _load_param(id)
+        return _load_param(id, param_type)
     
     # If no value is present, the notebook must be running interactively
     else:
@@ -67,6 +69,12 @@ def _save_param_schema(**param_schema):
     Add the parameter schema to .cirro/form.json
     """
 
+    # If the default value is a Dataset
+    if isinstance(param_schema['default'], DataPortalDataset):
+
+        # Convert to {project_uuid}::{dataset_uuid}
+        param_schema['default'] = _dehydrate_dataset(param_schema['default'])
+
     # Load the existing schema
     schema = FormSchema()
 
@@ -76,6 +84,42 @@ def _save_param_schema(**param_schema):
     # Save the updated schema
     schema.save()
 
+
+def _dehydrate_dataset(ds: DataPortalDataset) -> str:
+    """Return the {project_uuid}::{dataset_uuid}"""
+
+    return f"{ds.project_id}::{ds.id}"
+
+
+def _hydrate_dataset(val: str) -> DataPortalDataset:
+    """Parse the {project_id}::{dataset_id} to the Dataset object."""
+
+    if not "::" in val:
+        raise DataPortalInputError(f"Invalid Dataset id: {val}")
+    
+    # Parse the project ID and dataset ID
+    project_id, dataset_id = val.split("::", 1)
+
+    try:
+        portal = DataPortal()
+    except Exception as e:
+        msg = f"Could not instantiate DataPortal: {str(e)}"
+        raise DataPortalAssetNotFound(msg)
+    
+    try:
+        project = portal.get_project_by_id(project_id)
+    except Exception as e:
+        msg = f"Could not load project {project_id}: {str(e)}"
+        raise DataPortalAssetNotFound(msg)
+
+    try:
+        dataset = project.get_dataset_by_id(dataset_id)
+    except Exception as e:
+        msg = f"Could not load dataset {dataset_id}: {str(e)}"
+        raise DataPortalAssetNotFound(msg)
+    
+    return dataset
+    
 
 class FormSchema:
     """Form schema object"""
@@ -140,13 +184,20 @@ class FormSchema:
 
 
 @lru_cache
-def _load_param(id: str):
+def _load_param(id: str, param_type: str):
     """Check to see if there is a value provided in .cirro/params.json."""
 
     if Path('.cirro').exists() and Path('.cirro/params.json').exists():
         with open('.cirro/params.json', 'r') as handle:
             params = json.load(handle)
-            return params.get(id)
+            val = params.get(id)
+
+            # If the value is expected to be a dataset
+            if param_type == "dataset":
+                return _hydrate_dataset(val)
+            # For all other values
+            else:
+                return val
 
 
 def _get_id(title: str):
@@ -180,7 +231,8 @@ def _get_param_type(default):
         bool: "boolean",
         str: "string",
         int: "integer",
-        float: "number"
+        float: "number",
+        DataPortalDataset: "dataset"
     }.get(type(default))
 
     if param_type is None:
