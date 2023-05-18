@@ -136,7 +136,7 @@ class FormSchema:
         """Add a param to the schema."""
 
         # If the parameter already exists
-        saved_param = self._schema['form']['properties'].get(id)
+        saved_param = self._schema['form']['properties'].get('id')
         if saved_param is not None:
 
             # If any of the values are different
@@ -147,10 +147,17 @@ class FormSchema:
                     print(f"Warning - changing {kw} of '{id}' from {old_val} to {new_val}")
 
         # Set up the parameter definition
+        id = param_schema['id']
+        del param_schema['id']
         self._schema['form']['properties'][id] = param_schema
 
     def save(self):
         """Save the schema as JSON."""
+        # If the parent directory doesn't exist
+        if not Path(self._fp).parent.exists():
+            # Create the parent directory
+            Path(self._fp).parent.mkdir(parents=True, exist_ok=True)
+
         with open(self._fp, 'w') as handle:
             json.dump(self._schema, handle, indent=4)
 
@@ -208,7 +215,7 @@ def _get_id(title: str):
         raise DataPortalInputError("Parameter title must be a string")
 
     # The title may only contain letters, numbers, space, underscore, and dash
-    if not re.match("^[A-Za-z0-9_- ]*$", title):
+    if not re.match("^[A-Za-z0-9_-]*$", title.replace(" ", "")):
         msg = "Parameter title may only contain numbers, letters, and minimal punctuation"
         raise DataPortalInputError(msg)
     
