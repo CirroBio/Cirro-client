@@ -53,6 +53,42 @@ class DataPortalDataset(DataPortalAsset):
                 )
             ]
         )
+    
+    def get_file(self, name):
+        """
+        Return the indicated file in the dataset.
+        Query by:
+            1. Exact match of file path
+            2. Exact match of file name
+            3. Wildcard expression
+        """
+
+        # Get the full list of files
+        files = self.list_files()
+
+        # Check for an exact match of the full filepath
+        matching = [f for f in files if f.name == name]
+        # If there is only one
+        if len(matching) == 1:
+            # Return the match
+            return matching[0]
+
+        # Check for an exact match of the file name
+        matching = [f for f in files if f.name.rsplit("/")[-1] == name]
+        # If there is only one
+        if len(matching) == 1:
+            # Return the match
+            return matching[0]
+        
+        # Filter on wildcard glob
+        matching = files.filter_by_pattern(name)
+        # If there is only one
+        if len(matching) == 1:
+            # Return the match
+            return matching[0]
+        
+        # Otherwise, inform the user and return None
+        print(f"Could not find a file uniquely matching {name}")
 
     def download_files(self, download_location: str = None) -> None:
         """Download all of the files from the dataset to a local directory."""
