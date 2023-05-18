@@ -1,0 +1,20 @@
+{
+    "form": {
+        "type": "object",
+        "properties": {
+            "dataset": {
+                "title": "Dataset",
+                "type": "dataset",
+                "description": "VirScan analysis results to plot",
+                "default": "05e13a4d-5d3a-4615-b916-b0917239bd84::f8e25e02-d6f8-41f2-91c3-4a3e982a32d3"
+            },
+            "number_of_organisms": {
+                "title": "Number of organisms",
+                "type": "integer",
+                "description": null,
+                "default": 10
+            }
+        }
+    },
+    "ui": {}
+}
