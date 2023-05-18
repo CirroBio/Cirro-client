@@ -54,7 +54,8 @@ def expose_param(
             id=id,
             type=param_type,
             description=description,
-            default=default
+            default=default,
+            **kwargs
         )
 
         # Return the default value
