@@ -105,10 +105,10 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 ### Supported environment variables
 
-| Name        | Description                   | Default         |
-|-------------|-------------------------------|-----------------|
-| PW_HOME     | Local configuration directory | ~/.cirro        |
-| PW_BASE_URL | Base URL of the data portal   | data-portal.io  |
+| Name        | Description                   | Default   |
+|-------------|-------------------------------|-----------|
+| PW_HOME     | Local configuration directory | ~/.cirro  |
+| PW_BASE_URL | Base URL of the data portal   | cirro.bio |
 
 ### Configuration
 
@@ -122,7 +122,7 @@ It will pause for an increasing amount of time for each retry attempt.
 
 ```ini
 [General]
-base_url = data-portal.io
+base_url = cirro.bio
 transfer_max_retries = 15
 ```
 
