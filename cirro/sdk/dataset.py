@@ -30,6 +30,7 @@ class DataPortalDataset(DataPortalAsset):
         self.info = dataset.info
         self.params = dataset.params
         self.created_at = dataset.created_at
+        self.created_by = dataset.created_by
         self._client = client
 
     def __str__(self):

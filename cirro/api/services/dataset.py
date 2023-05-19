@@ -44,6 +44,7 @@ class DatasetService(FileEnabledService):
                 infoJson
                 paramJson
                 process
+                createdBy
                 createdAt
                 updatedAt
               }
@@ -79,6 +80,7 @@ class DatasetService(FileEnabledService):
                   infoJson
                   process
                   project
+                  createdBy
                   createdAt
                   updatedAt
                 }

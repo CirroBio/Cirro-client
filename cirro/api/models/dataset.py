@@ -42,6 +42,7 @@ class Dataset:
     info: Dict[str, Any]
     params: Dict[str, Any]
     created_at: datetime
+    created_by: str
 
     @classmethod
     def from_record(cls, record):
@@ -57,7 +58,8 @@ class Dataset:
             record.get('sourceDatasets'),
             safe_load_json(record.get('infoJson')),
             safe_load_json(record.get('paramJson')),
-            parse_json_date(record.get('createdAt'))
+            parse_json_date(record.get('createdAt')),
+            record.get('createdBy')
         )
 
     @property
