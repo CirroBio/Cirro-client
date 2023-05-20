@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cirro"
-version = "0.6.11"
+version = "0.7.0"
 description = "CLI tool and SDK for interacting with the Cirro platform"
 authors = ["Fred Hutch <cirro@fredhutch.org>"]
 license = "MIT"

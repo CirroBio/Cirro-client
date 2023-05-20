@@ -10,7 +10,7 @@ from requests import HTTPError
 class Constants:
     home = os.environ.get('PW_HOME', '~/.cirro')
     config_path = Path(home, 'config.ini').expanduser()
-    default_base_url = "data-portal.io"
+    default_base_url = 'cirro.bio'
     default_max_retries = 10
 
 
