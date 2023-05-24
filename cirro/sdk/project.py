@@ -3,6 +3,7 @@ from typing import Union
 
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.models.dataset import CreateIngestDatasetInput
+from cirro.api.models.exceptions import DataPortalModelException
 from cirro.api.models.project import Project
 from cirro.file_utils import get_files_in_directory
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
@@ -41,34 +42,35 @@ class DataPortalProject(DataPortalAsset):
     def list_datasets(self) -> DataPortalDatasets:
         """List all of the datasets available in the project."""
 
-        return DataPortalDatasets(
-            [
-                DataPortalDataset(d, self._client)
-                for d in self._client.dataset.find_by_project(self.id)
-            ]
-        )
+        if self._in_headless:
+            datasets = self._headless_project_data().get('datasets', [])
+
+        else:
+            datasets = self._client.dataset.find_by_project(self.id)
+
+        return DataPortalDatasets([
+            DataPortalDataset(d, self._client)
+            for d in datasets
+        ])
 
     def get_dataset_by_name(self, name: str = None) -> DataPortalDataset:
         """Return the dataset with the specified name."""
 
-        dataset = next(iter(self._client.dataset.find_by_project(self.id, name=name)), None)
-        if dataset is None:
-            raise DataPortalAssetNotFound(f'Dataset with name {name} not found')
-        return DataPortalDataset(dataset, self._client)
+        return self.list_datasets().get_by_name(name)
 
     def get_dataset_by_id(self, _id: str = None) -> DataPortalDataset:
         """Return the dataset with the specified id."""
 
-        dataset = self._client.dataset.get_from_id(_id=_id)
-        if dataset is None:
-            raise DataPortalAssetNotFound(f'Dataset with ID {_id} not found')
-        return DataPortalDataset(dataset, self._client)
+        return self.list_datasets().get_by_id(id)
 
     def list_references(self, reference_type: str = None) -> DataPortalReferences:
         """
         List the references available in a project.
         Optionally filter to references of a particular type (identified by name)
         """
+
+        if self._in_headless:
+            raise DataPortalModelException("Cannot access references")
 
         # Get the complete list of references which are available
         references = DataPortalReferenceTypes(
@@ -117,6 +119,9 @@ class DataPortalProject(DataPortalAsset):
 
         If the files parameter is not provided, it will upload all files in the upload folder
         """
+
+        if self._in_headless:
+            raise DataPortalModelException("Cannot upload dataset in headless mode")
 
         if name is None:
             raise DataPortalInputError("Must provide name for new dataset")

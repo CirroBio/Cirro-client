@@ -2,6 +2,7 @@ from typing import Union
 
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.models.dataset import Dataset
+from cirro.api.models.exceptions import DataPortalModelException
 from cirro.api.models.process import RunAnalysisCommand
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
@@ -109,6 +110,8 @@ class DataPortalDataset(DataPortalAsset):
         The process can be provided as either a DataPortalProcess object,
         or a string which corresponds to the name or ID of the process.
         """
+        if self._in_headless:
+            raise DataPortalModelException("Cannot run analysis in headless mode")
         if name is None:
             raise DataPortalInputError("Must specify 'name' for run_analysis")
         if process is None:
