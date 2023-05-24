@@ -53,6 +53,7 @@ class DataPortalDataset(DataPortalAsset):
                 )
             ]
         )
+
     def get_file(self, name):
         """
         Return the indicated file in the dataset.
