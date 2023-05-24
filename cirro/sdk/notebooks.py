@@ -23,7 +23,7 @@ def expose_param(
         title:          Name of the parameter
         default:        Default value of the parameter
         description:    (optional) Description of the parameter
-    
+
     Any additional keyword arguments will be used as parameters of
     the JSON schema which renders the webform.
     """
@@ -43,10 +43,10 @@ def expose_param(
     # Check to see if there is a value provided in .cirro/params.json
     # (which would indicate that this notebook is running in headless mode)
     if _load_param(id, param_type) is not None:
-        
+
         # Use the value from that file
         return _load_param(id, param_type)
-    
+
     # If no value is present, the notebook must be running interactively
     else:
 
@@ -62,7 +62,7 @@ def expose_param(
 
         # Return the default value
         return default
-    
+
 
 def _save_param_schema(**param_schema):
     """
@@ -94,9 +94,9 @@ def _dehydrate_dataset(ds: DataPortalDataset) -> str:
 def _hydrate_dataset(val: str) -> DataPortalDataset:
     """Parse the {project_id}::{dataset_id} to the Dataset object."""
 
-    if not "::" in val:
+    if "::" not in val:
         raise DataPortalInputError(f"Invalid Dataset id: {val}")
-    
+
     # Parse the project ID and dataset ID
     project_id, dataset_id = val.split("::", 1)
 
@@ -105,7 +105,7 @@ def _hydrate_dataset(val: str) -> DataPortalDataset:
     except Exception as e:
         msg = f"Could not instantiate DataPortal: {str(e)}"
         raise DataPortalAssetNotFound(msg)
-    
+
     try:
         project = portal.get_project_by_id(project_id)
     except Exception as e:
@@ -117,9 +117,9 @@ def _hydrate_dataset(val: str) -> DataPortalDataset:
     except Exception as e:
         msg = f"Could not load dataset {dataset_id}: {str(e)}"
         raise DataPortalAssetNotFound(msg)
-    
+
     return dataset
-    
+
 
 class FormSchema:
     """Form schema object"""
@@ -144,7 +144,8 @@ class FormSchema:
                 old_val = saved_param.get(kw)
                 # Warn the user
                 if old_val != new_val:
-                    print(f"Warning - changing {kw} of '{id}' from {old_val} to {new_val}")
+                    msg = f"Warning - changing {kw} of '{saved_param}' from {old_val} to {new_val}"
+                    print(msg)
 
         # Set up the parameter definition
         id = param_schema['id']
@@ -177,7 +178,7 @@ class FormSchema:
             if not isinstance(schema[kw], dict):
                 msg = f"Invalid schema: {self._fp} - {kw} should be dict"
                 raise DataPortalAssetNotFound(msg)
-            
+
         return schema
 
     def _empty_schema(self) -> dict:
@@ -218,12 +219,12 @@ def _get_id(title: str):
     if not re.match("^[A-Za-z0-9_-]*$", title.replace(" ", "")):
         msg = "Parameter title may only contain numbers, letters, and minimal punctuation"
         raise DataPortalInputError(msg)
-    
+
     # The first character must be a letter
     if not re.match("^[A-Za-z]$", title[:1]):
         msg = "The first character must be a letter"
         raise DataPortalInputError(msg)
-    
+
     id = title.lower()
     for chr in [' ', '-']:
         id = id.replace(chr, '_')

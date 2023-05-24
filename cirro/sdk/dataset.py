@@ -53,7 +53,6 @@ class DataPortalDataset(DataPortalAsset):
                 )
             ]
         )
-    
     def get_file(self, name):
         """
         Return the indicated file in the dataset.
@@ -79,14 +78,14 @@ class DataPortalDataset(DataPortalAsset):
         if len(matching) == 1:
             # Return the match
             return matching[0]
-        
+
         # Filter on wildcard glob
         matching = files.filter_by_pattern(name)
         # If there is only one
         if len(matching) == 1:
             # Return the match
             return matching[0]
-        
+
         # Otherwise, inform the user and return None
         print(f"Could not find a file uniquely matching {name}")
 

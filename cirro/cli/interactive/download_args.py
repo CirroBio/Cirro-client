@@ -6,8 +6,9 @@ from cirro.api.models.dataset import Dataset
 from cirro.api.models.file import File
 from cirro.api.models.project import Project
 from cirro.cli.interactive.common_args import ask_project
-from cirro.cli.interactive.utils import prompt_wrapper, InputError
+from cirro.cli.interactive.utils import prompt_wrapper
 from cirro.cli.models import DownloadArguments
+from cirro.sdk.exceptions import DataPortalInputError
 from cirro.utils import format_date
 
 
@@ -32,7 +33,7 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     for dataset in datasets:
         if f'{dataset.name} - {dataset.id}' == choice:
             return dataset.id
-    raise InputError("User must select a dataset to download")
+    raise DataPortalInputError("User must select a dataset to download")
 
 
 def ask_dataset_files(files: List[File]) -> List[File]:
