@@ -43,7 +43,7 @@ class IntegrationTestNotebookAutomation(unittest.TestCase):
             json.dump(
                 dict(
                     person="Kenji",
-                    food="hot dog",
+                    food="hot dogs",
                     emotion="mustard"
                 ),
                 handle
