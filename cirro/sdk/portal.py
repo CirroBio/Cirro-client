@@ -4,6 +4,7 @@ from cirro.api.models.exceptions import DataPortalModelException
 from cirro.api.models.process import Executor
 from cirro.api.models.project import Project
 from cirro.sdk.asset import DataPortalAsset
+from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
 from cirro.sdk.project import DataPortalProject, DataPortalProjects
 from cirro.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
@@ -75,6 +76,27 @@ class DataPortal(DataPortalAsset):
         """Return the project with the specified id."""
 
         return self.list_projects().get_by_id(_id)
+
+    def list_datasets(self) -> DataPortalDatasets:
+        """Return the list of datasets available across all projects."""
+
+        return DataPortalDatasets(
+            [
+                ds
+                for project in self.list_projects()
+                for ds in project.list_datasets()
+            ]
+        )
+
+    def get_dataset_by_name(self, name: str = None) -> DataPortalDataset:
+        """Return the dataset with the specified name."""
+
+        return self.list_datasets().get_by_name(name)
+
+    def get_dataset_by_id(self, _id: str = None) -> DataPortalDataset:
+        """Return the dataset with the specified id."""
+
+        return self.list_datasets().get_by_id(_id)
 
     def list_processes(self, ingest=False) -> DataPortalProcesses:
         """
