@@ -5,11 +5,11 @@ from pathlib import Path
 
 class FormSchema:
     """Form schema object"""
+    FORM_FP = ".cirro/form.json"
 
-    def __init__(self, fp=".cirro/form.json"):
-        self._fp = fp
+    def __init__(self):
 
-        if Path(fp).exists():
+        if Path(self.FORM_FP).exists():
             self._schema = self._load_schema()
         else:
             self._schema = self._empty_schema()
@@ -37,28 +37,28 @@ class FormSchema:
     def save(self):
         """Save the schema as JSON."""
         # If the parent directory doesn't exist
-        if not Path(self._fp).parent.exists():
+        if not Path(self.FORM_FP).parent.exists():
             # Create the parent directory
-            Path(self._fp).parent.mkdir(parents=True, exist_ok=True)
+            Path(self.FORM_FP).parent.mkdir(parents=True, exist_ok=True)
 
-        with open(self._fp, 'w') as handle:
+        with open(self.FORM_FP, 'w') as handle:
             json.dump(self._schema, handle, indent=4)
 
     def _load_schema(self) -> dict:
-        with open(self._fp, 'r') as handle:
+        with open(self.FORM_FP, 'r') as handle:
             schema: dict = json.load(handle)
 
         if not isinstance(schema, dict):
-            msg = f"Invalid schema: {self._fp} - requires dict"
+            msg = f"Invalid schema: {self.FORM_FP} - requires dict"
             raise DataPortalAssetNotFound(msg)
 
         for kw in ['form', 'ui']:
             if schema.get(kw) is None:
-                msg = f"Invalid schema: {self._fp} - missing {kw}"
+                msg = f"Invalid schema: {self.FORM_FP} - missing {kw}"
                 raise DataPortalAssetNotFound(msg)
 
             if not isinstance(schema[kw], dict):
-                msg = f"Invalid schema: {self._fp} - {kw} should be dict"
+                msg = f"Invalid schema: {self.FORM_FP} - {kw} should be dict"
                 raise DataPortalAssetNotFound(msg)
 
         return schema
