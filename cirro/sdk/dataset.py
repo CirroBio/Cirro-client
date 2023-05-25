@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import Union
 
 from cirro.api.clients.portal import DataPortalClient
@@ -39,6 +40,7 @@ class DataPortalDataset(DataPortalAsset):
             for i in ['name', 'id', 'description', 'status']
         ])
 
+    @lru_cache
     def list_files(self) -> DataPortalFiles:
         """Return the list of files which make up the dataset."""
 
