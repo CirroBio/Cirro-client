@@ -14,11 +14,11 @@ class FormSchema:
         else:
             self._schema = self._empty_schema()
 
-    def add_param(self, **param_schema):
+    def add_param(self, param_id, **param_schema):
         """Add a param to the schema."""
 
         # If the parameter already exists
-        saved_param = self._schema['form']['properties'].get('id')
+        saved_param = self._schema['form']['properties'].get(param_id)
         if saved_param is not None:
 
             # If any of the values are different
@@ -30,9 +30,7 @@ class FormSchema:
                     print(msg)
 
         # Set up the parameter definition
-        id = param_schema['id']
-        del param_schema['id']
-        self._schema['form']['properties'][id] = param_schema
+        self._schema['form']['properties'][param_id] = param_schema
 
     def save(self):
         """Save the schema as JSON."""

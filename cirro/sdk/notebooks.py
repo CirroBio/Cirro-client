@@ -53,8 +53,8 @@ def expose_param(
 
         # Add the parameter definition to the .cirro/form.json
         _save_param_schema(
+            id,
             title=title,
-            id=id,
             type=param_type,
             description=description,
             default=default,
@@ -65,7 +65,7 @@ def expose_param(
         return default
 
 
-def _save_param_schema(**param_schema):
+def _save_param_schema(param_id, **param_schema):
     """
     Add the parameter schema to .cirro/form.json
     """
@@ -80,7 +80,7 @@ def _save_param_schema(**param_schema):
     schema = FormSchema()
 
     # Add the param
-    schema.add_param(**param_schema)
+    schema.add_param(param_id, **param_schema)
 
     # Save the updated schema
     schema.save()
