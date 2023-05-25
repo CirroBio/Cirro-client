@@ -87,19 +87,15 @@ def _save_param_schema(**param_schema):
 
 
 def _dehydrate_dataset(ds: DataPortalDataset) -> str:
-    """Return the {project_uuid}::{dataset_uuid}"""
+    """Return the dataset_uuid"""
 
-    return f"{ds.project_id}::{ds.id}"
+    return ds.id
 
 
 def _hydrate_dataset(val: str) -> DataPortalDataset:
-    """Parse the {project_id}::{dataset_id} to the Dataset object."""
-
-    if "::" not in val:
-        raise DataPortalInputError(f"Invalid Dataset id: {val}")
-
-    # Parse the project ID and dataset ID
-    project_id, dataset_id = val.split("::", 1)
+    """
+    Parse the dataset_id to the Dataset object.
+    """
 
     try:
         portal = DataPortal()
@@ -107,19 +103,7 @@ def _hydrate_dataset(val: str) -> DataPortalDataset:
         msg = f"Could not instantiate DataPortal: {str(e)}"
         raise DataPortalAssetNotFound(msg)
 
-    try:
-        project = portal.get_project_by_id(project_id)
-    except Exception as e:
-        msg = f"Could not load project {project_id}: {str(e)}"
-        raise DataPortalAssetNotFound(msg)
-
-    try:
-        dataset = project.get_dataset_by_id(dataset_id)
-    except Exception as e:
-        msg = f"Could not load dataset {dataset_id}: {str(e)}"
-        raise DataPortalAssetNotFound(msg)
-
-    return dataset
+    return portal.get_dataset_by_id(val)
 
 
 @lru_cache
