@@ -2,7 +2,7 @@ import fnmatch
 from abc import abstractmethod
 import json
 import os
-from typing import List, TypeVar, Union
+from typing import List, Optional, TypeVar
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.models.file import File
 
@@ -27,7 +27,7 @@ class DataPortalAsset:
         return self._headless_project is not None
 
     @property
-    def _headless_project(self) -> Union[str, None]:
+    def _headless_project(self) -> Optional[str]:
         return os.getenv("CIRRO_NB_PROJECT")
 
     def _headless_project_data(self) -> dict:
