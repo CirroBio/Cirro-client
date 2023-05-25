@@ -5,9 +5,9 @@ import re
 
 from typing import Any
 from cirro import DataPortal
+from cirro.helpers.form import FormSchema
 from cirro.sdk.dataset import DataPortalDataset
 from cirro.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
-from cirro.sdk.helpers import FormSchema
 
 
 def expose_param(
