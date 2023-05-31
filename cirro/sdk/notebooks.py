@@ -7,7 +7,7 @@ from typing import Any
 from cirro import DataPortal
 from cirro.helpers.form import FormSchema
 from cirro.sdk.dataset import DataPortalDataset
-from cirro.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
+from cirro.exceptions import DataPortalAssetNotFound, DataPortalInputError
 
 
 def expose_param(

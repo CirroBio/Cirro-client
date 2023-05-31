@@ -6,7 +6,7 @@ from cirro.api.models.dataset import Dataset
 from cirro.api.models.exceptions import DataPortalModelException
 from cirro.api.models.process import RunAnalysisCommand
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
-from cirro.sdk.exceptions import DataPortalInputError
+from cirro.exceptions import DataPortalInputError
 from cirro.sdk.file import DataPortalFile, DataPortalFiles
 from cirro.sdk.helpers import parse_process_name_or_id
 from cirro.sdk.process import DataPortalProcess

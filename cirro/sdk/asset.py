@@ -6,7 +6,7 @@ from typing import List, Optional, TypeVar
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.models.file import File
 
-from cirro.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
+from cirro.exceptions import DataPortalAssetNotFound, DataPortalInputError
 
 
 class DataPortalAsset:

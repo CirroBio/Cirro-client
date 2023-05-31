@@ -1,4 +1,4 @@
-from cirro.sdk.exceptions import DataPortalAssetNotFound
+from cirro.exceptions import DataPortalAssetNotFound
 import json
 from pathlib import Path
 

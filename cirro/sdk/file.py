@@ -6,7 +6,7 @@ import pandas as pd
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
-from cirro.sdk.exceptions import DataPortalInputError
+from cirro.exceptions import DataPortalInputError
 
 
 class DataPortalFile(DataPortalAsset):

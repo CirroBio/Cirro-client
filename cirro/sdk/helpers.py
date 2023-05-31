@@ -3,7 +3,7 @@ from gql.transport.exceptions import TransportQueryError
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.models.exceptions import DataPortalModelException
 from cirro.api.models.process import Process
-from cirro.sdk.exceptions import DataPortalInputError
+from cirro.exceptions import DataPortalInputError
 from cirro.sdk.process import DataPortalProcess
 
 

@@ -8,7 +8,7 @@ from cirro.api.models.project import Project
 from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import prompt_wrapper
 from cirro.cli.models import DownloadArguments
-from cirro.sdk.exceptions import DataPortalInputError
+from cirro.exceptions import DataPortalInputError
 from cirro.utils import format_date
 
 

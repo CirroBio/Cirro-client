@@ -8,7 +8,7 @@ from cirro.api.models.project import Project
 from cirro.file_utils import get_files_in_directory
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets
-from cirro.sdk.exceptions import DataPortalAssetNotFound, DataPortalInputError
+from cirro.exceptions import DataPortalAssetNotFound, DataPortalInputError
 from cirro.sdk.helpers import parse_process_name_or_id
 from cirro.sdk.process import DataPortalProcess
 from cirro.sdk.reference import DataPortalReference, DataPortalReferences
