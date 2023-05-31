@@ -8,6 +8,10 @@ from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
 from cirro.sdk.project import DataPortalProject, DataPortalProjects
 from cirro.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
+from cirro.api.models.file import File
+import json
+import os
+from typing import Optional
 
 
 class DataPortal(DataPortalAsset):
@@ -35,6 +39,28 @@ class DataPortal(DataPortalAsset):
             # Set up default client if not provided
             else:
                 self._client = DataPortalClient()
+
+    @property
+    def _in_headless(self) -> bool:
+        """
+        Determine if this is a headless execution environment,
+        base on whether $CIRRO_NB_PROJECT is set.
+        """
+        return self._headless_project is not None
+
+    @property
+    def _headless_project(self) -> Optional[str]:
+        return os.getenv("CIRRO_NB_PROJECT")
+
+    def _headless_project_data(self) -> dict:
+        """
+        Read the project data provided for the headless execution environment.
+        """
+        return json.loads(
+            self._client.file.get_file(
+                File(relative_path="manifest.json")
+            ).decode('utf-8')
+        )
 
     def list_projects(self) -> DataPortalProjects:
         """List all of the projects available in the Data Portal."""

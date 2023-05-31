@@ -1,10 +1,7 @@
 import fnmatch
 from abc import abstractmethod
-import json
-import os
-from typing import List, Optional, TypeVar
+from typing import List, TypeVar
 from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.file import File
 
 from cirro.exceptions import DataPortalAssetNotFound, DataPortalInputError
 
@@ -17,28 +14,6 @@ class DataPortalAsset:
     @abstractmethod
     def name(self):
         pass
-
-    @property
-    def _in_headless(self) -> bool:
-        """
-        Determine if this is a headless execution environment,
-        base on whether $CIRRO_NB_PROJECT is set.
-        """
-        return self._headless_project is not None
-
-    @property
-    def _headless_project(self) -> Optional[str]:
-        return os.getenv("CIRRO_NB_PROJECT")
-
-    def _headless_project_data(self) -> dict:
-        """
-        Read the project data provided for the headless execution environment.
-        """
-        return json.loads(
-            self._client.file.get_file(
-                File(relative_path="manifest.json")
-            ).decode('utf-8')
-        )
 
 
 T = TypeVar('T', bound=DataPortalAsset)
