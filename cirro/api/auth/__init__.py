@@ -1,12 +1,10 @@
 from cirro.api.auth.base import AuthInfo
 from cirro.api.auth.iam import IAMAuth
 from cirro.api.auth.oauth_client import ClientAuth
-from cirro.api.auth.username import UsernameAndPasswordAuth
 
 __all__ = [
     'AuthInfo',
     'IAMAuth',
-    'UsernameAndPasswordAuth',
     'ClientAuth',
     'get_auth_info_from_config'
 ]
@@ -23,7 +21,6 @@ def get_auth_info_from_config(app_config: AppConfig):
 
     auth_methods = [
         ClientAuth,
-        UsernameAndPasswordAuth,
         IAMAuth
     ]
     matched_auth_method = next((m for m in auth_methods if m.__name__ == user_config.auth_method), None)
@@ -43,9 +40,3 @@ def get_auth_info_from_config(app_config: AppConfig):
 
     if matched_auth_method == IAMAuth:
         return IAMAuth(region=app_config.region, **auth_config)
-
-    if matched_auth_method == UsernameAndPasswordAuth:
-        return UsernameAndPasswordAuth(region=app_config.region,
-                                       client_id=app_config.client_id,
-                                       user_pool_id=app_config.user_pool_id,
-                                       **auth_config)
