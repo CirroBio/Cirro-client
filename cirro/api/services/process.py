@@ -51,6 +51,7 @@ class ProcessService(FileEnabledService):
                   }
                 }
               }
+              nextToken
             }
           }
         '''

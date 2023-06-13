@@ -27,6 +27,7 @@ class ProjectService(FileEnabledService):
                 desc
                 status
               }
+              nextToken
             }
           }
         '''
