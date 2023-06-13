@@ -4,6 +4,7 @@ from cirro.api.clients.utils import filter_deleted
 from cirro.api.models.file import FileAccessContext
 from cirro.api.models.project import Project
 from cirro.api.models.reference import Reference, References
+from cirro.api.services.base import fetch_all_items
 from cirro.api.services.file import FileEnabledService
 from cirro.file_utils import filter_files_by_pattern
 
@@ -30,9 +31,9 @@ class ProjectService(FileEnabledService):
           }
         '''
 
-        resp = self._api_client.query(query)['listProjects']
-        items = filter_deleted(resp['items'])
-        return [Project.from_record(item) for item in items]
+        items = fetch_all_items(self._api_client, query, {})
+        not_deleted = filter_deleted(items)
+        return [Project.from_record(item) for item in not_deleted]
 
     def find_by_name(self, name: str) -> Optional[Project]:
         """
