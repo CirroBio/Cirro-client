@@ -5,6 +5,7 @@ from cirro.api.models.file import FileAccessContext, CheckDataTypesInput
 from cirro.api.models.form_specification import ParameterSpecification
 from cirro.api.models.process import Executor, RunAnalysisCommand, Process
 from cirro.api.models.s3_path import S3Path
+from cirro.api.services.base import fetch_all_items
 from cirro.api.services.file import FileEnabledService
 
 
@@ -56,8 +57,10 @@ class ProcessService(FileEnabledService):
         item_filter = {}
         if process_type:
             item_filter['executor'] = {'eq': process_type.value}
-        resp = self._api_client.query(query, variables={'filter': item_filter})['listProcesses']
-        return [Process.from_record(p) for p in resp['items']]
+
+        items = fetch_all_items(self._api_client, query,
+                                input_variables={'filter': item_filter})
+        return [Process.from_record(p) for p in items]
 
     def get_process(self, process_id: str) -> Process:
         """
