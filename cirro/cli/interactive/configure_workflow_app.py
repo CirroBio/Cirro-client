@@ -157,10 +157,6 @@ class WorkflowConfig:
         self.serve_workflow_info()
         self.serve_parameter_info()
 
-        st.write(json.dumps(self.dynamo, indent=4))
-        st.write(json.dumps(self.form, indent=4))
-        st.write(json.dumps(self.input, indent=4))
-
     def serve_workflow_info(self):
         """Allow the user to edit general information about the workflow."""
 
@@ -393,6 +389,7 @@ class WorkflowConfig:
     def long_name(self, value: str):
         self.dynamo["name"] = value
         self.dynamo["id"] = value.lower().strip().replace(" ", "-")
+        self.save()
 
     @property
     def description(self):
@@ -402,6 +399,7 @@ class WorkflowConfig:
     @description.setter
     def description(self, value):
         self.dynamo["desc"] = value
+        self.save()
 
     @property
     def executor(self):
@@ -411,6 +409,7 @@ class WorkflowConfig:
     @executor.setter
     def executor(self, value):
         self.dynamo["executor"] = value.upper()
+        self.save()
 
 
 def read_json(fp) -> dict:
