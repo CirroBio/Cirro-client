@@ -1,20 +1,19 @@
+import os
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.config import UserConfig, save_user_config, load_user_config
 from cirro.api.models.dataset import CreateIngestDatasetInput
 from cirro.api.models.process import Executor
 from cirro.cli.interactive.auth_args import gather_auth_config
+from cirro.cli.interactive import configure_workflow_app
+from cirro.cli.interactive.configure_workflow_app import ask_workflow_directory
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
 from cirro.cli.interactive.list_dataset_args import gather_list_arguments
 from cirro.cli.interactive.upload_args import gather_upload_arguments
 from cirro.cli.interactive.utils import get_id_from_name, get_item_from_name_or_id
-from cirro.cli.interactive.workflow_args import get_preprocess_script, get_additional_inputs, get_outputs, \
-    get_child_processes, \
-    get_repository, get_description, get_output_resources_path
-from cirro.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
 from cirro.file_utils import get_files_in_directory
-from cirro.helpers import WorkflowConfigBuilder
+from streamlit.web.cli import _main_run
 
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
@@ -115,57 +114,15 @@ def run_download(input_params: DownloadArguments, interactive=False):
 
 def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
-    _check_configure()
-    cirro = DataPortalClient()
-    process_options = cirro.process.list(process_type=Executor.NEXTFLOW)
-    resources_folder, repo_prefix = get_output_resources_path()
 
-    workflow = WorkflowConfigBuilder(repo_prefix)
+    # Ask the user what folder should be used
+    workflow_directory = ask_workflow_directory(".")
 
-    # Process record
-    repo = get_repository()
-    workflow.with_repository(repo)
+    # Move to that directory
+    os.chdir(workflow_directory)
 
-    # Prompt for optional pre-process script
-    if (preprocess_py := get_preprocess_script()) is not None:
-        workflow.with_preprocess(preprocess_py)
-
-    workflow.with_child_processes(
-        get_child_processes(process_options)
-    )
-
-    # Process compute
-    workflow.with_compute()
-
-    # Process form & process inputs
-    nf_schema = get_nextflow_schema(repo.repo_path, repo.version)
-    inputs = {}
-    if nf_schema is not None:
-        form = {**nf_schema}
-        convert_nf_schema(form, inputs)
-
-        workflow.with_description(nf_schema['description'])
-        workflow.with_form_inputs(form)
-
-    else:
-        workflow.with_description(get_description())
-        form, inputs = prompt_user_inputs()
-        workflow.with_form_inputs(form)
-
-    # Inputs based on form config
-    workflow.with_inputs(inputs)
-
-    # Additional process inputs
-    for input_name, input_value in get_additional_inputs():
-        workflow.with_input(input_name, input_value)
-
-    # Process outputs
-    for output in get_outputs():
-        workflow.with_output(output)
-    workflow.with_common_outputs()
-
-    # Save to resources
-    workflow.save_local(resources_folder)
+    # Launch the configuration app
+    os.system(f"streamlit run {configure_workflow_app}")
 
 
 def run_configure():
