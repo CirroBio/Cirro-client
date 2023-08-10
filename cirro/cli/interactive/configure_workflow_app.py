@@ -46,6 +46,18 @@ class WorkflowConfig:
             "webOptimizationJson": "s3://<RESOURCES_BUCKET>/<PROCESS_DIRECTORY>/process-output.json"
         }
 
+        self.form = {"form": {}, "ui": {}}
+        self.input = {}
+
+        self.output = {
+            "commands": [
+                {
+                    "command": "hot.Manifest",
+                    "params": {}
+                }
+            ]
+        }
+
         self.compute = "// Empty compute config"
         self.preprocess = ""
 
@@ -73,44 +85,12 @@ class WorkflowConfig:
         st.session_state["refresh_parameter_menu_ix"] = i
 
     @property
-    def form(self):
+    def refresh_workflow_menu_ix(self):
+        return st.session_state.get("refresh_workflow_menu_ix", 0)
 
-        return st.session_state.get(
-            "_form",
-            {"form": {}, "ui": {}}
-        )
-
-    @form.setter
-    def form(self, form):
-        st.session_state["_form"] = form
-
-    @property
-    def input(self):
-
-        return st.session_state.get("_input", {})
-
-    @input.setter
-    def input(self, input):
-        st.session_state["_input"] = input
-
-    @property
-    def output(self):
-
-        return st.session_state.get(
-            "_output",
-            {
-                "commands": [
-                    {
-                        "command": "hot.Manifest",
-                        "params": {}
-                    }
-                ]
-            }
-        )
-
-    @output.setter
-    def output(self, output):
-        st.session_state["_output"] = output
+    @refresh_workflow_menu_ix.setter
+    def refresh_workflow_menu_ix(self, i: int):
+        st.session_state["refresh_workflow_menu_ix"] = i
 
     def save(self):
         """Save all files to the folder."""
@@ -120,9 +100,7 @@ class WorkflowConfig:
     def save_file(self, attr, fp, filetype):
         """Write the JSON/text record to disk."""
         val = getattr(self, attr)
-        if val is None:
-            print(f"Skipping {attr}")
-            return
+        assert val is not None, f"Could not find attribute {attr}"
 
         if filetype == "json":
             write_json(val, fp)
@@ -160,16 +138,71 @@ class WorkflowConfig:
     def serve_workflow_info(self):
         """Allow the user to edit general information about the workflow."""
 
-        self.long_name = st.text_input("Workflow Name", value=self.long_name)
-        self.description = st.text_input("Workflow Description", value=self.description)
-        self.executor = st.radio(
+        st.subheader('Workflow Description')
+
+        # Set up an empty element to use for displaying the main workflow info
+        self.workflow_empty = st.empty()
+
+        # Display inputs for the parameters
+        self.refresh_workflow_menu()
+
+    def refresh_workflow_menu(self):
+
+        # Replace any existing displays with an empty container
+        self.refresh_workflow_menu_ix = self.refresh_workflow_menu_ix + 1
+        self.workflow_container = self.workflow_empty.container()
+
+        # Load the underlying data
+        self.load()
+
+        # When any of the following properties are set, the setter methods
+        # will automatically save the changes to disk and refresh the app
+        self.workflow_container.text_input(
+            "Workflow Name",
+            value=self.dynamo["name"],
+            key=f"workflow.name.{self.refresh_workflow_menu_ix}",
+            on_change=self.update_workflow_attribute,
+            args=("name",)
+        )
+        self.workflow_container.text_input(
+            "Workflow Description",
+            value=self.dynamo["desc"],
+            key=f"workflow.desc.{self.refresh_workflow_menu_ix}",
+            on_change=self.update_workflow_attribute,
+            args=("desc",)
+        )
+        self.workflow_container.radio(
             "Workflow Executor",
             ["Nextflow", "Cromwell"],
-            ["Nextflow", "Cromwell"].index(self.executor.title())
+            ["Nextflow", "Cromwell"].index(self.dynamo["executor"].title()),
+            key=f"workflow.executor.{self.refresh_workflow_menu_ix}",
+            on_change=self.update_workflow_attribute,
+            args=("executor",)
         )
+
+    def update_workflow_attribute(self, attr):
+        # Get the new value
+        value = st.session_state[f"workflow.{attr}.{self.refresh_workflow_menu_ix}"]
+
+        # The executor has special behavior
+        if attr == "executor":
+            # Must be all caps
+            value = value.upper()
+
+            # Must also be set in the computeDefaults
+            self.dynamo["computeDefaults"][0]["executor"] = value
+
+        # Set at the top level of the dynamo record
+        if attr in self.dynamo:
+            self.dynamo[attr] = value
+
+        self.save()
+        self.refresh_workflow_menu()
 
     def serve_parameter_info(self):
         """Allow the user to edit the set of parameters used for the workflow."""
+
+        st.subheader('Workflow Parameters')
 
         # Set up an empty element to use for displaying the parameters
         self.parameter_empty = st.empty()
@@ -181,35 +214,44 @@ class WorkflowConfig:
         """Populate the parameter configuration menu display."""
 
         # Remove the previous set of display elements
+        # by replaceing the contents of self.parameter_empty with
+        # an empty container
         self.refresh_parameter_menu_ix = self.refresh_parameter_menu_ix + 1
         self.parameter_container = self.parameter_empty.container()
+
+        # Load any changed files
+        self.load()
 
         # Keep track of the containers used for each parameter
 
         # Iterate over each of the parameters defined by the form
-        for ix, parameter in enumerate(self.list_parameters()):
+        for ix, parameter in enumerate(self.flatten_parameters()):
 
             expander = self.parameter_container.expander(
-                f"Parameter {ix + 1}",
+                f"Parameter: {parameter.get('title', ix + 1)}",
                 expanded=True
             )
 
             # Display a set of menus to edit those parameters
             expander.text_input(
-                "Parameter Name",
+                "Parameter Display Name",
                 **self.input_kwargs(parameter, "title")
             )
             expander.text_input(
                 "Description",
+                help="Longer description of the parameter",
                 **self.input_kwargs(parameter, "description")
             )
+            type_options = ["string", "boolean", "integer", "number"]
             expander.selectbox(
                 "Variable Type",
-                ["string", "boolean", "integer", "number"],
+                type_options,
+                index=type_options.index(parameter["type"]),
                 **self.input_kwargs(parameter, "type", omit=["value"])
             )
             expander.text_input(
                 "Workflow Key",
+                help="Keyword used to define the parameter for the workflow",
                 **self.input_kwargs(parameter, "workflow_key")
             )
 
@@ -290,21 +332,16 @@ class WorkflowConfig:
     def remove_parameter(self, path):
 
         # Get the form element to modify
-        form = self.form
-        elem = form['form']
+        elem = self.form['form']
         for v in path[:-1]:
             elem = elem[v]
 
         # Remove the indicated parameter
         del elem["properties"][path[-1]]
-        self.form = form
 
         # If there is a workflow_key defined, remove it
-        workflow_key = self.find_workflow_key(".".join(path))
-        if workflow_key in self.input:
-            input = self.input
-            del input[workflow_key]
-            self.input = input
+        while self.find_workflow_key(path) in self.input:
+            del self.input[self.find_workflow_key(path)]
 
         self.save()
 
@@ -320,27 +357,22 @@ class WorkflowConfig:
         # If the attribute is the workflow_key
         if attr == "workflow_key":
 
-            # Modify the inputs element
-            input = self.input
-
             # Get the previous key used for this element (if any)
-            previous_key = self.find_workflow_key(path)
-            if previous_key is not None:
-                del input[previous_key]
-            input[val] = f"$.params.dataset.paramJson.{'.'.join(path)}"
-            self.input = input
+            while self.find_workflow_key(path) is not None:
+                del self.input[self.find_workflow_key(path)]
+            self.input[val] = f"$.params.dataset.paramJson.{'.'.join(path)}"
 
-        else:
+        # Get the flat list of parameters, keyed by path
+        flat_params = {
+            ".".join(param["path"]): param
+            for param in self.flatten_parameters()
+        }
 
-            # Get the form element to modify
-            form = self.form
-            elem = form['form']
-            for key in path:
-                elem = elem["properties"][key]
+        # Modify the specified parameter
+        flat_params['.'.join(path)][attr] = val
 
-            # Set the attribute
-            elem[attr] = val
-            self.form = form
+        # # Reform the nested set of parameters
+        self.form["form"] = self.nest_parameters(flat_params)
 
         # Save the changes
         self.save()
@@ -348,7 +380,48 @@ class WorkflowConfig:
         # Redraw the entire input element
         self.refresh_parameter_menu()
 
-    def list_parameters(self):
+    def nest_parameters(self, flat):
+
+        nested = dict(properties={})
+
+        # Add all of the top-level parameters from flat
+        for path, param in flat.items():
+
+            # Turn the path into a list
+            path = path.split(".")
+
+            # Skip any nested
+            if len(path) > 1:
+                continue
+
+            # Add it to the nested structure
+            nested['properties'][param['workflow_key']] = {
+                k: v
+                for k, v in param.items()
+                if k not in ["workflow_key", "path"]
+            }
+
+            # Find any parameters which are nested below this param
+            sub_params = {
+                k.split('.', 1)[1]: v
+                for k, v in flat.items()
+                if k.startswith(f"{param['workflow_key']}.")
+            }
+
+            if len(sub_params) > 0:
+                nested[
+                    'properties'
+                ][
+                    param['workflow_key']
+                ][
+                    'properties'
+                ] = self.nest_parameters(
+                    sub_params
+                )
+
+        return nested
+
+    def flatten_parameters(self):
 
         # Recursively traverse the form elements
         for parameter in self.traverse_form(self.form["form"], []):
@@ -360,12 +433,16 @@ class WorkflowConfig:
 
             param_path = root + [kw]
 
+            workflow_key = self.find_workflow_key(param_path)
+            if workflow_key is None:
+                workflow_key = kw
+
             yield dict(
                 path=param_path,
                 type=val.get("type"),
                 title=val.get("title"),
                 description=val.get("description"),
-                workflow_key=self.find_workflow_key(param_path)
+                workflow_key=workflow_key
             )
 
             for elem in self.traverse_form(val, param_path):
@@ -379,37 +456,6 @@ class WorkflowConfig:
         for kw, val in self.input.items():
             if val == query_str:
                 return kw
-
-    @property
-    def long_name(self):
-        """Human-readable name for the workflow."""
-        return self.dynamo["name"]
-
-    @long_name.setter
-    def long_name(self, value: str):
-        self.dynamo["name"] = value
-        self.dynamo["id"] = value.lower().strip().replace(" ", "-")
-        self.save()
-
-    @property
-    def description(self):
-        """Longer description of the workflow."""
-        return self.dynamo["desc"]
-
-    @description.setter
-    def description(self, value):
-        self.dynamo["desc"] = value
-        self.save()
-
-    @property
-    def executor(self):
-        """Workflow executor."""
-        return self.dynamo["executor"].title()
-
-    @executor.setter
-    def executor(self, value):
-        self.dynamo["executor"] = value.upper()
-        self.save()
 
 
 def read_json(fp) -> dict:
