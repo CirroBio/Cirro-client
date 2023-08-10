@@ -3,6 +3,7 @@ from cirro.api.clients.portal import DataPortalClient
 from cirro.cli.interactive.upload_args import DataDirectoryValidator
 from cirro.cli.interactive.utils import prompt_wrapper
 from pathlib import Path
+import pandas as pd
 from prompt_toolkit.shortcuts import CompleteStyle
 import streamlit as st
 
@@ -77,6 +78,14 @@ class WorkflowConfig:
         self.load()
 
     @property
+    def refresh_outputs_menu_ix(self):
+        return st.session_state.get("refresh_outputs_menu_ix", 0)
+
+    @refresh_outputs_menu_ix.setter
+    def refresh_outputs_menu_ix(self, i: int):
+        st.session_state["refresh_outputs_menu_ix"] = i
+
+    @property
     def refresh_parameter_menu_ix(self):
         return st.session_state.get("refresh_parameter_menu_ix", 0)
 
@@ -134,6 +143,11 @@ class WorkflowConfig:
         st.header("Cirro - Workflow Configuration")
         self.serve_workflow_info()
         self.serve_parameter_info()
+        self.serve_outputs_info()
+
+    ############
+    # WORKFLOW #
+    ############
 
     def serve_workflow_info(self):
         """Allow the user to edit general information about the workflow."""
@@ -199,6 +213,10 @@ class WorkflowConfig:
         self.save()
         self.refresh_workflow_menu()
 
+    ##############
+    # PARAMETERS #
+    ##############
+
     def serve_parameter_info(self):
         """Allow the user to edit the set of parameters used for the workflow."""
 
@@ -221,8 +239,6 @@ class WorkflowConfig:
 
         # Load any changed files
         self.load()
-
-        # Keep track of the containers used for each parameter
 
         # Iterate over each of the parameters defined by the form
         for ix, parameter in enumerate(self.flatten_parameters()):
@@ -285,8 +301,7 @@ class WorkflowConfig:
     def add_parameter(self, path):
 
         # Get the form element to modify
-        form = self.form
-        elem = form['form']
+        elem = self.form['form']
         for v in path:
             elem = elem[v]
 
@@ -310,11 +325,8 @@ class WorkflowConfig:
         )
 
         # Add to the inputs JSON
-        input = self.input
-        input[key] = f"$.params.dataset.paramJson.{'.'.join(path + [key])}"
+        self.input[key] = f"$.params.dataset.paramJson.{'.'.join(path + [key])}"
 
-        self.input = input
-        self.form = form
         self.save()
 
         # Redraw the entire input element
@@ -456,7 +468,277 @@ class WorkflowConfig:
         for kw, val in self.input.items():
             if val == query_str:
                 return kw
+            
+    ###########
+    # OUTPUTS #
+    ###########
 
+    def serve_outputs_info(self):
+        """Display the editable interface for workflow outputs."""
+
+        st.subheader('Workflow Output Files')
+
+        # Set up an empty element to use for displaying the outputs info
+        self.outputs_empty = st.empty()
+
+        # Display inputs for the parameters
+        self.refresh_outputs_menu()
+
+    def refresh_outputs_menu(self):
+
+        # Replace any existing displays with an empty container
+        self.refresh_outputs_menu_ix = self.refresh_outputs_menu_ix + 1
+        self.outputs_container = self.outputs_empty.container()
+
+        # Load any changed files
+        self.load()
+
+        # Iterate over each of the outputs defined by the workflow
+        for ix, command in enumerate(self.output.get('commands', [])):
+
+            # Skip the manifest command
+            if command['command'] == "hot.Manifest":
+                continue
+
+            # Only the hot.Dsv command is supported
+            msg = f"Command not supported: {command['command']}"
+            assert command['command'] == "hot.Dsv", msg
+
+            # Nest all of the menu items in an expander
+            expander = self.outputs_container.expander(
+                f"Output {ix}",
+                expanded=True
+            )
+            # Display a set of menus for this output
+            expander.text_input(
+                "File Name",
+                **self.output_kwargs(command["params"], ix, "name")
+            )
+            expander.text_input(
+                "File Description",
+                **self.output_kwargs(command["params"], ix, "desc")
+            )
+            expander.text_input(
+                "Documentation URL",
+                **self.output_kwargs(command["params"], ix, "url")
+            )
+            expander.radio(
+                "File Contains Header",
+                [True, False],
+                [True, False].index(command["params"]["header"]),
+                **self.output_kwargs(command["params"], ix, "header", omit=["value"])
+            )
+            expander.selectbox(
+                "Delimiter",
+                [",", "\\t"],
+                [",", "\t"].index(command["params"]["sep"]),
+                **self.output_kwargs(command["params"], ix, "sep", omit=["value"])
+            )
+            expander.text_input(
+                "Relative Path in Output Directory",
+                **self.output_kwargs(command["params"], ix, "source")
+            )
+            self.prompt_file_columns(expander, ix)
+
+            # Button used to remove an output file
+            self.remove_output_button(expander, ix)
+
+        # Add a button to add a new output element
+        self.add_output_button()
+
+    def remove_output_button(self, expander, ix):
+        expander.button(
+            "Remove Output File",
+            on_click=self.remove_output,
+            args=(ix,),
+            key=f"remove_output.{ix}" + f"-{self.refresh_outputs_menu_ix}"
+        )
+
+    def remove_output(self, ix):
+        self.output["commands"].pop(ix)
+        self.save()
+        self.refresh_outputs_menu()
+
+    def output_kwargs(self, params, ix, attr, omit=[]):
+        """Return a set of kwargs used for a streamlit UI element."""
+
+        return {
+            kw: val for kw, val in dict(
+                on_change=self.update_output,
+                value=params.get(attr, ""),
+                args=(ix, attr,),
+                key=f"_outputs.{ix}" + f".{attr}.{self.refresh_outputs_menu_ix}"
+            ).items()
+            if kw not in omit
+        }
+
+    def update_output(self, ix, attr):
+        """Change the value of an outputs element."""
+
+        # Get the new value
+        val = st.session_state[f"_outputs.{ix}" + f".{attr}.{self.refresh_outputs_menu_ix}"]
+
+        # Special case some of the attributes
+        if attr == "sep":
+            if val == "\\t":
+                val = "\t"
+
+        # Change the indicated output element
+        self.output["commands"][ix]["params"][attr] = val
+
+        self.save()
+        self.refresh_outputs_menu()
+
+    def prompt_file_columns(self, expander, ix):
+        """Display a set of prompts for the columns in a file"""
+
+        # Iterate over the columns defined for this file
+        for col_ix, col in enumerate(self.output["commands"][ix]["params"]["cols"]):
+
+            # Put the column elements in a set of columns
+            cols = expander.columns(3)
+
+            cols[0].text_input(
+                "Column Header",
+                **self.prompt_file_columns_kwargs(ix, col_ix, col, "col")
+            )
+            cols[1].text_input(
+                "Column Name",
+                **self.prompt_file_columns_kwargs(ix, col_ix, col, "name")
+            )
+            cols[2].text_area(
+                "Column Description",
+                **self.prompt_file_columns_kwargs(ix, col_ix, col, "desc")
+            )
+            expander.button(
+                "Remove Column",
+                on_click=self.remove_output_column,
+                args=(ix, col_ix,),
+                key=f"remove_output_column.{ix}.{col_ix}.{self.refresh_outputs_menu_ix}"
+            )
+        expander.button(
+            "Add Column",
+            on_click=self.add_output_column,
+            args=(ix, ),
+            key=f"add_output_column.{ix}.{self.refresh_outputs_menu_ix}"
+        )
+
+    def remove_output_column(self, ix, col_ix):
+
+        # Delete the output column
+        self.output["commands"][ix]["params"]["cols"].pop(col_ix)
+
+        # Refresh the app
+        self.save()
+        self.refresh_outputs_menu()
+
+    def add_output_column(self, ix):
+        """Add an output column."""
+        self.output["commands"][ix]["params"]["cols"].append(
+            dict(
+                col="",
+                name="",
+                desc=""
+            )
+        )
+
+        # Refresh the app
+        self.save()
+        self.refresh_outputs_menu()
+
+    def prompt_file_columns_kwargs(self, ix, col_ix, col, attr):
+
+        return dict(
+            value=col[attr],
+            on_change=self.update_output_column,
+            args=(ix, col_ix, attr,),
+            key=f"output_{ix}.col_{col_ix}.{attr}.{self.refresh_outputs_menu_ix}"
+        )
+
+    def update_output_column(self, output_ix, col_ix, col_attr):
+
+        # Get the value
+        val = st.session_state[
+            f"output_{output_ix}.col_{col_ix}.{col_attr}.{self.refresh_outputs_menu_ix}"
+        ]
+
+        # Update the corresponding element
+        self.output["commands"][output_ix]["params"]["cols"][col_ix][col_attr] = val
+        self.save()
+        self.refresh_outputs_menu()
+
+    def add_output_button(self):
+
+        self.outputs_container.button(
+            "Add Output File (Manual)",
+            on_click=self.add_output,
+            key=f"add_output.{self.refresh_parameter_menu_ix}"
+        )
+
+        self.outputs_container.file_uploader(
+            "Add Output File (From Template)",
+            on_change=self.add_output_template,
+            key=f"add_output_template.{self.refresh_parameter_menu_ix}"
+        )
+
+    def add_output_template(self):
+        # Get the file that was uploaded
+        file = st.session_state[
+            f"add_output_template.{self.refresh_parameter_menu_ix}"
+        ]
+
+        # Read as CSV
+        if "tsv" in file.name:
+            sep = "\t"
+            df = pd.read_excel(file, sep="\t")
+        else:
+            sep = ","
+            df = pd.read_csv(file)
+
+        # Add the columns to the output
+        self.output["commands"].append(
+            {
+                "command": "hot.Dsv",
+                "params": {
+                    "url": "",
+                    "source": "",
+                    "filename": file.name,
+                    "sep": sep,
+                    "header": True,
+                    "name": file.name,
+                    "desc": "",
+                    "cols": [
+                        dict(
+                            col=cname,
+                            name=cname,
+                            desc=""
+                        )
+                        for cname in df.columns.values
+                    ]
+                }
+            }
+        )
+        self.save()
+        self.refresh_outputs_menu()
+
+    def add_output(self):
+
+        self.output["commands"].append(dict(
+            command="hot.Dsv",
+            params=dict(
+                url="",
+                source="",
+                filename="",
+                sep=",",
+                header=True,
+                name="Output file name",
+                desc="Output file description",
+                cols=[]
+            )
+        ))
+
+        self.save()
+        self.refresh_outputs_menu()
 
 def read_json(fp) -> dict:
     with open(fp, "rt") as handle:
