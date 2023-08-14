@@ -1,3 +1,5 @@
+from io import StringIO
+from typing import Optional
 from cirro.api.auth.base import AuthInfo
 from cirro.api.auth.iam import IAMAuth
 from cirro.api.auth.oauth_client import ClientAuth
@@ -12,12 +14,13 @@ __all__ = [
 from cirro.api.config import AppConfig
 
 
-def get_auth_info_from_config(app_config: AppConfig):
+def get_auth_info_from_config(app_config: AppConfig, auth_io: Optional[StringIO] = None):
     user_config = app_config.user_config
     if not user_config or not user_config.auth_method:
         return ClientAuth(region=app_config.region,
                           client_id=app_config.client_id,
-                          auth_endpoint=app_config.auth_endpoint)
+                          auth_endpoint=app_config.auth_endpoint,
+                          auth_io=auth_io)
 
     auth_methods = [
         ClientAuth,
@@ -33,7 +36,8 @@ def get_auth_info_from_config(app_config: AppConfig):
         return ClientAuth(region=app_config.region,
                           client_id=app_config.client_id,
                           auth_endpoint=app_config.auth_endpoint,
-                          enable_cache=auth_config.get('enable_cache') == 'True')
+                          enable_cache=auth_config.get('enable_cache') == 'True',
+                          auth_io=auth_io)
 
     if matched_auth_method == IAMAuth and auth_config.get('load_current'):
         return IAMAuth.load_current()
