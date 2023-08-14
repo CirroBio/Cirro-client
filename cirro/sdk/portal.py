@@ -1,5 +1,3 @@
-from io import StringIO
-from typing import Optional
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.models.process import Executor
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
