@@ -13,7 +13,7 @@ class DataPortal:
     available in the Data Portal.
     """
 
-    def __init__(self, client: DataPortalClient = None, auth_io: Optional[StringIO] = None):
+    def __init__(self, client: DataPortalClient = None):
         """Set up the DataPortal object, establishing an authenticated connection."""
 
         if client is not None:
@@ -21,7 +21,7 @@ class DataPortal:
 
         # Set up default client if not provided
         else:
-            self._client = DataPortalClient(auth_io=auth_io)
+            self._client = DataPortalClient()
 
     def list_projects(self) -> DataPortalProjects:
         """List all of the projects available in the Data Portal."""
