@@ -1,10 +1,10 @@
-from io import StringIO
 import json
 import logging
 import sys
 import threading
 import time
 from datetime import datetime, timedelta
+from io import StringIO
 from pathlib import Path
 from typing import Optional
 
@@ -92,7 +92,7 @@ class ClientAuth(AuthInfo):
         client_id: str,
         region: str,
         auth_endpoint: str,
-        enable_cache=True,
+        enable_cache=False,
         auth_io: Optional[StringIO] = None
     ):
         self.client_id = client_id
