@@ -11,7 +11,9 @@ class Executor(Enum):
     INGEST = 'INGEST'
     "Process type used when manually uploading files"
     NEXTFLOW = 'NEXTFLOW'
-    "Processes that are ran using Nextflow"
+    "Processes that are run using Nextflow"
+    CROMWELL = 'CROMWELL'
+    "Processes that are run using Cromwell"
 
 
 @dataclass(frozen=True)

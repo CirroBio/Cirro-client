@@ -4,16 +4,17 @@ from cirro.api.auth import AuthInfo, get_auth_info_from_config
 from cirro.api.clients import ApiClient
 from cirro.api.config import AppConfig
 from cirro.api.services import DatasetService, ProcessService, ProjectService, FileService, CommonService
+from io import StringIO
 
 
 class DataPortalClient:
     """
     A client for interacting with the Cirro platform
     """
-    def __init__(self, auth_info: Optional[AuthInfo] = None, base_url: str = None):
+    def __init__(self, auth_info: Optional[AuthInfo] = None, base_url: str = None, auth_io: Optional[StringIO] = None):
         self._configuration = AppConfig(base_url=base_url)
         if not auth_info:
-            auth_info = get_auth_info_from_config(self._configuration)
+            auth_info = get_auth_info_from_config(self._configuration, auth_io=auth_io)
 
         self._api_client = ApiClient(auth_info, data_endpoint=self._configuration.data_endpoint)
         self._file_service = FileService(self._api_client, self._configuration)

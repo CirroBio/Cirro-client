@@ -4,6 +4,7 @@ import sys
 import threading
 import time
 from datetime import datetime, timedelta
+from io import StringIO
 from pathlib import Path
 from typing import Optional
 
@@ -42,12 +43,15 @@ def _build_token_persistence(location, fallback_to_plaintext=False):
         return FilePersistence(location)
 
 
-def _authenticate(client_id: str, auth_endpoint: str):
+def _authenticate(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO] = None):
     params = {'client_id': client_id}
     resp = requests.post(f'{auth_endpoint}/device-code', params=params)
     resp.raise_for_status()
     flow: DeviceTokenResponse = resp.json()
-    print(flow['message'])
+    if auth_io is None:
+        print(flow['message'])
+    else:
+        auth_io.write(flow['message'])
     device_expiry = datetime.fromisoformat(flow['expiry'])
 
     params = {
@@ -83,7 +87,14 @@ class ClientAuth(AuthInfo):
     Implements the OAuth device code flow
     This is the preferred way to authenticate
     """
-    def __init__(self, client_id: str, region: str, auth_endpoint: str, enable_cache=True):
+    def __init__(
+        self,
+        client_id: str,
+        region: str,
+        auth_endpoint: str,
+        enable_cache=False,
+        auth_io: Optional[StringIO] = None
+    ):
         self.client_id = client_id
         self.region = region
         self._token_info: Optional[OAuthTokenResponse] = None
@@ -107,7 +118,7 @@ class ClientAuth(AuthInfo):
                 self._clear_token_info()
 
         if not self._token_info:
-            self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint)
+            self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint, auth_io=auth_io)
 
         self._save_token_info()
         self._update_token_metadata()
