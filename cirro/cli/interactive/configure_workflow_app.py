@@ -1,4 +1,11 @@
+import io
 import json
+import threading
+from time import sleep
+from typing import List
+from cirro import DataPortal
+from cirro.api.auth.oauth_client import ClientAuth
+from cirro.api.config import AppConfig
 from cirro.api.clients.portal import DataPortalClient
 from cirro.cli.interactive.upload_args import DataDirectoryValidator
 from cirro.cli.interactive.utils import prompt_wrapper
@@ -6,6 +13,150 @@ from pathlib import Path
 import pandas as pd
 from prompt_toolkit.shortcuts import CompleteStyle
 import streamlit as st
+from streamlit.runtime.scriptrunner import get_script_run_ctx
+from streamlit.runtime.scriptrunner import script_run_context
+
+
+def session_cache(func):
+    def inner(*args, **kwargs):
+
+        # Get the session context, which has a unique ID element
+        ctx = get_script_run_ctx()
+
+        # Define a cache key based on the function name and arguments
+        cache_key = ".".join([
+            str(ctx.session_id),
+            func.__name__,
+            ".".join(map(str, args)),
+            ".".join([
+                f"{k}={v}"
+                for k, v in kwargs.items()
+            ])
+        ])
+
+        # If the value has not been computed
+        if st.session_state.get(cache_key) is None:
+            # Compute it
+            st.session_state[cache_key] = func(
+                *args,
+                **kwargs
+            )
+
+        # Return that value
+        return st.session_state[cache_key]
+
+    return inner
+
+
+def cirro_login(login_empty):
+    # If we have not logged in yet
+    if st.session_state.get('DataPortal') is None:
+
+        # Connect to Cirro - capturing the login URL
+        auth_io = io.StringIO()
+        cirro_login_thread = threading.Thread(
+            target=cirro_login_sub,
+            args=(auth_io,)
+        )
+        script_run_context.add_script_run_ctx(cirro_login_thread)
+
+        cirro_login_thread.start()
+
+        login_string = auth_io.getvalue()
+
+        while len(login_string) == 0 and cirro_login_thread.is_alive():
+            sleep(5)
+            login_string = auth_io.getvalue()
+
+        login_empty.write(login_string)
+        cirro_login_thread.join()
+
+    else:
+        login_empty.empty()
+
+    msg = "Error: Could not log in to Cirro"
+    assert st.session_state.get('DataPortal') is not None, msg
+
+
+def cirro_login_sub(auth_io: io.StringIO):
+
+    app_config = AppConfig()
+
+    st.session_state['DataPortal-auth_info'] = ClientAuth(
+        region=app_config.region,
+        client_id=app_config.client_id,
+        auth_endpoint=app_config.auth_endpoint,
+        enable_cache=False,
+        auth_io=auth_io
+    )
+
+    st.session_state['DataPortal-client'] = DataPortalClient(
+        auth_info=st.session_state['DataPortal-auth_info']
+    )
+    st.session_state['DataPortal'] = DataPortal(
+        client=st.session_state['DataPortal-client']
+    )
+
+
+def list_datasets_in_project(project_name):
+
+    # Connect to Cirro
+    portal = st.session_state['DataPortal']
+
+    # Access the project
+    project = portal.get_project_by_name(project_name)
+
+    # Get the list of datasets available (using their easily-readable names)
+    return [""] + [ds.name for ds in project.list_datasets()]
+
+
+@session_cache
+def list_projects() -> List[str]:
+
+    # Connect to Cirro
+    portal = st.session_state['DataPortal']
+
+    # List the projects available
+    project_list = portal.list_projects()
+
+    # Return the list of projects available (using their easily-readable names)
+    return [proj.name for proj in project_list]
+
+
+@session_cache
+def get_dataset(project_name, dataset_name):
+    """Return a Cirro Dataset object."""
+
+    # Connect to Cirro
+    portal = st.session_state['DataPortal']
+
+    # Access the project
+    project = portal.get_project_by_name(project_name)
+
+    # Get the dataset
+    return project.get_dataset_by_name(dataset_name)
+
+
+@session_cache
+def list_files_in_dataset(project_name, dataset_name):
+    """Return a list of files in a dataset."""
+
+    return [
+        f.name
+        for f in get_dataset(project_name, dataset_name).list_files()
+    ]
+
+
+@session_cache
+def read_csv(project_name, dataset_name, fn, **kwargs):
+    """Read a CSV from a dataset in Cirro."""
+
+    return (
+        get_dataset(project_name, dataset_name)
+        .list_files()
+        .get_by_name(f"data/{fn}")
+        .read_csv(**kwargs)
+    )
 
 
 class WorkflowConfig:
@@ -141,6 +292,7 @@ class WorkflowConfig:
             page_icon="https://cirro.bio/favicon-32x32.png"
         )
         st.header("Cirro - Workflow Configuration")
+        cirro_login(st.empty())
         self.serve_workflow_info()
         self.serve_parameter_info()
         self.serve_outputs_info()
@@ -563,7 +715,7 @@ class WorkflowConfig:
         for kw, val in self.input.items():
             if val == query_str:
                 return kw
-            
+
     ###########
     # OUTPUTS #
     ###########
@@ -573,11 +725,43 @@ class WorkflowConfig:
 
         st.subheader('Workflow Output Files')
 
+        # Set up an empty element to use for loading example data from Cirro
+        self.outputs_template = st.empty()
+        self.load_output_template_from_cirro()
+
         # Set up an empty element to use for displaying the outputs info
         self.outputs_empty = st.empty()
 
         # Display inputs for the parameters
         self.refresh_outputs_menu()
+
+    def load_output_template_from_cirro(self):
+        """Load a set of example data from Cirro."""
+
+        outputs_template_container = self.outputs_template.expander(
+            "Load Template Dataset (Cirro)",
+            expanded=False
+        )
+
+        selected_project = outputs_template_container.selectbox(
+            "Select Project",
+            [""] + list_projects()
+        )
+
+        if selected_project == "":
+            return
+
+        selected_dataset = outputs_template_container.selectbox(
+            "Select Dataset",
+            [""] + list_datasets_in_project(selected_project)
+        )
+
+        if selected_dataset == "":
+            return
+
+        # TODO
+        file_list = list_files_in_dataset(selected_project, selected_dataset)
+
 
     def refresh_outputs_menu(self):
 
