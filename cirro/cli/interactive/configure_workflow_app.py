@@ -248,27 +248,46 @@ class WorkflowConfig:
                 expanded=True
             )
 
-            # Display a set of menus to edit those parameters
-            expander.text_input(
-                "Parameter Display Name",
-                **self.input_kwargs(parameter, "title")
+            # Allow the user to set up a hard-coded vs. form-driven parameter
+            expander.radio(
+                "Parameter Type",
+                ["User Input", "Hardcoded"],
+                index=1 if parameter["hardcoded"] else 0,
+                **self.input_kwargs(parameter, "hardcoded", omit=["value"])
             )
-            expander.text_input(
-                "Description",
-                help="Longer description of the parameter",
-                **self.input_kwargs(parameter, "description")
-            )
-            type_options = ["string", "boolean", "integer", "number"]
-            expander.selectbox(
-                "Variable Type",
-                type_options,
-                index=type_options.index(parameter["type"]),
-                **self.input_kwargs(parameter, "type", omit=["value"])
-            )
+
+            if not parameter["hardcoded"]:
+
+                # Display a set of menus to edit those parameters
+                expander.text_input(
+                    "Parameter Display Name",
+                    **self.input_kwargs(parameter, "title")
+                )
+                expander.text_input(
+                    "Description",
+                    help="Longer description of the parameter",
+                    **self.input_kwargs(parameter, "description")
+                )
+                type_options = ["string", "boolean", "integer", "number"]
+                print("here")
+                print(parameter)
+                expander.selectbox(
+                    "Variable Type",
+                    type_options,
+                    index=type_options.index(parameter.get("type", "string")),
+                    **self.input_kwargs(parameter, "type", omit=["value"])
+                )
+
             expander.text_input(
                 "Workflow Key",
                 help="Keyword used to define the parameter for the workflow",
                 **self.input_kwargs(parameter, "workflow_key")
+            )
+
+            expander.text_input(
+                "Default Value",
+                help="Value assigned to the parameter by default",
+                **self.input_kwargs(parameter, "default")
             )
 
             # Add a button to delete the parameter
@@ -343,17 +362,35 @@ class WorkflowConfig:
 
     def remove_parameter(self, path):
 
+        # Get the flat list of parameters, keyed by path
+        flat_params = {
+            ".".join(param["path"]): param
+            for param in self.flatten_parameters()
+        }
+
+        # Get the state of the parameter, prior to being modified
+        param = flat_params[".".join(path)]
+
+        # Get the workflow key
+        workflow_key = param.get("workflow_key")
+
         # Get the form element to modify
         elem = self.form['form']
         for v in path[:-1]:
             elem = elem[v]
 
         # Remove the indicated parameter
-        del elem["properties"][path[-1]]
+        if path[-1] in elem["properties"]:
+            del elem["properties"][path[-1]]
 
         # If there is a workflow_key defined, remove it
         while self.find_workflow_key(path) in self.input:
             del self.input[self.find_workflow_key(path)]
+
+        # If there is a workflow key defined
+        if workflow_key is not None:
+            if workflow_key in self.input:
+                del self.input[workflow_key]
 
         self.save()
 
@@ -366,25 +403,62 @@ class WorkflowConfig:
         # Get the new value
         val = st.session_state[".".join(path + [attr, str(self.refresh_parameter_menu_ix)])]
 
-        # If the attribute is the workflow_key
-        if attr == "workflow_key":
-
-            # Get the previous key used for this element (if any)
-            while self.find_workflow_key(path) is not None:
-                del self.input[self.find_workflow_key(path)]
-            self.input[val] = f"$.params.dataset.paramJson.{'.'.join(path)}"
-
         # Get the flat list of parameters, keyed by path
         flat_params = {
             ".".join(param["path"]): param
             for param in self.flatten_parameters()
         }
 
-        # Modify the specified parameter
-        flat_params['.'.join(path)][attr] = val
+        # Get the state of the parameter, prior to being modified
+        param = flat_params[".".join(path)]
 
-        # # Reform the nested set of parameters
-        self.form["form"] = self.nest_parameters(flat_params)
+        # If we are modifying the "hardcoded" attribute
+        if attr == "hardcoded":
+            # Transform the value to a 1/0
+            val = val == "Hardcoded"
+
+        print("HERE")
+        print(path)
+        print(attr)
+        print(val)
+        print(param)
+        print("HERE2")
+
+        # If this is a hardcoded parameter and we're not changing that attribute
+        if param["hardcoded"] and attr != "hardcoded":
+
+            # If the attribute is the workflow_key
+            if attr == "workflow_key":
+
+                # Set up the newly indicated key
+                self.input[val] = self.input[param["workflow_key"]]
+                del self.input[param["workflow_key"]]
+
+            # If the modified attribute is the value
+            elif attr == "default":
+
+                # Modify the default value
+                self.input[param["workflow_key"]] = val
+
+            else:
+                raise Exception(f"Did not expect attribute: {attr}")
+
+        # If this is a form-driven parameter
+        else:
+
+            # If the attribute is the workflow_key
+            if attr == "workflow_key":
+
+                # Get the previous key used for this element (if any)
+                while self.find_workflow_key(path) is not None:
+                    del self.input[self.find_workflow_key(path)]
+                self.input[val] = f"$.params.dataset.paramJson.{'.'.join(path)}"
+
+            # Modify the specified parameter
+            flat_params['.'.join(path)][attr] = val
+
+            # # Reform the nested set of parameters
+            self.form["form"] = self.nest_parameters(flat_params)
 
         # Save the changes
         self.save()
@@ -398,6 +472,10 @@ class WorkflowConfig:
 
         # Add all of the top-level parameters from flat
         for path, param in flat.items():
+
+            # Hardcoded parameters do not go into the form
+            if param["hardcoded"]:
+                continue
 
             # Turn the path into a list
             path = path.split(".")
@@ -435,9 +513,24 @@ class WorkflowConfig:
 
     def flatten_parameters(self):
 
+        # Keep track of parameters which are defined in the form
+        form_parameters = set([])
+
         # Recursively traverse the form elements
         for parameter in self.traverse_form(self.form["form"], []):
+            form_parameters.add(parameter["workflow_key"])
             yield parameter
+
+        # Iterate over the inputs, to find the hardcoded parameters
+        for kw, val in self.input.items():
+            # If the parameter is not defined in the form, it must be hardcoded
+            if kw not in form_parameters:
+                yield dict(
+                    hardcoded=1,
+                    workflow_key=kw,
+                    default=val,
+                    path=[kw]
+                )
 
     def traverse_form(self, form, root):
 
@@ -450,10 +543,12 @@ class WorkflowConfig:
                 workflow_key = kw
 
             yield dict(
+                hardcoded=0,
                 path=param_path,
-                type=val.get("type"),
+                type=val.get("type", "string"),
                 title=val.get("title"),
                 description=val.get("description"),
+                default=val.get("default"),
                 workflow_key=workflow_key
             )
 
@@ -676,7 +771,7 @@ class WorkflowConfig:
         )
 
         self.outputs_container.file_uploader(
-            "Add Output File (From Template)",
+            "Add Output File (From Example)",
             on_change=self.add_output_template,
             key=f"add_output_template.{self.refresh_parameter_menu_ix}"
         )
