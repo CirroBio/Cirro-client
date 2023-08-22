@@ -345,6 +345,27 @@ class WorkflowConfig:
             on_change=self.update_workflow_attribute,
             args=("executor",)
         )
+        self.workflow_container.text_input(
+            "Workflow Repository (GitHub)",
+            value=self.dynamo["code"]["uri"],
+            key=f"workflow.code_uri.{self.refresh_workflow_menu_ix}",
+            on_change=self.update_workflow_attribute,
+            args=("code_uri",)
+        )
+        self.workflow_container.text_input(
+            "Workflow Entrypoint",
+            value=self.dynamo["code"]["script"],
+            key=f"workflow.code_script.{self.refresh_workflow_menu_ix}",
+            on_change=self.update_workflow_attribute,
+            args=("code_script",)
+        )
+        self.workflow_container.text_input(
+            "Repository Version",
+            value=self.dynamo["code"]["version"],
+            key=f"workflow.code_version.{self.refresh_workflow_menu_ix}",
+            on_change=self.update_workflow_attribute,
+            args=("code_version",)
+        )
 
     def update_workflow_attribute(self, attr):
         # Get the new value
@@ -358,8 +379,14 @@ class WorkflowConfig:
             # Must also be set in the computeDefaults
             self.dynamo["computeDefaults"][0]["executor"] = value
 
+        # If the attribute has a "code_" prefix
+        if attr.startswith("code_"):
+
+            # Set in the code dict
+            self.dynamo["code"][attr[len("code_"):]] = value
+
         # Set at the top level of the dynamo record
-        if attr in self.dynamo:
+        elif attr in self.dynamo:
             self.dynamo[attr] = value
 
         self.save()
