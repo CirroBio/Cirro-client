@@ -40,8 +40,8 @@ def confirm_data_directory(directory: str, files: List[str]):
 def ask_process(processes: List[Process], input_value: str) -> str:
     process_names = [process.name for process in processes]
     return ask(
-        "select",
-        "What type of files?",
+        'select',
+        'What type of files?',
         default=input_value if input_value in process_names else None,
         choices=process_names
     )
@@ -72,8 +72,8 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
     input_params['files'] = get_files_in_directory(input_params['data_directory'])
     if upload_method == 'select':
         input_params['files'] = ask(
-            "checkbox",
-            "Select the files you wish to upload",
+            'checkbox',
+            'Select the files you wish to upload',
             choices=input_params['files']
         )
     elif upload_method == 'glob':
@@ -84,7 +84,7 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
             if len(matching_files) == 0:
                 print('Glob pattern does not match any files, please specify another')
 
-        input_params["files"] = matching_files
+        input_params['files'] = matching_files
 
     confirm_data_directory(input_params['data_directory'], input_params['files'])
 
@@ -93,14 +93,14 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
     data_directory_name = Path(input_params['data_directory']).name
     default_name = input_params.get('name') or data_directory_name
     input_params['name'] = ask(
-        "text",
-        "What is the name of this dataset?",
+        'text',
+        'What is the name of this dataset?',
         default=default_name,
         validate=lambda val: len(val.strip()) > 0 or 'Please enter a name'
     )
     input_params['description'] = ask(
-        "text",
-        "Enter a description of the dataset (optional)",
+        'text',
+        'Enter a description of the dataset (optional)',
         default=input_params.get('description') or ''
     )
 
