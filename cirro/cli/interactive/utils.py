@@ -1,3 +1,5 @@
+from typing import List, Union
+
 import questionary
 from questionary import prompt
 
@@ -25,16 +27,19 @@ def type_validator(t, v):
         return False
 
 
-def ask(fname, msg, validate_type=None, output_f=None, **kwargs) -> str:
-    """Wrap questionary functions to catch escapes and exit gracefully."""
+def ask(function_name, msg, validate_type=None, output_f=None, **kwargs) -> Union[str, List[str]]:
+    """
+    Wrap questionary functions to catch escapes and exit gracefully.
+    function_name: https://questionary.readthedocs.io/en/stable/pages/types.html#
+    """
 
     # Get the questionary function
-    questionary_f = questionary.__dict__.get(fname)
+    questionary_f = questionary.__dict__.get(function_name)
 
     # Make sure that the function exists
-    assert questionary_f is not None, f"No such questionary function: {fname}"
+    assert questionary_f is not None, f"No such questionary function: {function_name}"
 
-    if fname == "select":
+    if function_name == "select":
         kwargs["use_shortcuts"] = True
 
     if validate_type is not None:

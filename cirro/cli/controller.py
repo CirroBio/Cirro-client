@@ -55,13 +55,14 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         print("No projects available")
         return
 
+    directory = input_params['data_directory']
     if interactive:
         input_params = gather_upload_arguments(input_params, projects, processes)
-
-    directory = input_params['data_directory']
-    files = get_files_in_directory(directory)
-    if len(files) == 0:
-        raise RuntimeWarning("No files to upload, exiting")
+        files = input_params['files']
+    else:
+        files = get_files_in_directory(directory)
+        if len(files) == 0:
+            raise RuntimeWarning("No files to upload, exiting")
 
     process = get_item_from_name_or_id(processes, input_params['process'])
     cirro.process.check_dataset_files(files, process.id, directory)
