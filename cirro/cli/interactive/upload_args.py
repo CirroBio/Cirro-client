@@ -77,11 +77,14 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
             choices=input_params['files']
         )
     elif upload_method == 'glob':
-        glob_pattern = ask("text", "Please specify a glob pattern")
-        input_params['files'] = [
-            file for file in input_params['files']
-            if fnmatch(file, glob_pattern)
-        ]
+        matching_files = None
+        while not matching_files:
+            glob_pattern = ask("text", "Please specify a glob pattern")
+            matching_files = [f for f in input_params['files'] if fnmatch(f, glob_pattern)]
+            if len(matching_files) == 0:
+                print('Glob pattern does not match any files, please specify another')
+
+        input_params["files"] = matching_files
 
     confirm_data_directory(input_params['data_directory'], input_params['files'])
 

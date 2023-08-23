@@ -40,7 +40,7 @@ def _is_hidden_file(file_path: Path):
 
 
 def get_files_in_directory(directory) -> List[str]:
-    path = Path(directory)
+    path = Path(directory).expanduser()
     path_posix = str(path.as_posix())
 
     paths = []
