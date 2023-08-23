@@ -51,8 +51,8 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
     input_params['project'] = ask_project(projects, input_params.get('project'))
 
     input_params['data_directory'] = ask(
-        "path",
-        "Enter the full path of the data directory",
+        'path',
+        'Enter the full path of the data directory',
         required=True,
         validate=DataDirectoryValidator,
         default=input_params.get('data_directory') or '',
@@ -61,8 +61,8 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
     )
 
     upload_method = ask(
-        "select",
-        "What files would you like to upload?",
+        'select',
+        'What files would you like to upload?',
         choices=[
             Choice('Upload all files in directory', 'all'),
             Choice('Choose files from a list', 'select'),
@@ -79,7 +79,7 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
     elif upload_method == 'glob':
         matching_files = None
         while not matching_files:
-            glob_pattern = ask("text", "Please specify a glob pattern")
+            glob_pattern = ask('text', 'Glob pattern:')
             matching_files = [f for f in input_params['files'] if fnmatch(f, glob_pattern)]
             if len(matching_files) == 0:
                 print('Glob pattern does not match any files, please specify another')
