@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Callable
 
 import questionary
 from questionary import prompt
@@ -27,7 +27,11 @@ def type_validator(t, v):
         return False
 
 
-def ask(function_name, msg, validate_type=None, output_f=None, **kwargs) -> Union[str, List[str]]:
+def ask(function_name: str,
+        msg: str,
+        validate_type=None,
+        output_transformer: Callable = None,
+        **kwargs) -> Union[str, List[str]]:
     """
     Wrap questionary functions to catch escapes and exit gracefully.
     function_name: https://questionary.readthedocs.io/en/stable/pages/types.html#
@@ -64,10 +68,9 @@ def ask(function_name, msg, validate_type=None, output_f=None, **kwargs) -> Unio
         raise KeyboardInterrupt()
 
     # If an output transformation function was defined
-    if output_f is not None:
-
+    if output_transformer is not None:
         # Call the function
-        resp = output_f(resp)
+        resp = output_transformer(resp)
 
     # Otherwise
     return resp
