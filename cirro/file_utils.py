@@ -40,7 +40,7 @@ def _is_hidden_file(file_path: Path):
 
 
 def get_files_in_directory(directory) -> List[str]:
-    path = Path(directory)
+    path = Path(directory).expanduser()
     path_posix = str(path.as_posix())
 
     paths = []
@@ -59,8 +59,11 @@ def get_files_in_directory(directory) -> List[str]:
     return paths
 
 
-def get_directory_stats(directory) -> DirectoryStatistics:
-    sizes = [f.stat().st_size for f in Path(directory).glob('**/*') if f.is_file()]
+def get_directory_stats(directory: str, files: List[str] = None) -> DirectoryStatistics:
+    if files:
+        sizes = [Path(directory, f).stat().st_size for f in files]
+    else:
+        sizes = [f.stat().st_size for f in Path(directory).glob('**/*') if f.is_file()]
     total_size = sum(sizes) / float(1 << 30)
     return {
         'sizeFriendly': f'{total_size:,.3f} GB',
