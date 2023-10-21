@@ -39,7 +39,17 @@ def _is_hidden_file(file_path: Path):
         return file_path.name.startswith('.')
 
 
-def get_files_in_directory(directory) -> List[str]:
+def get_files_in_directory(
+    directory,
+    include_hidden=False
+) -> List[str]:
+    """
+    Returns a list of strings containing the relative path of
+    each file within the indicated directory.
+
+    include_hidden: bool
+        Include hidden files in the returned list
+    """
     path = Path(directory)
     path_posix = str(path.as_posix())
 
@@ -49,8 +59,9 @@ def get_files_in_directory(directory) -> List[str]:
         if file_path.is_dir():
             continue
 
-        if _is_hidden_file(file_path):
-            continue
+        if not include_hidden:
+            if _is_hidden_file(file_path):
+                continue
 
         str_file_path = str(file_path.as_posix())
         str_file_path = str_file_path.replace(f'{path_posix}/', "")
