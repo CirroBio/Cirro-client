@@ -32,7 +32,17 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     for dataset in datasets:
         if f'{dataset.name} - {dataset.id}' == choice:
             return dataset.id
-    raise InputError("User must select a dataset to download")
+
+    # The user has made a selection which does not match
+    # any of the options available.
+    # This is most likely because there was a typo
+    if prompt_wrapper({
+        'type': 'confirm',
+        'name': 'try_again',
+        'message': 'The selection does match an option available - try again?'
+    })['try_again']:
+        return ask_dataset(datasets)
+    raise InputError("Exiting - no dataset selected")
 
 
 def ask_dataset_files(files: List[File]) -> List[File]:
