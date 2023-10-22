@@ -2,11 +2,9 @@ import sys
 from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
-from fnmatch import fnmatch
 
 from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
-from questionary import Choice
 
 from cirro.api.models.process import Process
 from cirro.api.models.project import Project
@@ -14,6 +12,46 @@ from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import ask, prompt_wrapper
 from cirro.cli.models import UploadArguments
 from cirro.file_utils import get_files_in_directory, get_files_stats
+
+
+def ask_data_directory(input_value: str) -> str:
+    directory_prompt = {
+        'type': 'path',
+        'name': 'data_directory',
+        'message': 'Enter the full path of the data directory',
+        'validate': DataDirectoryValidator,
+        'default': input_value or '',
+        'complete_style': CompleteStyle.READLINE_LIKE,
+        'only_directories': True
+    }
+
+    answers = prompt_wrapper(directory_prompt)
+    return answers['data_directory']
+
+
+def ask_name(input_value: str) -> str:
+    name_prompt = {
+        'type': 'input',
+        'name': 'name',
+        'message': 'What is the name of this dataset?',
+        'validate': lambda val: len(val.strip()) > 0 or 'Please enter a name',
+        'default': input_value or ''
+    }
+
+    answers = prompt_wrapper(name_prompt)
+    return answers['name']
+
+
+def ask_description(input_value: str) -> str:
+    description_prompt = {
+        'type': 'input',
+        'name': 'description',
+        'message': 'Enter a description of the dataset (optional)',
+        'default': input_value or ''
+    }
+
+    answers = prompt_wrapper(description_prompt)
+    return answers['description']
 
 
 class DataDirectoryValidator(Validator):
