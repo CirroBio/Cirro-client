@@ -67,11 +67,12 @@ def get_files_in_directory(
         str_file_path = str_file_path.replace(f'{path_posix}/', "")
         paths.append(str_file_path)
 
+    paths.sort()
     return paths
 
 
-def get_directory_stats(directory) -> DirectoryStatistics:
-    sizes = [f.stat().st_size for f in Path(directory).glob('**/*') if f.is_file()]
+def get_files_stats(files: List[File]) -> DirectoryStatistics:
+    sizes = [f.stat().st_size for f in files]
     total_size = sum(sizes) / float(1 << 30)
     return {
         'sizeFriendly': f'{total_size:,.3f} GB',

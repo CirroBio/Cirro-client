@@ -56,10 +56,12 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         return
 
     if interactive:
-        input_params = gather_upload_arguments(input_params, projects, processes)
+        input_params, files = gather_upload_arguments(input_params, projects, processes)
+        directory = input_params['data_directory']
+    else:
+        directory = input_params['data_directory']
+        files = get_files_in_directory(directory)
 
-    directory = input_params['data_directory']
-    files = get_files_in_directory(directory)
     if len(files) == 0:
         raise RuntimeWarning("No files to upload, exiting")
 
