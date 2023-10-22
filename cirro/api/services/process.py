@@ -55,9 +55,9 @@ class ProcessService(FileEnabledService):
             }
           }
         '''
-        item_filter = {}
+        item_filter = None
         if process_type:
-            item_filter['executor'] = {'eq': process_type.value}
+            item_filter = {'executor': {'eq': process_type.value}}
 
         items = fetch_all_items(self._api_client, query,
                                 input_variables={'filter': item_filter})

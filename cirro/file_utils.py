@@ -50,7 +50,7 @@ def get_files_in_directory(
     include_hidden: bool
         Include hidden files in the returned list
     """
-    path = Path(directory)
+    path = Path(directory).expanduser()
     path_posix = str(path.as_posix())
 
     paths = []
