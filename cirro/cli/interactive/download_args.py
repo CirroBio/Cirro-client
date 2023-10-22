@@ -82,11 +82,23 @@ def ask_dataset_files_list(files: List[File]) -> List[File]:
         ]
     })
 
-    return [
+    selected_files = [
         file
         for file in files
         if file.relative_path in set(answers['files'])
     ]
+
+    if len(selected_files) == 0:
+        if prompt_wrapper({
+            'type': 'confirm',
+            'name': 'try_again',
+            'message': 'No files were selected - try again?'
+        })['try_again']:
+            return ask_dataset_files_list(files)
+        else:
+            raise RuntimeWarning("No files selected")
+    else:
+        return selected_files
 
 
 def ask_dataset_files_glob(files: List[File]) -> List[File]:
@@ -104,6 +116,10 @@ def ask_dataset_files_glob(files: List[File]) -> List[File]:
             'name': 'confirm',
             'message': f'Number of files selected: {len(selected_files):} / {len(files):,}'
         })
+
+    if len(selected_files) == 0:
+        raise RuntimeWarning("No files selected")
+
     return selected_files
 
 
