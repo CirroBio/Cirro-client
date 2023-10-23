@@ -69,14 +69,11 @@ def confirm_data_files(data_directory: str, files: List[str]):
         Path(data_directory) / file
         for file in files
     ])
-    answers = prompt_wrapper({
-        'type': 'confirm',
-        'message': f'Please confirm that you wish to upload {stats["numberOfFiles"]} files ({stats["sizeFriendly"]})',
-        'name': 'continue',
-        'default': True
-    })
 
-    if not answers['continue']:
+    if not ask(
+        "confirm",
+        f'Please confirm that you wish to upload {stats["numberOfFiles"]} files ({stats["sizeFriendly"]})'
+    ):
         sys.exit(1)
 
 
@@ -147,18 +144,20 @@ def ask_dataset_files_list(files: List[str]) -> List[str]:
 def ask_dataset_files_glob(files: List[str]) -> List[str]:
 
     selected_files = ask_dataset_files_glob_single(files)
-    answers = prompt_wrapper({
-        'type': 'confirm',
-        'name': 'confirm',
-        'message': f'Number of files selected: {len(selected_files):} / {len(files):,}'
-    })
-    while not answers['confirm']:
+    confirmed = ask(
+        "confirm",
+        f'Number of files selected: {len(selected_files):} / {len(files):,}'
+    )
+    while not confirmed:
         selected_files = ask_dataset_files_glob_single(files)
-        answers = prompt_wrapper({
-            'type': 'confirm',
-            'name': 'confirm',
-            'message': f'Number of files selected: {len(selected_files):} / {len(files):,}'
-        })
+        confirmed = ask(
+            "confirm",
+            f'Number of files selected: {len(selected_files):} / {len(files):,}'
+        )
+
+    if len(selected_files) == 0:
+        raise RuntimeWarning("No files selected")
+
     return selected_files
 
 

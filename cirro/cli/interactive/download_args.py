@@ -36,11 +36,10 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     # The user has made a selection which does not match
     # any of the options available.
     # This is most likely because there was a typo
-    if prompt_wrapper({
-        'type': 'confirm',
-        'name': 'try_again',
-        'message': 'The selection does match an option available - try again?'
-    })['try_again']:
+    if ask(
+        'confirm',
+        'The selection does match an option available - try again?'
+    ):
         return ask_dataset(datasets, input_value)
     raise InputError("Exiting - no dataset selected")
 
@@ -103,18 +102,16 @@ def ask_dataset_files_list(files: List[File]) -> List[File]:
 def ask_dataset_files_glob(files: List[File]) -> List[File]:
 
     selected_files = ask_dataset_files_glob_single(files)
-    answers = prompt_wrapper({
-        'type': 'confirm',
-        'name': 'confirm',
-        'message': f'Number of files selected: {len(selected_files):} / {len(files):,}'
-    })
-    while not answers['confirm']:
+    confirmed = ask(
+        "confirm",
+        f'Number of files selected: {len(selected_files):} / {len(files):,}'
+    )
+    while not confirmed:
         selected_files = ask_dataset_files_glob_single(files)
-        answers = prompt_wrapper({
-            'type': 'confirm',
-            'name': 'confirm',
-            'message': f'Number of files selected: {len(selected_files):} / {len(files):,}'
-        })
+        confirmed = ask(
+            "confirm",
+            f'Number of files selected: {len(selected_files):} / {len(files):,}'
+        )
 
     if len(selected_files) == 0:
         raise RuntimeWarning("No files selected")
