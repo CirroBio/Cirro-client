@@ -41,7 +41,7 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
         'name': 'try_again',
         'message': 'The selection does match an option available - try again?'
     })['try_again']:
-        return ask_dataset(datasets)
+        return ask_dataset(datasets, input_value)
     raise InputError("Exiting - no dataset selected")
 
 
