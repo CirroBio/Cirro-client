@@ -6,7 +6,7 @@ from cirro.api.models.dataset import Dataset
 from cirro.api.models.file import File
 from cirro.api.models.project import Project
 from cirro.cli.interactive.common_args import ask_project
-from cirro.cli.interactive.utils import prompt_wrapper, InputError
+from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError
 from cirro.cli.models import DownloadArguments
 from cirro.utils import format_date
 
@@ -89,11 +89,10 @@ def ask_dataset_files_list(files: List[File]) -> List[File]:
     ]
 
     if len(selected_files) == 0:
-        if prompt_wrapper({
-            'type': 'confirm',
-            'name': 'try_again',
-            'message': 'No files were selected - try again?'
-        })['try_again']:
+        if ask(
+            "confirm",
+            "No files were selected - try again?"
+        ):
             return ask_dataset_files_list(files)
         else:
             raise RuntimeWarning("No files selected")
