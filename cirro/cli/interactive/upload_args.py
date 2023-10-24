@@ -115,18 +115,15 @@ def ask_files_in_directory(data_directory) -> List[str]:
         "Select files with a naming pattern (glob)"
     ]
 
-    selection_mode_prompt = {
-        'type': 'select',
-        'name': 'mode',
-        'message': 'Which files would you like to upload from this dataset?',
-        'choices': choices
-    }
+    choice = ask(
+        'select',
+        'Which files would you like to upload from this dataset?',
+        choices=choices
+    )
 
-    answers = prompt_wrapper(selection_mode_prompt)
-
-    if answers['mode'] == choices[0]:
+    if choice == choices[0]:
         return files
-    elif answers['mode'] == choices[1]:
+    elif choice == choices[1]:
         return ask_dataset_files_list(files)
     else:
         return ask_dataset_files_glob(files)
