@@ -68,6 +68,11 @@ def ask_dataset_files(files: List[File]) -> List[File]:
         return ask_dataset_files_list(files)
     else:
         return ask_dataset_files_glob(files)
+    
+
+def strip_prefix(fp: str, prefix: str):
+    assert fp.startswith(prefix), f"Expected {fp} to start with {prefix}"
+    return fp[len(prefix):]
 
 
 def ask_dataset_files_list(files: List[File]) -> List[File]:
@@ -76,7 +81,7 @@ def ask_dataset_files_list(files: List[File]) -> List[File]:
         'name': 'files',
         'message': 'Select the files to download',
         'choices': [
-            file.relative_path
+            strip_prefix(file.relative_path, "data/")
             for file in files
         ]
     })
@@ -84,7 +89,7 @@ def ask_dataset_files_list(files: List[File]) -> List[File]:
     selected_files = [
         file
         for file in files
-        if file.relative_path in set(answers['files'])
+        if strip_prefix(file.relative_path, "data/") in set(answers['files'])
     ]
 
     if len(selected_files) == 0:
@@ -119,7 +124,7 @@ def ask_dataset_files_glob_single(files: List[File]) -> List[File]:
 
     print("All Files:")
     for file in files:
-        print(f" - {file.relative_path}")
+        print(f" - {strip_prefix(file.relative_path, 'data/')}")
 
     answers = prompt_wrapper({
         'type': 'text',
@@ -131,12 +136,12 @@ def ask_dataset_files_glob_single(files: List[File]) -> List[File]:
     selected_files = [
         file
         for file in files
-        if fnmatch(file.relative_path, answers['glob'])
+        if fnmatch(strip_prefix(file.relative_path, "data/"), answers['glob'])
     ]
 
     print("Selected Files:")
     for file in selected_files:
-        print(f" - {file.relative_path}")
+        print(f" - {strip_prefix(file.relative_path, 'data/')}")
 
     return selected_files
 
