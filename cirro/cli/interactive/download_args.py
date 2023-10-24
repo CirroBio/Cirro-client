@@ -68,7 +68,7 @@ def ask_dataset_files(files: List[File]) -> List[File]:
         return ask_dataset_files_list(files)
     else:
         return ask_dataset_files_glob(files)
-    
+
 
 def strip_prefix(fp: str, prefix: str):
     assert fp.startswith(prefix), f"Expected {fp} to start with {prefix}"
