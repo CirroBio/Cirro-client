@@ -101,11 +101,7 @@ def ask_dataset_files_list(files: List[File]) -> List[File]:
 
 def ask_dataset_files_glob(files: List[File]) -> List[File]:
 
-    selected_files = ask_dataset_files_glob_single(files)
-    confirmed = ask(
-        "confirm",
-        f'Number of files selected: {len(selected_files):} / {len(files):,}'
-    )
+    confirmed = False
     while not confirmed:
         selected_files = ask_dataset_files_glob_single(files)
         confirmed = ask(
