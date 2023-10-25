@@ -134,6 +134,9 @@ class DataPortalProject(DataPortalAsset):
             # Get the list of files in the upload folder
             files = get_files_in_directory(upload_folder)
 
+        if files is None or len(files) == 0:
+            raise RuntimeWarning("No files to upload, exiting")
+
         # Make sure that the files match the expected pattern
         self._client.process.check_dataset_files(files, process.id, upload_folder)
 

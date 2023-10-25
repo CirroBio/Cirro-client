@@ -6,7 +6,7 @@ from cirro.api.models.dataset import Dataset
 from cirro.api.models.file import File
 from cirro.api.models.project import Project
 from cirro.cli.interactive.common_args import ask_project
-from cirro.cli.interactive.utils import prompt_wrapper, InputError
+from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError
 from cirro.cli.models import DownloadArguments
 from cirro.utils import format_date
 
@@ -32,7 +32,16 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     for dataset in datasets:
         if f'{dataset.name} - {dataset.id}' == choice:
             return dataset.id
-    raise InputError("User must select a dataset to download")
+
+    # The user has made a selection which does not match
+    # any of the options available.
+    # This is most likely because there was a typo
+    if ask(
+        'confirm',
+        'The selection does match an option available - try again?'
+    ):
+        return ask_dataset(datasets, input_value)
+    raise InputError("Exiting - no dataset selected")
 
 
 def ask_dataset_files(files: List[File]) -> List[File]:
@@ -61,39 +70,53 @@ def ask_dataset_files(files: List[File]) -> List[File]:
         return ask_dataset_files_glob(files)
 
 
+def strip_prefix(fp: str, prefix: str):
+    assert fp.startswith(prefix), f"Expected {fp} to start with {prefix}"
+    return fp[len(prefix):]
+
+
 def ask_dataset_files_list(files: List[File]) -> List[File]:
     answers = prompt_wrapper({
         'type': 'checkbox',
         'name': 'files',
         'message': 'Select the files to download',
         'choices': [
-            file.relative_path
+            strip_prefix(file.relative_path, "data/")
             for file in files
         ]
     })
 
-    return [
+    selected_files = [
         file
         for file in files
-        if file.relative_path in set(answers['files'])
+        if strip_prefix(file.relative_path, "data/") in set(answers['files'])
     ]
+
+    if len(selected_files) == 0:
+        if ask(
+            "confirm",
+            "No files were selected - try again?"
+        ):
+            return ask_dataset_files_list(files)
+        else:
+            raise RuntimeWarning("No files selected")
+    else:
+        return selected_files
 
 
 def ask_dataset_files_glob(files: List[File]) -> List[File]:
 
-    selected_files = ask_dataset_files_glob_single(files)
-    answers = prompt_wrapper({
-        'type': 'confirm',
-        'name': 'confirm',
-        'message': f'Number of files selected: {len(selected_files):} / {len(files):,}'
-    })
-    while not answers['confirm']:
+    confirmed = False
+    while not confirmed:
         selected_files = ask_dataset_files_glob_single(files)
-        answers = prompt_wrapper({
-            'type': 'confirm',
-            'name': 'confirm',
-            'message': f'Number of files selected: {len(selected_files):} / {len(files):,}'
-        })
+        confirmed = ask(
+            "confirm",
+            f'Number of files selected: {len(selected_files):} / {len(files):,}'
+        )
+
+    if len(selected_files) == 0:
+        raise RuntimeWarning("No files selected")
+
     return selected_files
 
 
@@ -101,7 +124,7 @@ def ask_dataset_files_glob_single(files: List[File]) -> List[File]:
 
     print("All Files:")
     for file in files:
-        print(f" - {file.relative_path}")
+        print(f" - {strip_prefix(file.relative_path, 'data/')}")
 
     answers = prompt_wrapper({
         'type': 'text',
@@ -113,12 +136,12 @@ def ask_dataset_files_glob_single(files: List[File]) -> List[File]:
     selected_files = [
         file
         for file in files
-        if fnmatch(file.relative_path, answers['glob'])
+        if fnmatch(strip_prefix(file.relative_path, "data/"), answers['glob'])
     ]
 
     print("Selected Files:")
     for file in selected_files:
-        print(f" - {file.relative_path}")
+        print(f" - {strip_prefix(file.relative_path, 'data/')}")
 
     return selected_files
 
