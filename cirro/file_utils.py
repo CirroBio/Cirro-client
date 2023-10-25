@@ -59,9 +59,8 @@ def get_files_in_directory(
         if file_path.is_dir():
             continue
 
-        if not include_hidden:
-            if _is_hidden_file(file_path):
-                continue
+        if not include_hidden and _is_hidden_file(file_path):
+            continue
 
         str_file_path = str(file_path.as_posix())
         str_file_path = str_file_path.replace(f'{path_posix}/', "")
@@ -71,7 +70,7 @@ def get_files_in_directory(
     return paths
 
 
-def get_files_stats(files: List[File]) -> DirectoryStatistics:
+def get_files_stats(files: List[Path]) -> DirectoryStatistics:
     sizes = [f.stat().st_size for f in files]
     total_size = sum(sizes) / float(1 << 30)
     return {

@@ -12,6 +12,10 @@ from cirro.api.models.auth import Creds
 from cirro.utils import parse_json_date
 
 
+_CHECKSUM_ARGS_UL = dict(ChecksumAlgorithm='CRC32')
+_CHECKSUM_ARGS_DL = dict(ChecksumMode='ENABLED')
+
+
 def convert_size(size):
     if size == 0:
         return '0B'
@@ -57,7 +61,9 @@ class S3Client:
                   unit='B', unit_scale=True,
                   unit_divisor=1024) as progress:
             absolute_path = str(local_path.absolute())
-            self._client.upload_file(absolute_path, bucket, key, Callback=ProgressPercentage(progress))
+            self._client.upload_file(absolute_path, bucket, key,
+                                     Callback=ProgressPercentage(progress),
+                                     ExtraArgs=_CHECKSUM_ARGS_UL)
 
     def download_file(self, local_path: Path, bucket: str, key: str):
         file_size = self.get_file_stats(bucket, key)['ContentLength']
@@ -69,7 +75,9 @@ class S3Client:
                   unit='B', unit_scale=True,
                   unit_divisor=1024) as progress:
             absolute_path = str(local_path.absolute())
-            self._client.download_file(bucket, key, absolute_path, Callback=ProgressPercentage(progress))
+            self._client.download_file(bucket, key, absolute_path,
+                                       Callback=ProgressPercentage(progress),
+                                       ExtraArgs=_CHECKSUM_ARGS_DL)
 
     def create_object(self, bucket: str, key: str, contents: str, content_type: str):
         self._client.put_object(
@@ -77,11 +85,12 @@ class S3Client:
             Key=key,
             ContentType=content_type,
             ContentEncoding='utf-8',
-            Body=bytes(contents, "UTF-8")
+            Body=bytes(contents, 'UTF-8'),
+            **_CHECKSUM_ARGS_UL
         )
 
     def get_file(self, bucket: str, key: str) -> bytes:
-        resp = self._client.get_object(Bucket=bucket, Key=key)
+        resp = self._client.get_object(Bucket=bucket, Key=key, **_CHECKSUM_ARGS_DL)
         file_body = resp['Body']
         return file_body.read()
 
