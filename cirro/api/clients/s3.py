@@ -12,10 +12,6 @@ from cirro.api.models.auth import Creds
 from cirro.utils import parse_json_date
 
 
-_CHECKSUM_ARGS_UL = dict(ChecksumAlgorithm='CRC32')
-_CHECKSUM_ARGS_DL = dict(ChecksumMode='ENABLED')
-
-
 def convert_size(size):
     if size == 0:
         return '0B'
@@ -47,9 +43,11 @@ class ProgressPercentage:
 
 
 class S3Client:
-    def __init__(self, creds_getter: Callable[[], Creds], region_name: str):
+    def __init__(self, creds_getter: Callable[[], Creds], region_name: str, enable_additional_checksum=False):
         self._creds_getter = creds_getter
         self._client = self._build_session_client(region_name)
+        self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict()
+        self._download_args = dict(ChecksumMode='ENABLED') if enable_additional_checksum else dict()
 
     def upload_file(self, local_path: Path, bucket: str, key: str):
         file_size = local_path.stat().st_size
@@ -63,7 +61,7 @@ class S3Client:
             absolute_path = str(local_path.absolute())
             self._client.upload_file(absolute_path, bucket, key,
                                      Callback=ProgressPercentage(progress),
-                                     ExtraArgs=_CHECKSUM_ARGS_UL)
+                                     ExtraArgs=self._upload_args)
 
     def download_file(self, local_path: Path, bucket: str, key: str):
         file_size = self.get_file_stats(bucket, key)['ContentLength']
@@ -77,7 +75,7 @@ class S3Client:
             absolute_path = str(local_path.absolute())
             self._client.download_file(bucket, key, absolute_path,
                                        Callback=ProgressPercentage(progress),
-                                       ExtraArgs=_CHECKSUM_ARGS_DL)
+                                       ExtraArgs=self._download_args)
 
     def create_object(self, bucket: str, key: str, contents: str, content_type: str):
         self._client.put_object(
@@ -86,15 +84,18 @@ class S3Client:
             ContentType=content_type,
             ContentEncoding='utf-8',
             Body=bytes(contents, 'UTF-8'),
-            **_CHECKSUM_ARGS_UL
+            **self._upload_args
         )
 
     def get_file(self, bucket: str, key: str) -> bytes:
-        resp = self._client.get_object(Bucket=bucket, Key=key, **_CHECKSUM_ARGS_DL)
+        resp = self._client.get_object(Bucket=bucket, Key=key, **self._download_args)
         file_body = resp['Body']
         return file_body.read()
 
     def get_file_stats(self, bucket: str, key: str):
+        """
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/head_object.html
+        """
         return self._client.head_object(Bucket=bucket, Key=key)
 
     def _build_session_client(self, region_name: str):

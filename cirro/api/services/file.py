@@ -30,7 +30,8 @@ class FileService(BaseService):
         """
         Gets the contents of a file by providing the path, used internally
         """
-        s3_client = S3Client(partial(self.get_access_credentials, access_context), self._configuration.region)
+        s3_client = S3Client(partial(self.get_access_credentials, access_context),
+                             self._configuration.region, self._configuration.enable_additional_checksum)
         full_path = f'{access_context.path_prefix}/{file_path}'.lstrip('/')
         return s3_client.get_file(access_context.bucket, full_path)
 
@@ -39,7 +40,8 @@ class FileService(BaseService):
         """
         Creates a file at the specified path
         """
-        s3_client = S3Client(partial(self.get_access_credentials, access_context), self._configuration.region)
+        s3_client = S3Client(partial(self.get_access_credentials, access_context),
+                             self._configuration.region, self._configuration.enable_additional_checksum)
         s3_client.create_object(key=key,
                                 contents=contents,
                                 content_type=content_type,
@@ -53,7 +55,8 @@ class FileService(BaseService):
         :param files: relative path of files to upload
         :return:
         """
-        s3_client = S3Client(partial(self.get_access_credentials, access_context), self._configuration.region)
+        s3_client = S3Client(partial(self.get_access_credentials, access_context),
+                             self._configuration.region, self._configuration.enable_additional_checksum)
         upload_directory(directory, files, s3_client, access_context.bucket, access_context.path_prefix,
                          max_retries=self._configuration.transfer_max_retries)
 
@@ -64,7 +67,8 @@ class FileService(BaseService):
         :param directory: download location
         :param files: relative path of files to download
         """
-        s3_client = S3Client(partial(self.get_access_credentials, access_context), self._configuration.region)
+        s3_client = S3Client(partial(self.get_access_credentials, access_context),
+                             self._configuration.region, self._configuration.enable_additional_checksum)
         download_directory(directory, files, s3_client, access_context.bucket, access_context.path_prefix)
 
     def get_file_listing(self, access_context: FileAccessContext) -> List[File]:
