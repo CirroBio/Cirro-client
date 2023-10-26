@@ -12,9 +12,9 @@ You can install Cirro using pip:
 
 `pip install cirro`
 
-or by cloning the repository and running:
+or you can install the main branch of the repo by running:
 
-`python setup.py install`
+`pip install git+https://github.com/CirroBio/Cirro-client.git`
 
 ## Authentication
 
