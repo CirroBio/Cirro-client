@@ -26,7 +26,7 @@ def ask_data_directory(input_value: str) -> str:
     }
 
     answers = prompt_wrapper(directory_prompt)
-    return answers['data_directory']
+    return str(Path(answers['data_directory']).expanduser())
 
 
 def ask_name(input_value: str) -> str:
@@ -56,7 +56,7 @@ def ask_description(input_value: str) -> str:
 
 class DataDirectoryValidator(Validator):
     def validate(self, document):
-        is_a_directory = Path(document.text).is_dir()
+        is_a_directory = Path(document.text).expanduser().is_dir()
         if not is_a_directory or len(document.text.strip()) == 0:
             raise ValidationError(
                 message='Please enter a valid directory',
