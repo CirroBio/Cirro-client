@@ -1,7 +1,8 @@
+import logging
 from cirro.api.clients.portal import DataPortalClient
 from cirro.api.config import UserConfig, save_user_config, load_user_config
 from cirro.api.models.dataset import CreateIngestDatasetInput
-from cirro.api.models.process import Executor
+from cirro.api.models.process import Executor, Process
 from cirro.cli.interactive.auth_args import gather_auth_config
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
@@ -46,9 +47,13 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
+    logger = _get_logger()
     _check_configure()
+    logger.info("Instantiating Cirro client")
     cirro = DataPortalClient()
+    logger.info("Listing available projects")
     projects = cirro.project.list()
+    logger.info("Listing available processes")
     processes = cirro.process.list(process_type=Executor.INGEST)
 
     if len(projects) == 0:
@@ -65,9 +70,11 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     if len(files) == 0:
         raise RuntimeWarning("No files to upload, exiting")
 
-    process = get_item_from_name_or_id(processes, input_params['process'])
+    process: Process = get_item_from_name_or_id(processes, input_params['process'])
+    logger.info(f"Validating expected files: {process.name}")
     cirro.process.check_dataset_files(files, process.id, directory)
 
+    logger.info("Creating new dataset")
     create_request = CreateIngestDatasetInput(
         project_id=get_id_from_name(projects, input_params['project']),
         process_id=process.id,
@@ -78,16 +85,26 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
     create_resp = cirro.dataset.create(create_request)
 
+    logger.info("Uploading files")
     cirro.dataset.upload_files(dataset_id=create_resp['datasetId'],
                                project_id=create_request.project_id,
                                directory=directory,
                                files=files)
 
+    if cirro._configuration.enable_additional_checksum:
+        checksum_method = "SHA256"
+    else:
+        checksum_method = "MD5"
+    logger.info(f"File content validated by {checksum_method}")
+
 
 def run_download(input_params: DownloadArguments, interactive=False):
+    logger = _get_logger()
     _check_configure()
+    logger.info("Instantiating Cirro client")
     cirro = DataPortalClient()
 
+    logger.info("Listing available projects")
     projects = cirro.project.list()
 
     if len(projects) == 0:
@@ -109,10 +126,17 @@ def run_download(input_params: DownloadArguments, interactive=False):
         'dataset': input_params['dataset']
     }
 
+    logger.info("Downloading files")
     cirro.dataset.download_files(project_id=dataset_params['project'],
                                  dataset_id=dataset_params['dataset'],
                                  download_location=input_params['data_directory'],
                                  files=files_to_download)
+
+    if cirro._configuration.enable_additional_checksum:
+        checksum_method = "SHA256"
+    else:
+        checksum_method = "MD5"
+    logger.info(f"File content validated by {checksum_method}")
 
 
 def run_configure_workflow():
@@ -186,3 +210,16 @@ def _check_configure():
         return
 
     run_configure()
+
+
+def _get_logger() -> logging.Logger:
+    # Log to STDOUT
+    log_formatter = logging.Formatter(
+        '%(asctime)s %(levelname)-8s [Cirro CLI] %(message)s'
+    )
+    logger = logging.getLogger("CLI")
+    logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(log_formatter)
+    logger.addHandler(console_handler)
+    return logger
