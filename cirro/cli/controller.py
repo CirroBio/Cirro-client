@@ -171,11 +171,12 @@ def run_configure_workflow():
 
 
 def run_configure():
-    auth_method, auth_method_config = gather_auth_config()
+    auth_method, auth_method_config, enable_additional_checksum = gather_auth_config()
     save_user_config(UserConfig(auth_method=auth_method,
                                 auth_method_config=auth_method_config,
                                 base_url=None,
-                                transfer_max_retries=None))
+                                transfer_max_retries=None,
+                                enable_additional_checksum=enable_additional_checksum))
 
 
 def _check_configure():
