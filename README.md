@@ -26,7 +26,7 @@ If you need to change your credentials after this point, and you've opted to sav
 
 #### Downloading a dataset:
 ```bash
-Usage: cirro-cli download [OPTIONS]
+Usage: cirro download [OPTIONS]
 
   Download dataset files
 
@@ -40,7 +40,7 @@ Options:
 
 #### Uploading a dataset:
 ```bash
-Usage: cirro-cli upload [OPTIONS]
+Usage: cirro upload [OPTIONS]
 
   Upload and create a dataset
 
@@ -56,7 +56,7 @@ Options:
 
 #### Listing datasets:
 ```bash
-Usage: cirro-cli list-datasets [OPTIONS]
+Usage: cirro list-datasets [OPTIONS]
 
   List available datasets
 
@@ -73,7 +73,7 @@ When running a command, you can specify the `--interactive` flag to gather the c
 Example:
 
 ```bash
-$ cirro-cli upload --interactive
+$ cirro upload --interactive
 ? What project is this dataset associated with?  Test project
 ? Enter the full path of the data directory  /shared/biodata/test
 ? Please confirm that you wish to upload 20 files (0.630 GB)  Yes
@@ -112,7 +112,7 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 ### Configuration
 
-The `cirro-cli configure` command creates a file in `PW_HOME` called `config.ini`.
+The `cirro configure` command creates a file in `PW_HOME` called `config.ini`.
 
 You can set the `base_url` property in the config file rather than using the environment variable. 
 
@@ -135,4 +135,4 @@ enable_additional_checksums = true
 ### Clearing saved login
 
 You can clear your saved login information by removing the `~/.cirro/token.dat` file from your system or
-by running `cirro-cli configure` and selecting **No** when it asks if you'd like to save your login information.
+by running `cirro configure` and selecting **No** when it asks if you'd like to save your login information.

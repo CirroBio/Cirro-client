@@ -31,6 +31,7 @@ flake8 = "*"
 
 [tool.poetry.scripts]
 cirro-cli = "cirro.cli.cli:main"
+cirro = "cirro.cli.cli:main"
 
 [build-system]
 requires = ["poetry-core"]

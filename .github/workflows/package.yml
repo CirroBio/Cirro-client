@@ -33,7 +33,7 @@ jobs:
       - name: Test install
         run: |
           poetry install --all-extras
-          poetry run cirro-cli
+          poetry run cirro
 
       - name: Build python package
         run: |
