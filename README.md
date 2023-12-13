@@ -4,7 +4,7 @@
 [![Lint and run tests](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml/badge.svg)](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml)
 ![](https://img.shields.io/pypi/v/cirro.svg)
 
-A Python 3.8+ library for the Cirro platform.
+A Python 3.9+ library for the Cirro platform.
 
 ## Installation
 
