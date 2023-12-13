@@ -1,7 +1,7 @@
+import importlib.metadata
 import platform
 from typing import Dict
 
-import pkg_resources
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
@@ -9,8 +9,8 @@ from cirro.api.auth.base import AuthInfo
 from cirro.api.auth.iam import IAMAuth
 
 try:
-    sdk_version = pkg_resources.get_distribution("cirro").version
-except (pkg_resources.RequirementParseError, TypeError):
+    sdk_version = importlib.metadata.version('cirro')
+except (importlib.metadata.PackageNotFoundError, ValueError):
     sdk_version = "Unknown"
 python_version = platform.python_version()
 headers = {
