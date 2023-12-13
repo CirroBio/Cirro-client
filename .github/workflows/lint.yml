@@ -27,7 +27,7 @@ jobs:
 
       - name: Install deps
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools
           pip install poetry
           poetry install --all-extras
 
