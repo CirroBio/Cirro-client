@@ -3,8 +3,9 @@
 [![Build Python package](https://github.com/FredHutch/Cirro-client/actions/workflows/package.yml/badge.svg)](https://github.com/FredHutch/Cirro-client/actions/workflows/package.yml)
 [![Lint and run tests](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml/badge.svg)](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml)
 ![](https://img.shields.io/pypi/v/cirro.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CirroBio_Cirro-client&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=CirroBio_Cirro-client)
 
-A Python 3.8+ library for the Cirro platform.
+A Python 3.9+ library for the Cirro platform.
 
 ## Installation
 
