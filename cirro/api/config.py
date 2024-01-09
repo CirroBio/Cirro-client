@@ -78,7 +78,8 @@ class AppConfig:
                          Constants.default_base_url)
         self.transfer_max_retries = self.user_config.transfer_max_retries\
             if self.user_config else Constants.default_max_retries
-        self.enable_additional_checksum = self.user_config.enable_additional_checksum or False
+        self.enable_additional_checksum = self.user_config.enable_additional_checksum\
+            if self.user_config else False
         self._init_config()
 
     def _init_config(self):
