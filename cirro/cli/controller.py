@@ -1,7 +1,7 @@
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.config import UserConfig, save_user_config, load_user_config
-from cirro.api.models.dataset import CreateIngestDatasetInput
-from cirro.api.models.process import Executor
+from cirro_api_client.v1.models import Executor, UploadDatasetRequest
+
+from cirro.cirro_client import Cirro
+from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.cli.interactive.auth_args import gather_auth_config
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
@@ -16,27 +16,29 @@ from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
 from cirro.file_utils import get_files_in_directory
 from cirro.helpers import WorkflowConfigBuilder
 
+NO_PROJECTS = "No projects available"
+
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
     _check_configure()
-    cirro = DataPortalClient()
+    cirro = Cirro()
 
     # If the user provided the --interactive flag
     if interactive:
 
         # Get the list of projects available to the user
-        projects = cirro.project.list()
+        projects = cirro.projects.list()
 
         if len(projects) == 0:
-            print("No projects available")
+            print(NO_PROJECTS)
             return
 
         # Prompt the user for the project
         input_params = gather_list_arguments(input_params, projects)
 
     # List the datasets available in that project
-    datasets = cirro.dataset.find_by_project(input_params['project'])
+    datasets = cirro.datasets.get_datasets(input_params['project'])
 
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
     print("\n\n".join([f'Name: {dataset.name}\n'
@@ -47,12 +49,12 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 def run_ingest(input_params: UploadArguments, interactive=False):
     _check_configure()
-    cirro = DataPortalClient()
-    projects = cirro.project.list()
-    processes = cirro.process.list(process_type=Executor.INGEST)
+    cirro = Cirro()
+    projects = cirro.projects.list()
+    processes = cirro.processes.get_processes()
 
     if len(projects) == 0:
-        print("No projects available")
+        print(NO_PROJECTS)
         return
 
     if interactive:
@@ -66,32 +68,33 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         raise RuntimeWarning("No files to upload, exiting")
 
     process = get_item_from_name_or_id(processes, input_params['process'])
-    cirro.process.check_dataset_files(files, process.id, directory)
+    cirro.processes.validate_file_requirements(process_id=process.id, )
 
-    create_request = CreateIngestDatasetInput(
-        project_id=get_id_from_name(projects, input_params['project']),
+    upload_dataset_request = UploadDatasetRequest(
         process_id=process.id,
         name=input_params['name'],
         description=input_params['description'],
-        files=files
+        expectedFiles=files
     )
 
-    create_resp = cirro.dataset.create(create_request)
+    project_id = get_id_from_name(projects, input_params['project'])
+    create_resp = cirro.datasets.upload(project_id=project_id,
+                                        upload_dataset_request=upload_dataset_request)
 
-    cirro.dataset.upload_files(dataset_id=create_resp['datasetId'],
-                               project_id=create_request.project_id,
-                               directory=directory,
-                               files=files)
+    cirro.datasets.upload_files(dataset_id=create_resp.id,
+                                project_id=project_id,
+                                directory=directory,
+                                files=files)
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
     _check_configure()
-    cirro = DataPortalClient()
+    cirro = Cirro()
 
-    projects = cirro.project.list()
+    projects = cirro.projects.list()
 
     if len(projects) == 0:
-        print("No projects available")
+        print(NO_PROJECTS)
         return
 
     files_to_download = None
@@ -99,9 +102,9 @@ def run_download(input_params: DownloadArguments, interactive=False):
         input_params = gather_download_arguments(input_params, projects)
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
-        datasets = cirro.dataset.find_by_project(input_params['project'])
+        datasets = cirro.datasets.find_by_project(input_params['project'])
         input_params = gather_download_arguments_dataset(input_params, datasets)
-        dataset_files = cirro.dataset.get_dataset_files(input_params['project'], input_params['dataset'])
+        dataset_files = cirro.datasets.get_dataset_files(input_params['project'], input_params['dataset'])
         files_to_download = ask_dataset_files(dataset_files)
 
     dataset_params = {
@@ -109,17 +112,17 @@ def run_download(input_params: DownloadArguments, interactive=False):
         'dataset': input_params['dataset']
     }
 
-    cirro.dataset.download_files(project_id=dataset_params['project'],
-                                 dataset_id=dataset_params['dataset'],
-                                 download_location=input_params['data_directory'],
-                                 files=files_to_download)
+    cirro.datasets.download_files(project_id=dataset_params['project'],
+                                  dataset_id=dataset_params['dataset'],
+                                  download_location=input_params['data_directory'],
+                                  files=files_to_download)
 
 
 def run_configure_workflow():
     """Configure a workflow to be run in the Data Portal as a process."""
     _check_configure()
-    cirro = DataPortalClient()
-    process_options = cirro.process.list(process_type=Executor.NEXTFLOW)
+    cirro = Cirro()
+    process_options = cirro.processes.list(process_type=Executor.NEXTFLOW)
     resources_folder, repo_prefix = get_output_resources_path()
 
     workflow = WorkflowConfigBuilder(repo_prefix)

@@ -1,6 +1,7 @@
 from typing import List
 
-from cirro.api.models.project import Project
+from cirro_api_client.v1.models import Project
+
 from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.models import ListArguments
 

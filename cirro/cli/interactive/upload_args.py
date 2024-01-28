@@ -3,11 +3,10 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
 
+from cirro_api_client.v1.models import Process, Project
 from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
 
-from cirro.api.models.process import Process
-from cirro.api.models.project import Project
 from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import ask, prompt_wrapper
 from cirro.cli.models import UploadArguments

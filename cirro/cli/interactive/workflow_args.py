@@ -7,7 +7,7 @@ from github.Branch import Branch
 from github.GitRelease import GitRelease
 from github.Repository import Repository
 
-from cirro.api.models.workflow_models import OptimizedOutput, Column, WorkflowRepository
+from cirro.models.workflow_models import OptimizedOutput, Column, WorkflowRepository
 from cirro.cli.interactive.utils import ask, ask_yes_no
 
 
