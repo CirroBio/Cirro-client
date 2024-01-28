@@ -1,5 +1,5 @@
-from cirro_api_client.v1.api.execution import run_analysis, stop_analysis, get_project_summary, get_tasks_for_execution, \
-    get_task_logs, get_execution_logs
+from cirro_api_client.v1.api.execution import run_analysis, stop_analysis, get_project_summary, \
+    get_tasks_for_execution, get_task_logs, get_execution_logs
 from cirro_api_client.v1.api.processes import get_process_parameters
 from cirro_api_client.v1.models import RunAnalysisRequest
 

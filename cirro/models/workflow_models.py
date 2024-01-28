@@ -1,7 +1,5 @@
 from typing import NamedTuple, List, Optional, Dict, TypedDict
 
-from cirro_api_client.v1.models import ProcessDetail
-
 
 class ProcessConfig(TypedDict):
     dynamo: Dict

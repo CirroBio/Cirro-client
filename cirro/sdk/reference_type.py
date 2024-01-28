@@ -7,7 +7,6 @@ class DataPortalReferenceType(DataPortalAsset):
     """
     Reference data is organized by project, categorized by type.
     """
-    name = None
 
     def __init__(self, ref_type: ReferenceType):
         self.data = ref_type

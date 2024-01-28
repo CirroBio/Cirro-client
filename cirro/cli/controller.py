@@ -104,8 +104,8 @@ def run_download(input_params: DownloadArguments, interactive=False):
         input_params['project'] = get_id_from_name(projects, input_params['project'])
         datasets = cirro.datasets.list(input_params['project'])
         input_params = gather_download_arguments_dataset(input_params, datasets)
-        manifest = cirro.datasets.get_manifest(input_params['project'], input_params['dataset'])
-        files_to_download = ask_dataset_files(manifest.files)
+        files = cirro.datasets.get_file_listing(input_params['project'], input_params['dataset'])
+        files_to_download = ask_dataset_files(files)
 
     project_id = get_id_from_name(projects, input_params['project'])
     dataset_id = input_params['dataset']

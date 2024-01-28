@@ -3,18 +3,19 @@ from typing import List
 
 from cirro_api_client.v1.api.processes import get_processes, get_process, get_process_parameters, \
     validate_file_requirements
-from cirro_api_client.v1.models import ValidateFileRequirementsRequest
+from cirro_api_client.v1.models import ValidateFileRequirementsRequest, Executor
 
 from cirro.models.form_specification import ParameterSpecification
 from cirro.services.base import BaseService
 
 
 class ProcessService(BaseService):
-    def list(self):
+    def list(self, process_type: Executor = None):
         """
         Retrieves a list of available processes
         """
-        return get_processes.sync(client=self._api_client)
+        processes = get_processes.sync(client=self._api_client)
+        return [p for p in processes if process_type and process_type == p.executor]
 
     def get(self, process_id: str):
         """
