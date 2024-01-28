@@ -1,5 +1,6 @@
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.process import Executor
+from cirro_api_client.models.process import Executor
+
+from cirro.cirro_client import Cirro
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
 from cirro.sdk.project import DataPortalProject, DataPortalProjects
 from cirro.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
@@ -11,7 +12,7 @@ class DataPortal:
     available in the Data Portal.
     """
 
-    def __init__(self, client: DataPortalClient = None):
+    def __init__(self, client: Cirro = None):
         """Set up the DataPortal object, establishing an authenticated connection."""
 
         if client is not None:
@@ -19,15 +20,15 @@ class DataPortal:
 
         # Set up default client if not provided
         else:
-            self._client = DataPortalClient()
+            self._client = Cirro()
 
     def list_projects(self) -> DataPortalProjects:
-        """List all of the projects available in the Data Portal."""
+        """List all the projects available in the Data Portal."""
 
         return DataPortalProjects(
             [
                 DataPortalProject(proj, self._client)
-                for proj in self._client.project.list()
+                for proj in self._client.projects.list()
             ]
         )
 
@@ -51,7 +52,7 @@ class DataPortal:
         return DataPortalProcesses(
             [
                 DataPortalProcess(p, self._client)
-                for p in self._client.process.list()
+                for p in self._client.processes.list()
                 if (p.executor == Executor.INGEST) == ingest
             ]
         )
@@ -72,6 +73,6 @@ class DataPortal:
         return DataPortalReferenceTypes(
             [
                 DataPortalReferenceType(ref)
-                for ref in self._client.common.get_references_types()
+                for ref in self._client.references.get_references_types()
             ]
         )

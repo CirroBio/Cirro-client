@@ -3,8 +3,8 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.file import File
+from cirro.cirro_client import Cirro
+from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 
@@ -15,7 +15,7 @@ class DataPortalFile(DataPortalAsset):
     """
     name = None
 
-    def __init__(self, file: File, client: DataPortalClient):
+    def __init__(self, file: File, client: Cirro):
 
         # Note that the 'name' and 'id' attributes are set to the relative path
         # The purpose of this is to support the DataPortalAssets class functions

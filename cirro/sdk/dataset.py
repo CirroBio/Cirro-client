@@ -1,8 +1,8 @@
 from typing import Union
 
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.dataset import Dataset
-from cirro.api.models.process import RunAnalysisCommand
+from cirro_api_client.v1.models import Dataset
+
+from cirro.cirro_client import Cirro
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.file import DataPortalFile, DataPortalFiles
@@ -18,7 +18,7 @@ class DataPortalDataset(DataPortalAsset):
     """
     name = None
 
-    def __init__(self, dataset: Dataset, client: DataPortalClient):
+    def __init__(self, dataset: Dataset, client: Cirro):
         assert dataset.project_id is not None, "Must provide dataset with project_id attribute"
         self.id = dataset.id
         self.name = dataset.name

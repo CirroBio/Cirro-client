@@ -1,27 +1,43 @@
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.form_specification import ParameterSpecification
-from cirro.api.models.process import Process
+from cirro_api_client.v1.models import Process
+
+from cirro.cirro_client import Cirro
+from cirro.models.form_specification import ParameterSpecification
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 
 
 class DataPortalProcess(DataPortalAsset):
     """Helper functions for interacting with analysis processes."""
-    name = None
-
-    def __init__(self, process: Process, client: DataPortalClient):
-
-        self.id = process.id
-        self.name = process.name
-        self.description = process.description
-        self.child_process_ids = process.child_process_ids
-        self.executor = process.executor
-        self.documentation_url = process.documentation_url
-        self.code = process.code
-        self.form_spec_json = process.form_spec_json
-        self.sample_sheet_path = process.sample_sheet_path
-        self.file_requirements_message = process.file_requirements_message
-        self.file_mapping_rules = process.file_mapping_rules
+    def __init__(self, process: Process, client: Cirro):
+        self.data = process
         self._client = client
+
+    @property
+    def id(self):
+        return self.data.id
+
+    @property
+    def name(self):
+        return self.data.name
+
+    @property
+    def description(self):
+        return self.data.description
+
+    @property
+    def child_process_ids(self):
+        return self.data.child_process_ids
+
+    @property
+    def executor(self):
+        return self.data.executor
+
+    @property
+    def documentation_url(self):
+        return self.data.documentation_url
+
+    @property
+    def file_requirements_message(self):
+        return self.data.file_requirements_message
 
     def __str__(self):
         return '\n'.join([
@@ -33,7 +49,7 @@ class DataPortalProcess(DataPortalAsset):
         """
         Gets a specification used to describe the parameters used in the process.
         """
-        return self._client.process.get_parameter_spec(self.id)
+        return self._client.processes.get_parameter_spec(self.id)
 
 
 class DataPortalProcesses(DataPortalAssets[DataPortalProcess]):

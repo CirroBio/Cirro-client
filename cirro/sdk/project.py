@@ -1,9 +1,9 @@
 from time import sleep
 from typing import Union
 
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.dataset import CreateIngestDatasetInput
-from cirro.api.models.project import Project
+from cirro_api_client.v1.models import Project
+
+from cirro.cirro_client import Cirro
 from cirro.file_utils import get_files_in_directory
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets
@@ -20,15 +20,16 @@ class DataPortalProject(DataPortalAsset):
     Users are granted permissions at the project-level, allowing them
     to view and/or modify all of the datasets in that collection.
     """
-    name = None
-
-    def __init__(self, proj: Project, client: DataPortalClient):
+    def __init__(self, proj: Project, client: Cirro):
         """Initialize the Project from the base Cirro model."""
-
+        self.data = proj
         self.id = proj.id
         self.name = proj.name
         self.description = proj.description
         self._client = client
+
+    def name(self):
+        return self.data.name
 
     def __str__(self):
         """Control how the Project is rendered as a string."""

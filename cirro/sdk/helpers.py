@@ -1,15 +1,15 @@
 from typing import Union
 
-from gql.transport.exceptions import TransportQueryError
+from cirro_api_client.v1.errors import UnexpectedStatus
+from cirro_api_client.v1.models import ProcessDetail
 
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.exceptions import DataPortalModelException
-from cirro.api.models.process import Process
+from cirro.clients import Cirro
+
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.process import DataPortalProcess
 
 
-def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: DataPortalClient):
+def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Cirro):
     """
     If the process is a string, try to parse it as a process name or ID.
     """
@@ -24,22 +24,22 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Dat
 
     # Try to get the process by ID
     try:
-        process = client.process.get_process(process)
-        if isinstance(process, Process):
+        process = client.processes.get(process)
+        if isinstance(process, ProcessDetail):
             return DataPortalProcess(process, client)
 
-    # Catch the error if no dataset is found
-    except (TransportQueryError, DataPortalModelException):
+    # Catch the error if no process is found
+    except UnexpectedStatus:
         pass
 
     # If that didn't work, try to parse it as a name
     try:
-        process = client.process.find_by_name(process) or process
-        if isinstance(process, Process):
+        process = client.processes.find_by_name(process) or process
+        if isinstance(process, ProcessDetail):
             return DataPortalProcess(process, client)
 
-    # Catch the error if no dataset is found
-    except (TransportQueryError, DataPortalModelException):
+    # Catch the error if no process is found
+    except UnexpectedStatus:
         pass
 
     # If that didn't work, raise an error indicating that the process couldn't be parsed
