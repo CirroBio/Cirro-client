@@ -1,3 +1,4 @@
+import pandas as pd
 from cirro_api_client.v1.models import Executor, UploadDatasetRequest
 
 from cirro.cirro_client import Cirro
@@ -38,20 +39,19 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
         input_params = gather_list_arguments(input_params, projects)
 
     # List the datasets available in that project
-    datasets = cirro.datasets.get_datasets(input_params['project'])
+    datasets = cirro.datasets.list(input_params['project'])
 
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
-    print("\n\n".join([f'Name: {dataset.name}\n'
-                       f'Desc: {dataset.description}\n'
-                       f'GUID: ({dataset.id})'
-                       for dataset in sorted_datasets]))
+    df = pd.DataFrame.from_records([d.to_dict() for d in sorted_datasets])
+    df = df[['id', 'name', 'description', 'processId', 'status', 'createdBy', 'createdAt']]
+    print(df.to_string())
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
     _check_configure()
     cirro = Cirro()
     projects = cirro.projects.list()
-    processes = cirro.processes.get_processes()
+    processes = cirro.processes.list()
 
     if len(projects) == 0:
         print(NO_PROJECTS)
@@ -68,7 +68,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         raise RuntimeWarning("No files to upload, exiting")
 
     process = get_item_from_name_or_id(processes, input_params['process'])
-    cirro.processes.validate_file_requirements(process_id=process.id, )
+    cirro.processes.check_dataset_files(process_id=process.id, files=files, directory=directory)
 
     upload_dataset_request = UploadDatasetRequest(
         process_id=process.id,
@@ -78,12 +78,12 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     )
 
     project_id = get_id_from_name(projects, input_params['project'])
-    create_resp = cirro.datasets.upload(project_id=project_id,
-                                        upload_dataset_request=upload_dataset_request)
+    create_resp = cirro.datasets.create(project_id=project_id,
+                                        upload_request=upload_dataset_request)
 
-    cirro.datasets.upload_files(dataset_id=create_resp.id,
-                                project_id=project_id,
-                                directory=directory,
+    cirro.datasets.upload_files(project_id=project_id,
+                                destination_prefix=create_resp.upload_path,
+                                local_directory=directory,
                                 files=files)
 
 
@@ -102,18 +102,16 @@ def run_download(input_params: DownloadArguments, interactive=False):
         input_params = gather_download_arguments(input_params, projects)
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
-        datasets = cirro.datasets.find_by_project(input_params['project'])
+        datasets = cirro.datasets.list(input_params['project'])
         input_params = gather_download_arguments_dataset(input_params, datasets)
-        dataset_files = cirro.datasets.get_dataset_files(input_params['project'], input_params['dataset'])
-        files_to_download = ask_dataset_files(dataset_files)
+        manifest = cirro.datasets.get_manifest(input_params['project'], input_params['dataset'])
+        files_to_download = ask_dataset_files(manifest.files)
 
-    dataset_params = {
-        'project': get_id_from_name(projects, input_params['project']),
-        'dataset': input_params['dataset']
-    }
+    project_id = get_id_from_name(projects, input_params['project'])
+    dataset_id = input_params['dataset']
 
-    cirro.datasets.download_files(project_id=dataset_params['project'],
-                                  dataset_id=dataset_params['dataset'],
+    cirro.datasets.download_files(project_id=project_id,
+                                  dataset_id=dataset_id,
                                   download_location=input_params['data_directory'],
                                   files=files_to_download)
 

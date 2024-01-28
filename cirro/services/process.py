@@ -11,6 +11,7 @@ from cirro.services.base import BaseService
 
 
 class ProcessService(BaseService):
+    @cache
     def list(self):
         """
         Retrieves a list of available processes
@@ -75,3 +76,7 @@ class ProcessService(BaseService):
         if len(all_errors) != 0:
             raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
                              "\n".join(patterns))
+
+    def clear_cache(self):
+        self.list.cache_clear()
+        self.get_parameter_spec.cache_clear()

@@ -4,7 +4,7 @@ from cirro_api_client.v1.models import ProcessDetail
 
 
 class ProcessConfig(TypedDict):
-    record: ProcessDetail
+    dynamo: Dict
     form: Dict
     input: Dict[str, str]
     output: Dict

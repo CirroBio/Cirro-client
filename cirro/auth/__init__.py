@@ -1,7 +1,7 @@
 from io import StringIO
 from typing import Optional
 
-from cirro.auth.oauth_client import DeviceCodeAuth
+from cirro.auth.device_code import DeviceCodeAuth
 
 __all__ = [
     'get_auth_info_from_config'

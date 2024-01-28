@@ -2,9 +2,9 @@ import gzip
 from io import BytesIO, StringIO
 
 import pandas as pd
+from cirro_api_client.v1.models import FileEntry
 
 from cirro.cirro_client import Cirro
-from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 
@@ -13,24 +13,37 @@ class DataPortalFile(DataPortalAsset):
     """
     Datasets are made up of a collection of File objects in the Data Portal.
     """
-    name = None
 
-    def __init__(self, file: File, client: Cirro):
-
-        # Note that the 'name' and 'id' attributes are set to the relative path
-        # The purpose of this is to support the DataPortalAssets class functions
-        self.name = file.relative_path
-        self.id = file.relative_path
-        self.absolute_path = file.absolute_path
-
-        # Inherit all of the other attributes
-        self.relative_path = file.relative_path
-        self.size = file.size
-        self._access_context = file.access_context
-        self._client = client
-
+    def __init__(self, file: FileEntry, domain: str, client: Cirro):
         # Attach the file object
         self.file = file
+        self.absolute_path = f'{domain}/{file.path}'
+        self._client = client
+
+    # Note that the 'name' and 'id' attributes are set to the relative path
+    # The purpose of this is to support the DataPortalAssets class functions
+    @property
+    def id(self):
+        return self.file.path
+
+    @property
+    def name(self):
+        return self.file.path
+
+    @property
+    def relative_path(self):
+        return self.file.path
+
+    @property
+    def metadata(self):
+        return self.file.metadata.to_dict()
+
+    @property
+    def size(self):
+        """
+        File size (in bytes)
+        """
+        return self.file.size
 
     def __str__(self):
         return f"{self.relative_path} ({self.size} bytes)"

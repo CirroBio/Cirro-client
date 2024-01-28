@@ -1,4 +1,4 @@
-from cirro_api_client.models.process import Executor
+from cirro_api_client.v1.models import Executor
 
 from cirro.cirro_client import Cirro
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
@@ -44,7 +44,7 @@ class DataPortal:
 
     def list_processes(self, ingest=False) -> DataPortalProcesses:
         """
-        List all of the processes available in the Data Portal.
+        List all the processes available in the Data Portal.
         By default, only list non-ingest processes (those which can be run on existing datasets).
         To list the processes which can be used to upload datasets, use ingest = True.
         """
@@ -53,7 +53,7 @@ class DataPortal:
             [
                 DataPortalProcess(p, self._client)
                 for p in self._client.processes.list()
-                if (p.executor == Executor.INGEST) == ingest
+                if p.executor == Executor.INGEST == ingest
             ]
         )
 

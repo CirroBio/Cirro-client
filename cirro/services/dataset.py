@@ -6,7 +6,6 @@ from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_p
 from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest
 
 from cirro.models.file import FileAccessContext, File
-from cirro.services.base import BaseService
 from cirro.services.file import FileEnabledService
 
 logger = logging.getLogger()
@@ -60,7 +59,7 @@ class DatasetService(FileEnabledService):
         """
         return get_dataset_manifest.sync(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
 
-    def upload_files(self, project_id: str, dataset_id: str, directory: str, files: List[str]):
+    def upload_files(self, project_id: str, destination_prefix: str, local_directory: str, files: List[str]):
         """
         Uploads files to a given dataset from the specified local directory
         """

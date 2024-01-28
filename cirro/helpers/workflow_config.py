@@ -3,7 +3,8 @@ import shutil
 from pathlib import Path
 from typing import List, Dict
 
-from cirro.models import ProcessRecord, Executor
+from cirro_api_client.v1.models import Executor
+
 from cirro.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
 from cirro.helpers.constants import PROCESSES_PATH_S3
 
@@ -34,14 +35,6 @@ class WorkflowConfigBuilder:
         Write out the workflow configuration as a collection of files.
         """
         output_folder.mkdir(parents=True, exist_ok=True)
-
-        # Reorder dynamo config based on model order
-        ordered_record = {}
-        for key in ProcessRecord.__annotations__.keys():
-            value = self.process_config["dynamo"].get(key)  # type: ignore
-            if value is not None:
-                ordered_record[key] = value
-        self.process_config["dynamo"] = ordered_record
 
         # Save each of the items in the process configuration
         for config_name, config_value in self.process_config.items():

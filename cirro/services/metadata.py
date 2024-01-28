@@ -1,6 +1,6 @@
 from cirro_api_client.v1.api.metadata import get_project_samples, get_project_schema, update_project_schema, \
     update_sample
-from cirro_api_client.v1.models import FormSchema, FormSchemaForm, SampleRequest
+from cirro_api_client.v1.models import FormSchema, SampleRequest
 
 from cirro.services.base import BaseService
 

@@ -11,6 +11,7 @@ from cirro.services.metadata import MetadataService
 from cirro.services.metrics import MetricsService
 from cirro.services.process import ProcessService
 from cirro.services.projects import ProjectService
+from cirro.services.references import ReferenceService
 
 
 class Cirro:
@@ -40,37 +41,46 @@ class Cirro:
         self._metrics_service = MetricsService(self._api_client)
         self._metadata_service = MetadataService(self._api_client)
         self._billing_service = BillingService(self._api_client)
+        self._references_service = ReferenceService(self._api_client)
 
     @property
-    def datasets(self):
+    def datasets(self) -> DatasetService:
         return self._dataset_service
 
     @property
-    def projects(self):
+    def projects(self) -> ProjectService:
         return self._project_service
 
     @property
-    def processes(self):
+    def processes(self) -> ProcessService:
         return self._process_service
 
     @property
-    def execution(self):
+    def execution(self) -> ExecutionService:
         return self._execution_service
 
     @property
-    def metrics(self):
+    def metrics(self) -> MetricsService:
         return self._metrics_service
 
     @property
-    def metadata(self):
+    def metadata(self) -> MetadataService:
         return self._metadata_service
 
     @property
-    def billing(self):
+    def billing(self) -> BillingService:
         return self._billing_service
 
     @property
-    def api_client(self):
+    def references(self) -> ReferenceService:
+        return self._references_service
+
+    @property
+    def file(self) -> FileService:
+        return self._file_service
+
+    @property
+    def api_client(self) -> CirroApiClient:
         """
         Gets the underlying API client
         """

@@ -15,10 +15,8 @@ class FileAccessContext:
     Prefer to use the class methods to instantiate
     """
     def __init__(self,
-                 access_input: S3AuthorizerInput,
                  bucket: str,
                  path: str = None):
-        self._access_input = access_input
         self.bucket = bucket
         self._path = path
 
@@ -30,7 +28,6 @@ class FileAccessContext:
                 'datasetId': dataset_id, 'projectId': project_id,
                 'tokenLifetimeHours': None
             },
-            get_project_bucket(project_id),
             f'datasets/{dataset_id}'
         )
 
@@ -42,7 +39,6 @@ class FileAccessContext:
                 'datasetId': dataset_id, 'projectId': project_id,
                 'tokenLifetimeHours': token_lifetime_override
             },
-            get_project_bucket(project_id),
             f'datasets/{dataset_id}/data'
         )
 
