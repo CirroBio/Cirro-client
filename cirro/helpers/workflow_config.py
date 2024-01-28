@@ -3,8 +3,8 @@ import shutil
 from pathlib import Path
 from typing import List, Dict
 
-from cirro.api.models.process import ProcessRecord, Executor
-from cirro.api.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
+from cirro.models import ProcessRecord, Executor
+from cirro.models.workflow_models import OptimizedOutput, WorkflowRepository, ProcessConfig
 from cirro.helpers.constants import PROCESSES_PATH_S3
 
 

@@ -1,45 +1,12 @@
 from dataclasses import dataclass
 from pathlib import PurePath
-from typing import Literal, TypedDict, Optional, List
-
-from cirro.api.models.api import ApiQuery
-
-AccessType = Literal['PROJECT', 'CHART', 'DATASET', 'RESOURCES']
-FileOperation = Literal['UPLOAD', 'DOWNLOAD']
-_GET_FILE_ACCESS_TOKEN_QUERY = '''
-  query GetFileAccessToken($input: GetFileAccessTokenInput!) {
-    getFileAccessToken(input: $input) {
-      AccessKeyId
-      Expiration
-      SecretAccessKey
-      SessionToken
-    }
-  }
-'''
-
-
-def get_project_bucket(project_id):
-    return f'project-{project_id}'
-
-
-class S3AuthorizerInput(TypedDict):
-    accessType: AccessType
-    operation: FileOperation
-    projectId: Optional[str]
-    datasetId: Optional[str]
-    tokenLifetimeHours: Optional[int]
+from typing import TypedDict
 
 
 class DirectoryStatistics(TypedDict):
     size: float
     sizeFriendly: str
     numberOfFiles: int
-
-
-class CheckDataTypesInput(TypedDict):
-    fileNames: List[str]
-    processId: str
-    sampleSheet: str
 
 
 class FileAccessContext:
@@ -101,26 +68,6 @@ class FileAccessContext:
             },
             get_project_bucket(project_id),
             'resources/data'
-        )
-
-    @classmethod
-    def resources(cls, resources_bucket):
-        return cls(
-            {
-                'accessType': 'RESOURCES', 'operation': 'DOWNLOAD',
-                'projectId': None, 'datasetId': None,
-                'tokenLifetimeHours': None
-            },
-            resources_bucket,
-            ''
-        )
-
-    @property
-    def get_token_query(self) -> ApiQuery:
-        """ Used to fetch access token """
-        return ApiQuery(
-            query=_GET_FILE_ACCESS_TOKEN_QUERY,
-            variables={'input': self._access_input}
         )
 
     @property

@@ -1,7 +1,7 @@
-import json
 from typing import Dict, Any, List
 
 import jsonschema
+from cirro_api_client.v1.models import FormSchema
 
 
 def _get_fields_in_schema(schema: Dict, parent_path='') -> List['Parameter']:
@@ -23,15 +23,10 @@ class ParameterSpecification:
     """
     Used to describe parameters used in a process (uses JSONSchema)
     """
-    def __init__(self, form_spec: Dict):
-        self._form_spec_raw: Dict = form_spec['form']
-        self._form_spec_ui: Dict = form_spec['ui']
+    def __init__(self, form_schema: FormSchema):
+        self._form_spec_raw: Dict = form_schema.form.additional_properties
+        self._form_spec_ui: Dict = form_schema.ui.additional_properties
         self.form_spec = _get_fields_in_schema(self._form_spec_raw.get('properties') or {})
-
-    @classmethod
-    def from_json(cls, form_spec_json: str):
-        form_spec = json.loads(form_spec_json)
-        return cls(form_spec)
 
     def validate_params(self, params: Dict):
         """

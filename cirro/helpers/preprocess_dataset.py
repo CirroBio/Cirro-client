@@ -6,7 +6,7 @@ from pathlib import Path
 import boto3
 import pandas as pd
 
-from cirro.api.models.s3_path import S3Path
+from cirro.models.s3_path import S3Path
 
 
 class PreprocessDataset:

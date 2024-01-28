@@ -1,24 +1,24 @@
-import json
 from functools import partial
 from typing import List
 
-from cirro.api.clients import ApiClient, S3Client
-from cirro.api.config import AppConfig
-from cirro.api.models.auth import Creds
-from cirro.api.models.file import FileAccessContext, File
-from cirro.api.services.base import BaseService
+from attr import define
+from cirro_api_client import CirroApiClient
+from cirro_api_client.v1.api.file import generate_project_file_access_token
+from cirro_api_client.v1.models import AWSCredentials
+
+from cirro.clients.s3 import S3Client
 from cirro.file_utils import upload_directory, download_directory
+from cirro.models.file import FileAccessContext, File
+from cirro.services.base import BaseService
 
 
+@define
 class FileService(BaseService):
-    def get_access_credentials(self, access_context: FileAccessContext) -> Creds:
-        # Special case:
-        # we do not need to call the API to get IAM creds if we are using IAM creds
-        if self._api_client.has_iam_creds:
-            return self._api_client.get_iam_creds()
-        # Call API to get temporary credentials
-        credentials_response = self._api_client.query(*access_context.get_token_query)
-        return credentials_response['getFileAccessToken']
+    enable_additional_checksum: bool
+    transfer_retries: int
+
+    def get_access_credentials(self, project_id: str) -> AWSCredentials:
+        return generate_project_file_access_token.sync(client=self._api_client, project_id=project_id, body=request)
 
     def get_file(self, file: File) -> bytes:
         """
@@ -71,18 +71,6 @@ class FileService(BaseService):
                              self._configuration.region, self._configuration.enable_additional_checksum)
         download_directory(directory, files, s3_client, access_context.bucket, access_context.path_prefix)
 
-    def get_file_listing(self, access_context: FileAccessContext) -> List[File]:
-        """
-        Gets a listing of files of the current access context,
-        note that this expects a manifest.json file
-        :param access_context: File access context, use class methods to generate
-        :return: relative path of files
-        """
-        file = self.get_file_from_path(access_context, 'web/manifest.json')
-        manifest = json.loads(file)
-        return [File(file['file'], file['size'], access_context)
-                for file in manifest['files']]
-
 
 class FileEnabledService(BaseService):
     """
@@ -90,6 +78,6 @@ class FileEnabledService(BaseService):
     """
     _file_service: FileService
 
-    def __init__(self, api_client: ApiClient, file_service: FileService, configuration: AppConfig):
-        super().__init__(api_client, configuration)
+    def __init__(self, api_client: CirroApiClient, file_service: FileService):
+        super().__init__(api_client)
         self._file_service = file_service

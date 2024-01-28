@@ -6,10 +6,8 @@ from typing import Callable
 from boto3 import Session
 from botocore.credentials import RefreshableCredentials
 from botocore.session import get_session
+from cirro_api_client.v1.models import AWSCredentials
 from tqdm import tqdm
-
-from cirro.api.models.auth import Creds
-from cirro.utils import parse_json_date
 
 
 def convert_size(size):
@@ -22,13 +20,12 @@ def convert_size(size):
     return '%.2f %s' % (s, size_name[i])
 
 
-def format_creds_for_session(creds: Creds):
-    expiration = parse_json_date(creds['Expiration'])
+def format_creds_for_session(creds: AWSCredentials):
     return {
-        'access_key': creds['AccessKeyId'],
-        'secret_key': creds['SecretAccessKey'],
-        'token': creds['SessionToken'],
-        'expiry_time': expiration.isoformat()
+        'access_key': creds.access_key_id,
+        'secret_key': creds.secret_access_key,
+        'token': creds.session_token,
+        'expiry_time': creds.expiration.isoformat()
     }
 
 
@@ -43,7 +40,7 @@ class ProgressPercentage:
 
 
 class S3Client:
-    def __init__(self, creds_getter: Callable[[], Creds], region_name: str, enable_additional_checksum=False):
+    def __init__(self, creds_getter: Callable[[], AWSCredentials], region_name: str, enable_additional_checksum=False):
         self._creds_getter = creds_getter
         self._client = self._build_session_client(region_name)
         self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict()
@@ -101,7 +98,7 @@ class S3Client:
     def _build_session_client(self, region_name: str):
         creds = self._creds_getter()
 
-        if creds['Expiration']:
+        if creds.expiration:
             session = get_session()
             session._credentials = RefreshableCredentials.create_from_metadata(
                 metadata=format_creds_for_session(creds),
@@ -111,9 +108,9 @@ class S3Client:
             session = Session(botocore_session=session)
         else:
             session = Session(
-                aws_access_key_id=creds['AccessKeyId'],
-                aws_secret_access_key=creds['SecretAccessKey'],
-                aws_session_token=creds['SessionToken']
+                aws_access_key_id=creds.access_key_id,
+                aws_secret_access_key=creds.secret_access_key,
+                aws_session_token=creds.session_token
             )
         return session.client('s3', region_name=region_name)
 

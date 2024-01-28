@@ -1,10 +1,10 @@
 from typing import NamedTuple, List, Optional, Dict, TypedDict
 
-from cirro.api.models.process import ProcessRecord
+from cirro_api_client.v1.models import ProcessDetail
 
 
 class ProcessConfig(TypedDict):
-    dynamo: ProcessRecord
+    record: ProcessDetail
     form: Dict
     input: Dict[str, str]
     output: Dict

@@ -12,13 +12,13 @@ import boto3
 import jwt
 import requests
 from botocore.exceptions import ClientError
+from cirro_api_client.cirro_auth import AuthMethod
 from msal_extensions import FilePersistence
 from msal_extensions.persistence import BasePersistence
-from requests.auth import AuthBase
 
-from cirro.api.auth.base import AuthInfo, RequestAuthWrapper
-from cirro.api.config import Constants
-from cirro.api.models.auth import DeviceTokenResponse, OAuthTokenResponse
+from cirro.auth.oauth_models import DeviceTokenResponse, OAuthTokenResponse
+from cirro.auth.base import AuthInfo, RefreshableToken
+from cirro.config import Constants
 
 logger = logging.getLogger()
 TOKEN_PATH = Path(Constants.home, '.token.dat').expanduser()
@@ -77,7 +77,7 @@ def _authenticate(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO
     raise RuntimeError(f'error authenticating {auth_status}')
 
 
-class ClientAuth(AuthInfo):
+class DeviceCodeAuth(AuthInfo):
     """
     Authenticates to Cirro by asking
      the user to enter a verification code on the portal website
@@ -124,8 +124,8 @@ class ClientAuth(AuthInfo):
         self._update_token_metadata()
         self._get_token_lock = threading.Lock()
 
-    def get_request_auth(self) -> AuthBase:
-        return RequestAuthWrapper(lambda: self._get_token()['access_token'])
+    def get_auth_method(self) -> AuthMethod:
+        return RefreshableToken(token_getter=lambda: self._get_token()['access_token'])
 
     def get_current_user(self) -> str:
         return self._username

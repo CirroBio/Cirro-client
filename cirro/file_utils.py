@@ -7,8 +7,8 @@ from typing import List, Union
 from boto3.exceptions import S3UploadFailedError
 from botocore.exceptions import ConnectionError
 
-from cirro.api.clients import S3Client
-from cirro.api.models.file import DirectoryStatistics, File
+from cirro.clients import S3Client
+from cirro.models.file import DirectoryStatistics, File
 
 if os.name == 'nt':
     import win32api
