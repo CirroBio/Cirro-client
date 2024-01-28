@@ -1,4 +1,3 @@
-from functools import cache
 from pathlib import Path
 from typing import List
 
@@ -11,7 +10,6 @@ from cirro.services.base import BaseService
 
 
 class ProcessService(BaseService):
-    @cache
     def list(self):
         """
         Retrieves a list of available processes
@@ -34,7 +32,6 @@ class ProcessService(BaseService):
 
         return self.get(matched_process.id)
 
-    @cache
     def get_parameter_spec(self, process_id: str) -> ParameterSpecification:
         """
         Gets a specification used to describe the parameters used in the process

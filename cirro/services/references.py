@@ -1,12 +1,9 @@
-from functools import cache
-
 from cirro_api_client.v1.api.references import get_reference_types, get_references_for_project
 
 from cirro.services.base import BaseService
 
 
 class ReferenceService(BaseService):
-    @cache
     def get_types(self):
         """
         List available reference types

@@ -101,11 +101,11 @@ class DataPortalDataset(DataPortalAsset):
         if not self._files:
             self._files = DataPortalFiles(
                 [
-                    DataPortalFile(file=f, client=self._client)
-                    for f in self._client.datasets.get_manifest(
+                    DataPortalFile(file=file, client=self._client)
+                    for file in self._client.datasets.get_file_listing(
                         project_id=self.project_id,
                         dataset_id=self.id
-                    ).files
+                    )
                 ]
             )
         return self._files

@@ -2,9 +2,9 @@ import gzip
 from io import BytesIO, StringIO
 
 import pandas as pd
-from cirro_api_client.v1.models import FileEntry
 
 from cirro.cirro_client import Cirro
+from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 
@@ -14,36 +14,35 @@ class DataPortalFile(DataPortalAsset):
     Datasets are made up of a collection of File objects in the Data Portal.
     """
 
-    def __init__(self, file: FileEntry, domain: str, client: Cirro):
+    def __init__(self, file: File, client: Cirro):
         # Attach the file object
-        self.file = file
-        self.absolute_path = f'{domain}/{file.path}'
+        self._file = file
         self._client = client
 
     # Note that the 'name' and 'id' attributes are set to the relative path
     # The purpose of this is to support the DataPortalAssets class functions
     @property
     def id(self):
-        return self.file.path
+        return self._file.relative_path
 
     @property
     def name(self):
-        return self.file.path
+        return self._file.name
 
     @property
     def relative_path(self):
-        return self.file.path
+        return self._file.relative_path
 
     @property
     def metadata(self):
-        return self.file.metadata.to_dict()
+        return self._file.metadata
 
     @property
     def size(self):
         """
         File size (in bytes)
         """
-        return self.file.size
+        return self._file.size
 
     def __str__(self):
         return f"{self.relative_path} ({self.size} bytes)"
@@ -51,7 +50,7 @@ class DataPortalFile(DataPortalAsset):
     def _get(self) -> bytes:
         """Internal method to call client.file.get_file"""
 
-        return self._client.file.get_file(self.file)
+        return self._client.file.get_file(self._file)
 
     def read_csv(self, compression='infer', encoding='utf-8', **kwargs):
         """
@@ -133,7 +132,7 @@ class DataPortalFile(DataPortalAsset):
             raise DataPortalInputError("Must provide download location")
 
         self._client.file.download_files(
-            self.file.access_context,
+            self._file.access_context,
             download_location,
             [self.relative_path]
         )

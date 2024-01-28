@@ -53,18 +53,26 @@ class DatasetService(FileEnabledService):
         """
         delete_dataset.sync_detailed(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
 
-    def get_manifest(self, project_id: str, dataset_id: str):
+    def get_file_listing(self, project_id: str, dataset_id: str):
         """
         Gets a listing of files, charts, and other assets available for the dataset
         """
-        return get_dataset_manifest.sync(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
+        manifest = get_dataset_manifest.sync(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
+        files = [
+            File.from_file_entry(f, project_id=project_id, domain=manifest.domain)
+            for f in manifest.files
+        ]
+        return files
 
-    def upload_files(self, project_id: str, destination_prefix: str, local_directory: str, files: List[str]):
+    def upload_files(self, project_id: str, dataset_id: str, local_directory: str, files: List[str]):
         """
         Uploads files to a given dataset from the specified local directory
         """
-        access_context = FileAccessContext.upload_dataset(project_id=project_id, dataset_id=dataset_id)
-        self._file_service.upload_files(access_context, directory, files)
+        dataset = self.get(project_id, dataset_id)
+        access_context = FileAccessContext.upload_dataset(project_id=project_id,
+                                                          dataset_id=dataset_id,
+                                                          base_url=dataset.s3)
+        self._file_service.upload_files(access_context, local_directory, files)
 
     def download_files(self, project_id: str, dataset_id: str, download_location: str,
                        files: Union[List[File], List[str]] = None):
@@ -72,15 +80,19 @@ class DatasetService(FileEnabledService):
          Downloads all the dataset files
          If the files argument isn't provided, all files will be downloaded
         """
-        access_context = FileAccessContext.download_dataset(project_id=project_id, dataset_id=dataset_id)
-        manifest = self.get_manifest(project_id, dataset_id)
         if files is None:
-            files = manifest.files
+            files = self.get_file_listing(project_id, dataset_id)
 
         if len(files) == 0:
             return
 
-        if isinstance(files[0], File):
+        first_file = files[0]
+        if isinstance(first_file, File):
             files = [file.relative_path for file in files]
+            access_context = first_file.access_context
+        else:
+            dataset = self.get(project_id, dataset_id)
+            access_context = FileAccessContext.download(project_id=project_id,
+                                                        base_url=dataset.s3)
 
         self._file_service.download_files(access_context, download_location, files)

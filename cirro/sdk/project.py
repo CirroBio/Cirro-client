@@ -87,23 +87,23 @@ class DataPortalProject(DataPortalAsset):
         """
 
         # Get the complete list of references which are available
-        references = DataPortalReferenceTypes(
+        reference_types = DataPortalReferenceTypes(
             [
                 DataPortalReferenceType(ref)
-                for ref in self._client.projects.get_references_types()
+                for ref in self._client.references.get_types()
             ]
         )
 
         # If a particular name was specified
         if reference_type is not None:
-            references = references.filter_by_pattern(reference_type)
-            if len(references) == 0:
+            reference_types = reference_types.filter_by_pattern(reference_type)
+            if len(reference_types) == 0:
                 msg = f"Could not find any reference types with the name {reference_type}"
                 raise DataPortalAssetNotFound(msg)
 
         return DataPortalReferences(
             [
-                DataPortalReference(ref)
+                DataPortalReference(ref, project_id=self.id, client=self._client)
                 for ref in self._client.references.get_for_project(
                     self.id
                 )
@@ -169,7 +169,7 @@ class DataPortalProject(DataPortalAsset):
         # Upload the files
         self._client.datasets.upload_files(
             project_id=self.id,
-            destination_prefix=create_response.upload_path,
+            dataset_id=create_response.id,
             local_directory=upload_folder,
             files=files
         )

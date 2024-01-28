@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from pathlib import PurePath
-from typing import TypedDict
+from typing import TypedDict, Dict, Optional
+
+from cirro_api_client.v1.models import FileAccessRequest, AccessType, FileEntry
+
+from cirro.models.s3_path import S3Path
 
 
 class DirectoryStatistics(TypedDict):
@@ -15,64 +19,65 @@ class FileAccessContext:
     Prefer to use the class methods to instantiate
     """
     def __init__(self,
-                 bucket: str,
-                 path: str = None):
-        self.bucket = bucket
-        self._path = path
+                 file_access_request: FileAccessRequest,
+                 project_id: str,
+                 base_url: str):
+        self.file_access_request = file_access_request
+        self.base_url = base_url
+        self.project_id = project_id
+        self._s3_path = S3Path(base_url)
 
     @classmethod
-    def download_dataset(cls, dataset_id: str, project_id: str):
+    def download(cls, project_id: str, base_url: str, token_lifetime_override: int = None):
         return cls(
-            {
-                'accessType': 'PROJECT', 'operation': 'DOWNLOAD',
-                'datasetId': dataset_id, 'projectId': project_id,
-                'tokenLifetimeHours': None
-            },
-            f'datasets/{dataset_id}'
+            file_access_request=FileAccessRequest(
+                access_type=AccessType.PROJECT_DOWNLOAD,
+                token_lifetime_hours=token_lifetime_override
+            ),
+            base_url=base_url,
+            project_id=project_id
         )
 
     @classmethod
-    def upload_dataset(cls, dataset_id: str, project_id: str, token_lifetime_override: int = None):
+    def upload_dataset(cls, project_id: str, dataset_id: str, base_url: str, token_lifetime_override: int = None):
         return cls(
-            {
-                'accessType': 'DATASET', 'operation': 'UPLOAD',
-                'datasetId': dataset_id, 'projectId': project_id,
-                'tokenLifetimeHours': token_lifetime_override
-            },
-            f'datasets/{dataset_id}/data'
+            file_access_request=FileAccessRequest(
+                access_type=AccessType.DATASET_UPLOAD,
+                dataset_id=dataset_id,
+                token_lifetime_hours=token_lifetime_override
+            ),
+            base_url=base_url,
+            project_id=project_id
         )
 
     @classmethod
-    def download_project_resources(cls, project_id: str):
+    def upload_reference(cls, project_id: str, base_url: str):
         return cls(
-            {
-                'accessType': 'PROJECT', 'operation': 'DOWNLOAD',
-                'projectId': project_id, 'datasetId': None,
-                'tokenLifetimeHours': None
-            },
-            get_project_bucket(project_id),
-            'resources'
+            file_access_request=FileAccessRequest(
+                access_type=AccessType.REFERENCE_UPLOAD
+            ),
+            base_url=base_url,
+            project_id=project_id
         )
 
     @classmethod
-    def upload_project_resources(cls, project_id: str):
+    def upload_sample_sheet(cls, project_id: str, dataset_id: str, base_url: str):
         return cls(
-            {
-                'accessType': 'PROJECT', 'operation': 'UPLOAD',
-                'projectId': project_id, 'datasetId': None,
-                'tokenLifetimeHours': None
-            },
-            get_project_bucket(project_id),
-            'resources/data'
+            file_access_request=FileAccessRequest(
+                access_type=AccessType.SAMPLESHEET_UPLOAD,
+                dataset_id=dataset_id
+            ),
+            base_url=base_url,
+            project_id=project_id
         )
 
     @property
-    def path_prefix(self):
-        return self._path
+    def bucket(self):
+        return self._s3_path.bucket
 
     @property
-    def domain(self):
-        return f's3://{self.bucket}/{self.path_prefix}'
+    def prefix(self):
+        return self._s3_path.key
 
 
 @dataclass(frozen=True)
@@ -80,14 +85,28 @@ class File:
     relative_path: str
     size: int
     access_context: FileAccessContext
+    metadata: Optional[Dict] = None
 
     @classmethod
-    def of(cls, file: 'File'):
-        return cls(file.relative_path, file.size, file.access_context)
+    def from_file_entry(cls, file: FileEntry, project_id: str, domain: str = None):
+        # Path is absolute rather than relative
+        if 's3://' in file.path:
+            parts = S3Path(file.path)
+            domain = parts.base
+            path = parts.key
+        else:
+            path = file.path
+
+        return cls(
+            relative_path=path,
+            metadata=file.metadata.additional_properties,
+            size=file.size,
+            access_context=FileAccessContext.download(project_id=project_id, base_url=domain)
+        )
 
     @property
     def absolute_path(self):
-        return f'{self.access_context.domain}/{self.relative_path.strip("/")}'
+        return f'{self.access_context.base_url}/{self.relative_path.strip("/")}'
 
     @property
     def name(self):

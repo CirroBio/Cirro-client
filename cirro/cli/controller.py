@@ -2,7 +2,6 @@ import pandas as pd
 from cirro_api_client.v1.models import Executor, UploadDatasetRequest
 
 from cirro.cirro_client import Cirro
-from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.cli.interactive.auth_args import gather_auth_config
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
@@ -14,6 +13,7 @@ from cirro.cli.interactive.workflow_args import get_preprocess_script, get_addit
     get_repository, get_description, get_output_resources_path
 from cirro.cli.interactive.workflow_form_args import prompt_user_inputs, get_nextflow_schema, convert_nf_schema
 from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
+from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.file_utils import get_files_in_directory
 from cirro.helpers import WorkflowConfigBuilder
 
@@ -82,7 +82,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
                                         upload_request=upload_dataset_request)
 
     cirro.datasets.upload_files(project_id=project_id,
-                                destination_prefix=create_resp.upload_path,
+                                dataset_id=create_resp.id,
                                 local_directory=directory,
                                 files=files)
 

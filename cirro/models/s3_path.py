@@ -17,5 +17,9 @@ class S3Path:
     def valid(self):
         return self._parsed.scheme == 's3'
 
+    @property
+    def base(self):
+        return f's3://{self.bucket}'
+
     def __str__(self):
         return self._parsed.geturl()

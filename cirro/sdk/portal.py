@@ -53,7 +53,7 @@ class DataPortal:
             [
                 DataPortalProcess(p, self._client)
                 for p in self._client.processes.list()
-                if p.executor == Executor.INGEST == ingest
+                if not ingest or p.executor == Executor.INGEST
             ]
         )
 

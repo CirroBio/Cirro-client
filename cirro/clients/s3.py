@@ -40,9 +40,9 @@ class ProgressPercentage:
 
 
 class S3Client:
-    def __init__(self, creds_getter: Callable[[], AWSCredentials], region_name: str, enable_additional_checksum=False):
+    def __init__(self, creds_getter: Callable[[], AWSCredentials], enable_additional_checksum=False):
         self._creds_getter = creds_getter
-        self._client = self._build_session_client(region_name)
+        self._client = self._build_session_client()
         self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict()
         self._download_args = dict(ChecksumMode='ENABLED') if enable_additional_checksum else dict()
 
@@ -95,7 +95,7 @@ class S3Client:
         """
         return self._client.head_object(Bucket=bucket, Key=key)
 
-    def _build_session_client(self, region_name: str):
+    def _build_session_client(self):
         creds = self._creds_getter()
 
         if creds.expiration:
@@ -112,7 +112,7 @@ class S3Client:
                 aws_secret_access_key=creds.secret_access_key,
                 aws_session_token=creds.session_token
             )
-        return session.client('s3', region_name=region_name)
+        return session.client('s3', region_name=creds.region)
 
     def _refresh_credentials(self):
         new_creds = self._creds_getter()
