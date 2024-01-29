@@ -12,12 +12,12 @@ import boto3
 import jwt
 import requests
 from botocore.exceptions import ClientError
-from cirro_api_client.cirro_auth import AuthMethod
+from cirro_api_client.cirro_auth import AuthMethod, RefreshableTokenAuth
 from msal_extensions import FilePersistence
 from msal_extensions.persistence import BasePersistence
 
+from cirro.auth.base import AuthInfo
 from cirro.auth.oauth_models import DeviceTokenResponse, OAuthTokenResponse
-from cirro.auth.base import AuthInfo, RefreshableToken
 from cirro.config import Constants
 
 logger = logging.getLogger()
@@ -125,7 +125,7 @@ class DeviceCodeAuth(AuthInfo):
         self._get_token_lock = threading.Lock()
 
     def get_auth_method(self) -> AuthMethod:
-        return RefreshableToken(token_getter=lambda: self._get_token()['access_token'])
+        return RefreshableTokenAuth(token_getter=lambda: self._get_token()['access_token'])
 
     def get_current_user(self) -> str:
         return self._username

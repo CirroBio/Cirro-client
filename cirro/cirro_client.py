@@ -25,10 +25,10 @@ class Cirro:
 
         self._api_client = CirroApiClient(
             base_url=self._configuration.rest_endpoint,
-            auth_method=auth_info.get_auth_method()
+            auth_method=auth_info.get_auth_method(),
+            client_name='Cirro SDK',
+            package_name='cirro'
         )
-        self._api_client._client_name = 'CirroSDK'
-        self._api_client_package_name = 'cirro'
 
         # Init services
         self._file_service = FileService(self._api_client,
