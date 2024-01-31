@@ -24,6 +24,12 @@ class DataPortalReference(DataPortalAsset):
     def type(self):
         return self.data.type
 
+    @property
+    def absolute_path(self):
+        if len(self.files) == 0:
+            return None
+        return self.files[0].absolute_path
+
     def __str__(self):
         return self.name
 

@@ -34,6 +34,10 @@ class DataPortalFile(DataPortalAsset):
         return self._file.relative_path
 
     @property
+    def absolute_path(self):
+        return self._file.absolute_path
+
+    @property
     def metadata(self):
         return self._file.metadata
 

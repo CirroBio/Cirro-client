@@ -15,7 +15,7 @@ class ProcessService(BaseService):
         Retrieves a list of available processes
         """
         processes = get_processes.sync(client=self._api_client)
-        return [p for p in processes if process_type and process_type == p.executor]
+        return [p for p in processes if not process_type or process_type == p.executor]
 
     def get(self, process_id: str):
         """
