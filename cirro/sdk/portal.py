@@ -73,6 +73,6 @@ class DataPortal:
         return DataPortalReferenceTypes(
             [
                 DataPortalReferenceType(ref)
-                for ref in self._client.references.get_references_types()
+                for ref in self._client.references.get_types()
             ]
         )

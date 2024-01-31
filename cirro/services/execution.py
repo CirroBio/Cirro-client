@@ -13,7 +13,7 @@ class ExecutionService(BaseService):
         Run analysis
         """
         form_spec = get_process_parameters.sync(process_id=request.process_id, client=self._api_client)
-        ParameterSpecification(form_spec).validate_params(request.params.additional_properties)
+        ParameterSpecification(form_spec).validate_params(request.params.to_dict() if request.params else {})
 
         return run_analysis.sync(project_id=project_id, body=request, client=self._api_client)
 

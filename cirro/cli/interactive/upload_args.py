@@ -83,7 +83,8 @@ def ask_process(processes: List[Process], input_value: str) -> str:
         'select',
         'What type of files?',
         default=input_value if input_value in process_names else None,
-        choices=process_names
+        choices=process_names,
+        use_shortcuts=len(process_names) < 30
     )
 
 

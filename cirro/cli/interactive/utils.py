@@ -43,7 +43,7 @@ def ask(function_name: str,
     # Make sure that the function exists
     assert questionary_f is not None, f"No such questionary function: {function_name}"
 
-    if function_name == "select":
+    if kwargs.get("use_shortcuts") is None and function_name == "select":
         kwargs["use_shortcuts"] = True
 
     if validate_type is not None:

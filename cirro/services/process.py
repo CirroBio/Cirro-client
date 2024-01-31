@@ -74,7 +74,3 @@ class ProcessService(BaseService):
         if len(all_errors) != 0:
             raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
                              "\n".join(patterns))
-
-    def clear_cache(self):
-        self.list.cache_clear()
-        self.get_parameter_spec.cache_clear()

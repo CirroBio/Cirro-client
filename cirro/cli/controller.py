@@ -1,5 +1,5 @@
 import pandas as pd
-from cirro_api_client.v1.models import Executor, UploadDatasetRequest
+from cirro_api_client.v1.models import Executor, UploadDatasetRequest, Status
 
 from cirro.cirro_client import Cirro
 from cirro.cli.interactive.auth_args import gather_auth_config
@@ -74,7 +74,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         process_id=process.id,
         name=input_params['name'],
         description=input_params['description'],
-        expectedFiles=files
+        expected_files=files
     )
 
     project_id = get_id_from_name(projects, input_params['project'])
@@ -103,13 +103,19 @@ def run_download(input_params: DownloadArguments, interactive=False):
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
         datasets = cirro.datasets.list(input_params['project'])
+        # Filter out datasets that are not complete
+        datasets = [d for d in datasets if d.status == Status.COMPLETED]
         input_params = gather_download_arguments_dataset(input_params, datasets)
         files = cirro.datasets.get_file_listing(input_params['project'], input_params['dataset'])
+
+        if len(files) == 0:
+            print('There are no files in this dataset')
+            return
+
         files_to_download = ask_dataset_files(files)
 
     project_id = get_id_from_name(projects, input_params['project'])
     dataset_id = input_params['dataset']
-
     cirro.datasets.download_files(project_id=project_id,
                                   dataset_id=dataset_id,
                                   download_location=input_params['data_directory'],

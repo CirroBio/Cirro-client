@@ -46,7 +46,7 @@ class FileAccessContext:
                 dataset_id=dataset_id,
                 token_lifetime_hours=token_lifetime_override
             ),
-            base_url=base_url,
+            base_url=f'{base_url}/data',
             project_id=project_id
         )
 

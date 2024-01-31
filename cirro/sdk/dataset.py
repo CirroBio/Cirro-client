@@ -1,6 +1,6 @@
 from typing import Union, List, Optional
 
-from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, FileEntry
+from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, FileEntry, RunAnalysisRequestParams
 
 from cirro.cirro_client import Cirro
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
@@ -148,7 +148,7 @@ class DataPortalDataset(DataPortalAsset):
                 description=description,
                 process_id=process.id,
                 source_dataset_ids=[self.id],
-                params=params,
+                params=RunAnalysisRequestParams.from_dict(params),
                 notification_emails=notifications_emails
             )
         )
