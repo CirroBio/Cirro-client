@@ -1,12 +1,14 @@
+from typing import List
+
 from cirro_api_client.v1.api.metadata import get_project_samples, get_project_schema, update_project_schema, \
     update_sample
-from cirro_api_client.v1.models import FormSchema, SampleRequest
+from cirro_api_client.v1.models import FormSchema, SampleRequest, Sample
 
 from cirro.services.base import BaseService, get_all_records
 
 
 class MetadataService(BaseService):
-    def get_project_samples(self, project_id: str, max_items: int = 10000):
+    def get_project_samples(self, project_id: str, max_items: int = 10000) -> List[Sample]:
         """
         Retrieves a list of samples associated with a project along with their metadata
 

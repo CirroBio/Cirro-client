@@ -3,7 +3,7 @@ from typing import List, Union
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
     update_dataset, delete_dataset, get_dataset_manifest
-from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest
+from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest, Dataset
 
 from cirro.models.file import FileAccessContext, File
 from cirro.services.base import get_all_records
@@ -13,7 +13,7 @@ logger = logging.getLogger()
 
 
 class DatasetService(FileEnabledService):
-    def list(self, project_id: str, max_items: int = 10000):
+    def list(self, project_id: str, max_items: int = 10000) -> List[Dataset]:
         """List datasets
 
          Retrieves a list of datasets for a given project

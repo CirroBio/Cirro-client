@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import TypeVar, Callable, Generic, Optional
+from typing import TypeVar, Callable, Generic, Optional, List
 
 from attr import define
 from cirro_api_client import CirroApiClient
@@ -22,7 +22,8 @@ class PageArgs:
 T = TypeVar('T', bound=PageResp)
 
 
-def get_all_records(records_getter: Callable[[PageArgs], Optional[PageResp[D]]], batch_size=5000, max_items=None) -> D:
+def get_all_records(records_getter: Callable[[PageArgs], Optional[PageResp[D]]],
+                    batch_size=5000, max_items=None) -> List[D]:
     next_token = None
     items = []
 
