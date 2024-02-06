@@ -6,22 +6,29 @@ from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_p
 from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest
 
 from cirro.models.file import FileAccessContext, File
+from cirro.services.base import get_all_records
 from cirro.services.file import FileEnabledService
 
 logger = logging.getLogger()
 
 
 class DatasetService(FileEnabledService):
-    def list(self, project_id: str):
+    def list(self, project_id: str, max_items: int = 10000):
         """List datasets
 
          Retrieves a list of datasets for a given project
 
         Args:
             project_id (str): ID of the Project
+            max_items (int): Maximum number of records to get (default 10,000)
         """
-        resp = get_datasets.sync(project_id=project_id, client=self._api_client)
-        return resp.data
+        return get_all_records(
+            records_getter=lambda page_args: get_datasets.sync(project_id=project_id,
+                                                               client=self._api_client,
+                                                               next_token=page_args.next_token,
+                                                               limit=page_args.limit),
+            max_items=max_items
+        )
 
     def import_public(self, project_id: str, import_request: ImportDataRequest):
         """
