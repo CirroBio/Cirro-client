@@ -1,13 +1,6 @@
 from typing import TypedDict, Optional
 
 
-class Creds(TypedDict):
-    AccessKeyId: str
-    SecretAccessKey: str
-    SessionToken: Optional[str]
-    Expiration: Optional[str]
-
-
 class DeviceTokenResponse(TypedDict):
     device_code: str
     user_code: str

@@ -2,7 +2,7 @@ import json
 from datetime import timezone, datetime
 from typing import Optional, Union
 
-from cirro.api.models.auth import Creds
+from cirro_api_client.v1.models import AWSCredentials
 
 
 def parse_json_date(json_date: str) -> Optional[datetime]:
@@ -33,10 +33,10 @@ def format_date(date: Union[str, datetime]) -> str:
     return date.strftime('%m/%d/%Y, %H:%M:%S')
 
 
-def print_credentials(creds: Creds):
-    print(f'AWS_ACCESS_KEY_ID: {creds["AccessKeyId"]}')
-    print(f'AWS_SECRET_ACCESS_KEY: {creds["SecretAccessKey"]}')
-    print(f'AWS_SESSION_TOKEN: {creds["SessionToken"]}')
-    if creds['Expiration']:
+def print_credentials(creds: AWSCredentials):
+    print(f'AWS_ACCESS_KEY_ID={creds.access_key_id}')
+    print(f'AWS_SECRET_ACCESS_KEY={creds.secret_access_key}')
+    print(f'AWS_SESSION_TOKEN={creds.session_token}')
+    if creds.expiration:
         print()
-        print(f'These credentials expire at {format_date(creds["Expiration"])}')
+        print(f'These credentials expire at {format_date(creds.expiration)}')

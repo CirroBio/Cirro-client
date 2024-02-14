@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cirro"
-version = "0.8.4"
+version = "1.0.0"
 description = "CLI tool and SDK for interacting with the Cirro platform"
 authors = ["Cirro Bio <support@cirro.bio>"]
 license = "MIT"
@@ -10,17 +10,16 @@ packages = [{include = "cirro"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+attrs = ">=21.3.0"
+cirro_api_client = "0.0.9"
 click = "^8.1.3"
-boto3 = "1.33.13"
+boto3 = "~=1.34"
 questionary = "^2.0.1"
 requests = "^2.31.0"
-requests_aws4auth = "^1.2.3"
 tqdm = "^4.62.3"
-pygithub = "2.1.1"
-jsonschema = "^4.6.1"
-gql = {extras = ["requests"], version = "^3.4.1"}
-pandas = "^2.1.4"
-s3fs = "2023.12.2"
+jsonschema = "^4.21.1"
+pandas = "^2.2.0"
+s3fs = "2024.2.0"
 pyjwt = "^2.7.0"
 msal-extensions = "^1.0.0"
 

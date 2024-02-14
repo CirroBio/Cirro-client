@@ -6,7 +6,12 @@ from pathlib import Path
 import boto3
 import pandas as pd
 
-from cirro.api.models.s3_path import S3Path
+from cirro.models.s3_path import S3Path
+
+
+def _write_json(dat, local_path: str, indent=4):
+    with Path(local_path).open(mode="wt") as handle:
+        return json.dump(dat, handle, indent=indent)
 
 
 class PreprocessDataset:
@@ -85,10 +90,6 @@ class PreprocessDataset:
         # Parse JSON
         return json.loads(text)
 
-    def _write_json(self, dat, local_path: str, indent=4):
-        with Path(local_path).open(mode="wt") as handle:
-            return json.dump(dat, handle, indent=indent)
-
     def add_param(self, name: str, value, overwrite=False, log=True):
         """Add a parameter to the dataset."""
 
@@ -101,7 +102,7 @@ class PreprocessDataset:
 
         if log:
             self.logger.info("Saving parameters")
-        self._write_json(self.params, "nextflow.json")
+        _write_json(self.params, "nextflow.json")
 
     def remove_param(self, name: str, force=False):
         """Remove a parameter from the dataset."""
@@ -113,7 +114,7 @@ class PreprocessDataset:
         del self.params[name]
 
         self.logger.info("Saving parameters")
-        self._write_json(self.params, "nextflow.json")
+        _write_json(self.params, "nextflow.json")
 
     def update_compute(self, from_str, to_str, fp="nextflow-override.config"):
         """Replace all instances of a text string in the compute config file."""
@@ -129,16 +130,18 @@ class PreprocessDataset:
 
     def wide_samplesheet(
             self,
-            index=["sampleIndex", "sample", "lane"],
+            index=None,
             columns="read",
             values="file",
             column_prefix="fastq_"
     ):
         """Format a wide samplesheet with each read-pair on a row."""
 
+        if index is None:
+            index = ["sampleIndex", "sample", "lane"]
         self.logger.info("Formatting a wide samplesheet")
         self.logger.info("File table (long)")
-        self.logger.info(self.files.head().to_csv(index=None))
+        self.logger.info(self.files.head().to_csv(index=False))
 
         assert columns in self.files.columns.values, f"Column '{columns}' not found in file table"
         assert values in self.files.columns.values, f"Column '{values}' not found in file table"

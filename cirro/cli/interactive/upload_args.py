@@ -3,11 +3,10 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
 
+from cirro_api_client.v1.models import Process, Project
 from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
 
-from cirro.api.models.process import Process
-from cirro.api.models.project import Project
 from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import ask, prompt_wrapper
 from cirro.cli.models import UploadArguments
@@ -84,7 +83,8 @@ def ask_process(processes: List[Process], input_value: str) -> str:
         'select',
         'What type of files?',
         default=input_value if input_value in process_names else None,
-        choices=process_names
+        choices=process_names,
+        use_shortcuts=len(process_names) < 30
     )
 
 

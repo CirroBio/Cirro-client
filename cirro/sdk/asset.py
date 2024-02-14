@@ -13,6 +13,9 @@ class DataPortalAsset:
     def name(self):
         pass
 
+    def __repr__(self):
+        return f'<{self.__class__.__name__}:name={self.name}>'
+
 
 T = TypeVar('T', bound=DataPortalAsset)
 

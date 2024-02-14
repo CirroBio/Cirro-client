@@ -1,6 +1,6 @@
 import unittest
 
-from cirro.api.config import AppConfig
+from cirro.config import AppConfig
 
 
 class TestConfigLoad(unittest.TestCase):

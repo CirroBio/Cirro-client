@@ -1,18 +1,34 @@
-from cirro.api.models.reference import Reference
+from cirro_api_client.v1.models import Reference
+
+from cirro.cirro_client import Cirro
+from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
+from cirro.sdk.file import DataPortalFile
 
 
 class DataPortalReference(DataPortalAsset):
     """
     Reference data is organized by project, categorized by type.
     """
-    name = None
+    def __init__(self, ref: Reference, project_id: str, client: Cirro):
+        self.data = ref
+        self.files = [
+            DataPortalFile(File.from_file_entry(f, project_id), client) for f in ref.files
+        ]
 
-    def __init__(self, ref: Reference):
-        self.name = ref.name
-        self._access_context = ref.access_context
-        self.relative_path = ref.relative_path
-        self.absolute_path = f'{self._access_context.domain}/{self.relative_path.strip("/")}'
+    @property
+    def name(self):
+        return self.data.name
+
+    @property
+    def type(self):
+        return self.data.type
+
+    @property
+    def absolute_path(self):
+        if len(self.files) == 0:
+            return None
+        return self.files[0].absolute_path
 
     def __str__(self):
         return self.name

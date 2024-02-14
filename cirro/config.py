@@ -95,7 +95,6 @@ class AppConfig:
             self.user_pool_id = info['auth']['userPoolId']
             self.references_bucket = info['referencesBucket']
             self.resources_bucket = info['resourcesBucket']
-            self.data_endpoint = info['dataEndpoint']
             self.region = info['region']
         except HTTPError:
             raise RuntimeError('Failed to get system metadata')
