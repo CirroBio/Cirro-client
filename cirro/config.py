@@ -24,7 +24,7 @@ class UserConfig(NamedTuple):
 
 def save_user_config(user_config: UserConfig):
     original_user_config = load_user_config()
-    ini_config = configparser.SafeConfigParser()
+    ini_config = configparser.ConfigParser()
     ini_config['General'] = {
         'auth_method': user_config.auth_method,
         'base_url': Constants.default_base_url,
