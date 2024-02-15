@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Callable
 
 from boto3 import Session
+from botocore.config import Config
 from botocore.credentials import RefreshableCredentials
 from botocore.session import get_session
 from cirro_api_client.v1.models import AWSCredentials
@@ -112,7 +113,10 @@ class S3Client:
                 aws_secret_access_key=creds.secret_access_key,
                 aws_session_token=creds.session_token
             )
-        return session.client('s3', region_name=creds.region)
+        s3_config = Config(
+            use_dualstack_endpoint=True
+        )
+        return session.client('s3', region_name=creds.region, config=s3_config)
 
     def _refresh_credentials(self):
         new_creds = self._creds_getter()
