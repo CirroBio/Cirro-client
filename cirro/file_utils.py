@@ -62,6 +62,9 @@ def get_files_in_directory(
         if not include_hidden and _is_hidden_file(file_path):
             continue
 
+        if not file_path.exists():
+            continue
+
         str_file_path = str(file_path.as_posix())
         str_file_path = str_file_path.replace(f'{path_posix}/', "")
         paths.append(str_file_path)
