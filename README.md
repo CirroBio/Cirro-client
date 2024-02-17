@@ -106,14 +106,14 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 ### Supported environment variables
 
-| Name        | Description                   | Default   |
-|-------------|-------------------------------|-----------|
-| PW_HOME     | Local configuration directory | ~/.cirro  |
-| PW_BASE_URL | Base URL of the data portal   | cirro.bio |
+| Name           | Description                   | Default   |
+|----------------|-------------------------------|-----------|
+| CIRRO_HOME     | Local configuration directory | ~/.cirro  |
+| CIRRO_BASE_URL | Base URL of the data portal   | cirro.bio |
 
 ### Configuration
 
-The `cirro configure` command creates a file in `PW_HOME` called `config.ini`.
+The `cirro configure` command creates a file in `CIRRO_HOME` called `config.ini`.
 
 You can set the `base_url` property in the config file rather than using the environment variable. 
 
