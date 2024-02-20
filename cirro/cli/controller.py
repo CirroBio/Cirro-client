@@ -41,7 +41,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
     df = pd.DataFrame.from_records([d.to_dict() for d in sorted_datasets])
     df = df[['id', 'name', 'description', 'processId', 'status', 'createdBy', 'createdAt']]
-    print(df.to_string())
+    logger.info(df.to_string())
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
@@ -55,7 +55,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     projects = cirro.projects.list()
 
     if len(projects) == 0:
-        print(NO_PROJECTS)
+        logger.info(NO_PROJECTS)
         return
 
     if interactive:
@@ -122,7 +122,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
         files = cirro.datasets.get_file_listing(input_params['project'], input_params['dataset'])
 
         if len(files) == 0:
-            print('There are no files in this dataset')
+            logger.info('There are no files in this dataset')
             return
 
         files_to_download = ask_dataset_files(files)
