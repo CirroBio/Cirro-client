@@ -29,7 +29,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
         projects = cirro.projects.list()
 
         if len(projects) == 0:
-            print(NO_PROJECTS)
+            logger.info(NO_PROJECTS)
             return
 
         # Prompt the user for the project
@@ -49,11 +49,10 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     logger = _get_logger()
     logger.info(f"Collecting data from {cirro._configuration.base_url}")
     logger.info("Listing available projects")
-    projects = cirro.project.list()
-    logger.info("Listing available processes")
-    processes = cirro.process.list(process_type=Executor.INGEST)
-    projects = cirro.projects.list()
     processes = cirro.processes.list()
+
+    logger.info("Listing available projects")
+    projects = cirro.projects.list()
 
     if len(projects) == 0:
         print(NO_PROJECTS)
@@ -108,7 +107,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
     projects = cirro.projects.list()
 
     if len(projects) == 0:
-        print(NO_PROJECTS)
+        logger.info(NO_PROJECTS)
         return
 
     files_to_download = None
