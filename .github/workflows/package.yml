@@ -20,20 +20,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Set up Python 3.8
+      - name: Set up Python 3.12
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: "3.12"
 
       - name: Install deps
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools
           pip install poetry
 
       - name: Test install
         run: |
           poetry install --all-extras
-          poetry run cirro-cli
+          poetry run cirro
 
       - name: Build python package
         run: |

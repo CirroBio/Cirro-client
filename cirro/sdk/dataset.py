@@ -1,8 +1,8 @@
-from typing import Union
+from typing import Union, List, Optional
 
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.dataset import Dataset
-from cirro.api.models.process import RunAnalysisCommand
+from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, FileEntry, RunAnalysisRequestParams
+
+from cirro.cirro_client import Cirro
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.file import DataPortalFile, DataPortalFiles
@@ -16,22 +16,79 @@ class DataPortalDataset(DataPortalAsset):
     either been uploaded directly, or which have been output by
     an analysis pipeline or notebook.
     """
-    name = None
 
-    def __init__(self, dataset: Dataset, client: DataPortalClient):
+    def __init__(self, dataset: Union[Dataset, DatasetDetail], client: Cirro):
         assert dataset.project_id is not None, "Must provide dataset with project_id attribute"
-        self.id = dataset.id
-        self.name = dataset.name
-        self.description = dataset.description
-        self.process_id = dataset.process_id
-        self.project_id = dataset.project_id
-        self.status = dataset.status
-        self.source_dataset_ids = dataset.source_dataset_ids
-        self.info = dataset.info
-        self.params = dataset.params
-        self.created_at = dataset.created_at
-        self.created_by = dataset.created_by
+        self.data = dataset
+        self._files: Optional[List[FileEntry]] = None
         self._client = client
+
+    @property
+    def id(self):
+        return self.data.id
+
+    @property
+    def name(self):
+        return self.data.name
+
+    @property
+    def description(self):
+        return self.data.description
+
+    @property
+    def process_id(self):
+        return self.data.process_id
+
+    @property
+    def process(self):
+        return self._client.processes.get(self.process_id)
+
+    @property
+    def project_id(self):
+        return self.data.project_id
+
+    @property
+    def status(self):
+        return self.data.status
+
+    @property
+    def source_dataset_ids(self):
+        return self.data.source_dataset_ids
+
+    @property
+    def source_datasets(self):
+        return [
+            DataPortalDataset(
+                dataset=self._client.datasets.get(project_id=self.project_id, dataset_id=dataset_id),
+                client=self._client
+            )
+            for dataset_id in self.source_dataset_ids
+        ]
+
+    @property
+    def params(self):
+        return self._get_detail().params
+
+    @property
+    def info(self):
+        return self._get_detail().info
+
+    @property
+    def tags(self):
+        return self.data.tags
+
+    @property
+    def created_by(self):
+        return self.data.created_by
+
+    @property
+    def created_at(self):
+        return self.data.created_at
+
+    def _get_detail(self):
+        if not isinstance(self.data, DatasetDetail):
+            self.data = self._client.datasets.get(project_id=self.project_id, dataset_id=self.id)
+        return self.data
 
     def __str__(self):
         return '\n'.join([
@@ -41,22 +98,20 @@ class DataPortalDataset(DataPortalAsset):
 
     def list_files(self) -> DataPortalFiles:
         """Return the list of files which make up the dataset."""
-
-        return DataPortalFiles(
-            [
-                DataPortalFile(
-                    f,
-                    client=self._client
-                )
-                for f in self._client.dataset.get_dataset_files(
-                    project_id=self.project_id,
-                    dataset_id=self.id
-                )
-            ]
-        )
+        if not self._files:
+            self._files = DataPortalFiles(
+                [
+                    DataPortalFile(file=file, client=self._client)
+                    for file in self._client.datasets.get_file_listing(
+                        project_id=self.project_id,
+                        dataset_id=self.id
+                    )
+                ]
+            )
+        return self._files
 
     def download_files(self, download_location: str = None) -> None:
-        """Download all of the files from the dataset to a local directory."""
+        """Download all the files from the dataset to a local directory."""
 
         # Alias for internal method
         self.list_files().download(download_location)
@@ -86,15 +141,15 @@ class DataPortalDataset(DataPortalAsset):
         # If the process is a string, try to parse it as a process name or ID
         process = parse_process_name_or_id(process, self._client)
 
-        return self._client.process.run_analysis(
-            RunAnalysisCommand(
+        return self._client.execution.run_analysis(
+            project_id=self.project_id,
+            request=RunAnalysisRequest(
                 name=name,
                 description=description,
                 process_id=process.id,
-                parent_dataset_id=self.id,
-                project_id=self.project_id,
-                params=params,
-                notifications_emails=notifications_emails
+                source_dataset_ids=[self.id],
+                params=RunAnalysisRequestParams.from_dict(params),
+                notification_emails=notifications_emails
             )
         )
 

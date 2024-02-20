@@ -2,9 +2,9 @@ from fnmatch import fnmatch
 from pathlib import Path
 from typing import List
 
-from cirro.api.models.dataset import Dataset
-from cirro.api.models.file import File
-from cirro.api.models.project import Project
+from cirro_api_client.v1.models import Dataset, Project
+
+from cirro.models.file import File
 from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError
 from cirro.cli.models import DownloadArguments

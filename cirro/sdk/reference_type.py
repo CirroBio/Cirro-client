@@ -1,4 +1,5 @@
-from cirro.api.models.reference import ReferenceType
+from cirro_api_client.v1.models import ReferenceType
+
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 
 
@@ -6,13 +7,25 @@ class DataPortalReferenceType(DataPortalAsset):
     """
     Reference data is organized by project, categorized by type.
     """
-    name = None
 
     def __init__(self, ref_type: ReferenceType):
-        self.name = ref_type.name
-        self.description = ref_type.description
-        self.directory = ref_type.directory
-        self.validation = ref_type.validation
+        self.data = ref_type
+
+    @property
+    def name(self):
+        return self.data.name
+
+    @property
+    def description(self):
+        return self.data.description
+
+    @property
+    def directory(self):
+        return self.data.directory
+
+    @property
+    def validation(self):
+        return self.data.validation
 
     def __str__(self):
         return '\n'.join([

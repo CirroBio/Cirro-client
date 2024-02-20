@@ -7,8 +7,8 @@ from typing import List, Union
 from boto3.exceptions import S3UploadFailedError
 from botocore.exceptions import ConnectionError
 
-from cirro.api.clients import S3Client
-from cirro.api.models.file import DirectoryStatistics, File
+from cirro.clients import S3Client
+from cirro.models.file import DirectoryStatistics, File
 
 if os.name == 'nt':
     import win32api
@@ -62,6 +62,9 @@ def get_files_in_directory(
         if not include_hidden and _is_hidden_file(file_path):
             continue
 
+        if not file_path.exists():
+            continue
+
         str_file_path = str(file_path.as_posix())
         str_file_path = str_file_path.replace(f'{path_posix}/', "")
         paths.append(str_file_path)
@@ -113,7 +116,7 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
 
 def download_directory(directory: str, files: List[str], s3_client: S3Client, bucket: str, prefix: str):
     for file in files:
-        key = f'{prefix}/{file}'
+        key = f'{prefix}/{file}'.lstrip('/')
         local_path = Path(directory, file)
         local_path.parent.mkdir(parents=True, exist_ok=True)
 

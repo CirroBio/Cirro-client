@@ -3,8 +3,8 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.file import File
+from cirro.cirro_client import Cirro
+from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 
@@ -13,24 +13,40 @@ class DataPortalFile(DataPortalAsset):
     """
     Datasets are made up of a collection of File objects in the Data Portal.
     """
-    name = None
 
-    def __init__(self, file: File, client: DataPortalClient):
-
-        # Note that the 'name' and 'id' attributes are set to the relative path
-        # The purpose of this is to support the DataPortalAssets class functions
-        self.name = file.relative_path
-        self.id = file.relative_path
-        self.absolute_path = file.absolute_path
-
-        # Inherit all of the other attributes
-        self.relative_path = file.relative_path
-        self.size = file.size
-        self._access_context = file.access_context
+    def __init__(self, file: File, client: Cirro):
+        # Attach the file object
+        self._file = file
         self._client = client
 
-        # Attach the file object
-        self.file = file
+    # Note that the 'name' and 'id' attributes are set to the relative path
+    # The purpose of this is to support the DataPortalAssets class functions
+    @property
+    def id(self):
+        return self._file.relative_path
+
+    @property
+    def name(self):
+        return self._file.name
+
+    @property
+    def relative_path(self):
+        return self._file.relative_path
+
+    @property
+    def absolute_path(self):
+        return self._file.absolute_path
+
+    @property
+    def metadata(self):
+        return self._file.metadata
+
+    @property
+    def size(self):
+        """
+        File size (in bytes)
+        """
+        return self._file.size
 
     def __str__(self):
         return f"{self.relative_path} ({self.size} bytes)"
@@ -38,7 +54,7 @@ class DataPortalFile(DataPortalAsset):
     def _get(self) -> bytes:
         """Internal method to call client.file.get_file"""
 
-        return self._client.file.get_file(self.file)
+        return self._client.file.get_file(self._file)
 
     def read_csv(self, compression='infer', encoding='utf-8', **kwargs):
         """
@@ -120,7 +136,7 @@ class DataPortalFile(DataPortalAsset):
             raise DataPortalInputError("Must provide download location")
 
         self._client.file.download_files(
-            self.file.access_context,
+            self._file.access_context,
             download_location,
             [self.relative_path]
         )

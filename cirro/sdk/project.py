@@ -1,9 +1,10 @@
+from functools import cache
 from time import sleep
 from typing import Union
 
-from cirro.api.clients.portal import DataPortalClient
-from cirro.api.models.dataset import CreateIngestDatasetInput
-from cirro.api.models.project import Project
+from cirro_api_client.v1.models import Project, UploadDatasetRequest
+
+from cirro.cirro_client import Cirro
 from cirro.file_utils import get_files_in_directory
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets
@@ -18,17 +19,24 @@ class DataPortalProject(DataPortalAsset):
     """
     Projects in the Data Portal contain collections of Datasets.
     Users are granted permissions at the project-level, allowing them
-    to view and/or modify all of the datasets in that collection.
+    to view and/or modify all the datasets in that collection.
     """
-    name = None
-
-    def __init__(self, proj: Project, client: DataPortalClient):
+    def __init__(self, proj: Project, client: Cirro):
         """Initialize the Project from the base Cirro model."""
-
-        self.id = proj.id
-        self.name = proj.name
-        self.description = proj.description
+        self.data = proj
         self._client = client
+
+    @property
+    def id(self):
+        return self.data.id
+
+    @property
+    def name(self):
+        return self.data.name
+
+    @property
+    def description(self):
+        return self.data.description
 
     def __str__(self):
         """Control how the Project is rendered as a string."""
@@ -38,28 +46,36 @@ class DataPortalProject(DataPortalAsset):
             for i in ['name', 'id', 'description']
         ])
 
-    def list_datasets(self) -> DataPortalDatasets:
-        """List all of the datasets available in the project."""
+    @cache
+    def _get_datasets(self):
+        return self._client.datasets.list(self.id)
+
+    def list_datasets(self, force_refresh=False) -> DataPortalDatasets:
+        """List all the datasets available in the project."""
+        if force_refresh:
+            self._get_datasets.cache_clear()
 
         return DataPortalDatasets(
             [
                 DataPortalDataset(d, self._client)
-                for d in self._client.dataset.find_by_project(self.id)
+                for d in self._get_datasets()
             ]
         )
 
-    def get_dataset_by_name(self, name: str = None) -> DataPortalDataset:
+    def get_dataset_by_name(self, name: str, force_refresh=False) -> DataPortalDataset:
         """Return the dataset with the specified name."""
+        if force_refresh:
+            self._get_datasets.cache_clear()
 
-        dataset = next(iter(self._client.dataset.find_by_project(self.id, name=name)), None)
+        dataset = next((d for d in self._get_datasets() if d.name == name), None)
         if dataset is None:
             raise DataPortalAssetNotFound(f'Dataset with name {name} not found')
-        return DataPortalDataset(dataset, self._client)
+        return self.get_dataset_by_id(dataset.id)
 
     def get_dataset_by_id(self, _id: str = None) -> DataPortalDataset:
         """Return the dataset with the specified id."""
 
-        dataset = self._client.dataset.get_from_id(_id=_id)
+        dataset = self._client.datasets.get(project_id=self.id, dataset_id=_id)
         if dataset is None:
             raise DataPortalAssetNotFound(f'Dataset with ID {_id} not found')
         return DataPortalDataset(dataset, self._client)
@@ -71,28 +87,27 @@ class DataPortalProject(DataPortalAsset):
         """
 
         # Get the complete list of references which are available
-        references = DataPortalReferenceTypes(
+        reference_types = DataPortalReferenceTypes(
             [
                 DataPortalReferenceType(ref)
-                for ref in self._client.common.get_references_types()
+                for ref in self._client.references.get_types()
             ]
         )
 
         # If a particular name was specified
         if reference_type is not None:
-            references = references.filter_by_pattern(reference_type)
-            if len(references) == 0:
+            reference_types = reference_types.filter_by_pattern(reference_type)
+            if len(reference_types) == 0:
                 msg = f"Could not find any reference types with the name {reference_type}"
                 raise DataPortalAssetNotFound(msg)
 
         return DataPortalReferences(
             [
-                DataPortalReference(ref)
-                for reference_type in references
-                for ref in self._client.project.get_references(
-                    self.id,
-                    reference_type.directory
+                DataPortalReference(ref, project_id=self.id, client=self._client)
+                for ref in self._client.references.get_for_project(
+                    self.id
                 )
+                if reference_type is None or ref.type == reference_type
             ]
         )
 
@@ -130,7 +145,6 @@ class DataPortalProject(DataPortalAsset):
 
         # If no files were provided
         if files is None:
-
             # Get the list of files in the upload folder
             files = get_files_in_directory(upload_folder)
 
@@ -138,33 +152,33 @@ class DataPortalProject(DataPortalAsset):
             raise RuntimeWarning("No files to upload, exiting")
 
         # Make sure that the files match the expected pattern
-        self._client.process.check_dataset_files(files, process.id, upload_folder)
+        self._client.processes.check_dataset_files(files, process.id, upload_folder)
 
         # Create the ingest process request
-        dataset_create_request = CreateIngestDatasetInput(
-            project_id=self.id,
+        dataset_create_request = UploadDatasetRequest(
             process_id=process.id,
             name=name,
             description=description,
-            files=files
+            expected_files=files
         )
 
         # Get the response
-        create_response = self._client.dataset.create(dataset_create_request)
+        create_response = self._client.datasets.create(project_id=self.id,
+                                                       upload_request=dataset_create_request)
 
         # Upload the files
-        self._client.dataset.upload_files(
+        self._client.datasets.upload_files(
             project_id=self.id,
-            dataset_id=create_response['datasetId'],
-            directory=upload_folder,
-            files=dataset_create_request.files
+            dataset_id=create_response.id,
+            local_directory=upload_folder,
+            files=files
         )
 
         # Return the dataset which was created, which might take a second to update
         max_attempts = 5
         for attempt in range(max_attempts):
             try:
-                return self.get_dataset_by_id(create_response['datasetId'])
+                return self.get_dataset_by_id(create_response.id)
             except DataPortalAssetNotFound as e:
                 if attempt == max_attempts - 1:
                     raise e

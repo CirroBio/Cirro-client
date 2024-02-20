@@ -3,8 +3,9 @@
 [![Build Python package](https://github.com/FredHutch/Cirro-client/actions/workflows/package.yml/badge.svg)](https://github.com/FredHutch/Cirro-client/actions/workflows/package.yml)
 [![Lint and run tests](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml/badge.svg)](https://github.com/FredHutch/Cirro-client/actions/workflows/lint.yml)
 ![](https://img.shields.io/pypi/v/cirro.svg)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CirroBio_Cirro-client&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=CirroBio_Cirro-client)
 
-A Python 3.8+ library for the Cirro platform.
+A Python 3.9+ library for the Cirro platform.
 
 ## Installation
 
@@ -26,7 +27,7 @@ If you need to change your credentials after this point, and you've opted to sav
 
 #### Downloading a dataset:
 ```bash
-Usage: cirro-cli download [OPTIONS]
+Usage: cirro download [OPTIONS]
 
   Download dataset files
 
@@ -40,7 +41,7 @@ Options:
 
 #### Uploading a dataset:
 ```bash
-Usage: cirro-cli upload [OPTIONS]
+Usage: cirro upload [OPTIONS]
 
   Upload and create a dataset
 
@@ -56,7 +57,7 @@ Options:
 
 #### Listing datasets:
 ```bash
-Usage: cirro-cli list-datasets [OPTIONS]
+Usage: cirro list-datasets [OPTIONS]
 
   List available datasets
 
@@ -73,7 +74,7 @@ When running a command, you can specify the `--interactive` flag to gather the c
 Example:
 
 ```bash
-$ cirro-cli upload --interactive
+$ cirro upload --interactive
 ? What project is this dataset associated with?  Test project
 ? Enter the full path of the data directory  /shared/biodata/test
 ? Please confirm that you wish to upload 20 files (0.630 GB)  Yes
@@ -105,14 +106,14 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 ### Supported environment variables
 
-| Name        | Description                   | Default   |
-|-------------|-------------------------------|-----------|
-| PW_HOME     | Local configuration directory | ~/.cirro  |
-| PW_BASE_URL | Base URL of the data portal   | cirro.bio |
+| Name           | Description                   | Default   |
+|----------------|-------------------------------|-----------|
+| CIRRO_HOME     | Local configuration directory | ~/.cirro  |
+| CIRRO_BASE_URL | Base URL of the data portal   | cirro.bio |
 
 ### Configuration
 
-The `cirro-cli configure` command creates a file in `PW_HOME` called `config.ini`.
+The `cirro configure` command creates a file in `CIRRO_HOME` called `config.ini`.
 
 You can set the `base_url` property in the config file rather than using the environment variable. 
 
@@ -135,4 +136,4 @@ enable_additional_checksums = true
 ### Clearing saved login
 
 You can clear your saved login information by removing the `~/.cirro/token.dat` file from your system or
-by running `cirro-cli configure` and selecting **No** when it asks if you'd like to save your login information.
+by running `cirro configure` and selecting **No** when it asks if you'd like to save your login information.
