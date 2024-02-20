@@ -41,7 +41,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
     df = pd.DataFrame.from_records([d.to_dict() for d in sorted_datasets])
     df = df[['id', 'name', 'description', 'processId', 'status', 'createdBy', 'createdAt']]
-    logger.info(df.to_string())
+    print(df.to_string())
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
