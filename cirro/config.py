@@ -8,7 +8,7 @@ from requests import HTTPError
 
 
 class Constants:
-    home = os.environ.get('PW_HOME', '~/.cirro')
+    home = os.environ.get('CIRRO_HOME', '~/.cirro')
     config_path = Path(home, 'config.ini').expanduser()
     default_base_url = 'cirro.bio'
     default_max_retries = 10
@@ -73,7 +73,7 @@ class AppConfig:
     def __init__(self, base_url: str = None):
         self.user_config = load_user_config()
         self.base_url = (base_url or
-                         os.environ.get('PW_BASE_URL') or
+                         os.environ.get('CIRRO_BASE_URL') or
                          (self.user_config.base_url if self.user_config else None) or
                          Constants.default_base_url)
         self.transfer_max_retries = self.user_config.transfer_max_retries\
