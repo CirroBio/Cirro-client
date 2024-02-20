@@ -22,6 +22,8 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
     _check_configure()
     cirro = DataPortalClient()
+    logger = _get_logger()
+    logger.info(f"Collecting data from {cirro._configuration.base_url}")
 
     # If the user provided the --interactive flag
     if interactive:
@@ -47,10 +49,10 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
-    logger = _get_logger()
     _check_configure()
-    logger.info("Instantiating Cirro client")
     cirro = DataPortalClient()
+    logger = _get_logger()
+    logger.info(f"Collecting data from {cirro._configuration.base_url}")
     logger.info("Listing available projects")
     projects = cirro.project.list()
     logger.info("Listing available processes")
@@ -99,10 +101,10 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
-    logger = _get_logger()
     _check_configure()
-    logger.info("Instantiating Cirro client")
     cirro = DataPortalClient()
+    logger = _get_logger()
+    logger.info(f"Collecting data from {cirro._configuration.base_url}")
 
     logger.info("Listing available projects")
     projects = cirro.project.list()
