@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 from cirro_api_client.v1.models import UploadDatasetRequest, Status
 
@@ -19,6 +20,8 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
     _check_configure()
     cirro = Cirro()
+    logger = _get_logger()
+    logger.info(f"Collecting data from {cirro._configuration.base_url}")
 
     # If the user provided the --interactive flag
     if interactive:
@@ -27,7 +30,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
         projects = cirro.projects.list()
 
         if len(projects) == 0:
-            print(NO_PROJECTS)
+            logger.warning(NO_PROJECTS)
             return
 
         # Prompt the user for the project
@@ -45,11 +48,15 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 def run_ingest(input_params: UploadArguments, interactive=False):
     _check_configure()
     cirro = Cirro()
-    projects = cirro.projects.list()
+    logger = _get_logger()
+    logger.info(f"Collecting data from {cirro._configuration.base_url}")
     processes = cirro.processes.list()
 
+    logger.info("Listing available projects")
+    projects = cirro.projects.list()
+
     if len(projects) == 0:
-        print(NO_PROJECTS)
+        logger.warning(NO_PROJECTS)
         return
 
     if interactive:
@@ -63,7 +70,9 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         raise RuntimeWarning("No files to upload, exiting")
 
     process = get_item_from_name_or_id(processes, input_params['process'])
+    logger.info(f"Validating expected files: {process.name}")
     cirro.processes.check_dataset_files(process_id=process.id, files=files, directory=directory)
+    logger.info("Creating new dataset")
 
     upload_dataset_request = UploadDatasetRequest(
         process_id=process.id,
@@ -76,20 +85,30 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     create_resp = cirro.datasets.create(project_id=project_id,
                                         upload_request=upload_dataset_request)
 
+    logger.info("Uploading files")
     cirro.datasets.upload_files(project_id=project_id,
                                 dataset_id=create_resp.id,
                                 local_directory=directory,
                                 files=files)
 
+    if cirro._configuration.enable_additional_checksum:
+        checksum_method = "SHA256"
+    else:
+        checksum_method = "MD5"
+    logger.info(f"File content validated by {checksum_method}")
+
 
 def run_download(input_params: DownloadArguments, interactive=False):
     _check_configure()
     cirro = Cirro()
+    logger = _get_logger()
+    logger.info(f"Collecting data from {cirro._configuration.base_url}")
 
+    logger.info("Listing available projects")
     projects = cirro.projects.list()
 
     if len(projects) == 0:
-        print(NO_PROJECTS)
+        logger.warning(NO_PROJECTS)
         return
 
     files_to_download = None
@@ -104,10 +123,17 @@ def run_download(input_params: DownloadArguments, interactive=False):
         files = cirro.datasets.get_file_listing(input_params['project'], input_params['dataset'])
 
         if len(files) == 0:
-            print('There are no files in this dataset')
+            logger.info('There are no files in this dataset')
             return
 
         files_to_download = ask_dataset_files(files)
+
+    logger.info("Downloading files")
+    if cirro._configuration.enable_additional_checksum:
+        checksum_method = "SHA256"
+    else:
+        checksum_method = "MD5"
+    logger.info(f"File content validated by {checksum_method}")
 
     project_id = get_id_from_name(projects, input_params['project'])
     dataset_id = input_params['dataset']
@@ -134,3 +160,16 @@ def _check_configure():
         return
 
     run_configure()
+
+
+def _get_logger() -> logging.Logger:
+    # Log to STDOUT
+    log_formatter = logging.Formatter(
+        '%(asctime)s %(levelname)-8s [Cirro CLI] %(message)s'
+    )
+    logger = logging.getLogger("CLI")
+    logger.setLevel(logging.INFO)
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(log_formatter)
+    logger.addHandler(console_handler)
+    return logger
