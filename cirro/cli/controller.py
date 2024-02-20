@@ -18,6 +18,7 @@ NO_PROJECTS = "No projects available"
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
+    _check_configure()
     cirro = Cirro()
     logger = _get_logger()
     logger.info(f"Collecting data from {cirro._configuration.base_url}")
@@ -45,6 +46,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 
 def run_ingest(input_params: UploadArguments, interactive=False):
+    _check_configure()
     cirro = Cirro()
     logger = _get_logger()
     logger.info(f"Collecting data from {cirro._configuration.base_url}")
