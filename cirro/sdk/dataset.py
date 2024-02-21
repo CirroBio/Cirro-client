@@ -141,7 +141,7 @@ class DataPortalDataset(DataPortalAsset):
         # If the process is a string, try to parse it as a process name or ID
         process = parse_process_name_or_id(process, self._client)
 
-        return self._client.execution.run_analysis(
+        resp = self._client.execution.run_analysis(
             project_id=self.project_id,
             request=RunAnalysisRequest(
                 name=name,
@@ -152,6 +152,7 @@ class DataPortalDataset(DataPortalAsset):
                 notification_emails=notifications_emails
             )
         )
+        return resp.id
 
 
 class DataPortalDatasets(DataPortalAssets[DataPortalDataset]):
