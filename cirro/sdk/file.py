@@ -4,6 +4,7 @@ from io import BytesIO, StringIO
 import pandas as pd
 
 from cirro.cirro_client import Cirro
+from cirro.clients.s3 import convert_size
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
@@ -42,11 +43,19 @@ class DataPortalFile(DataPortalAsset):
         return self._file.metadata
 
     @property
-    def size(self):
+    def size_bytes(self):
         """
         File size (in bytes)
         """
         return self._file.size
+
+    @property
+    def size(self):
+        """
+        File size converted to human-readable
+        (e.g., 4.50 GB)
+        """
+        return convert_size(self._file.size)
 
     def __str__(self):
         return f"{self.relative_path} ({self.size} bytes)"
