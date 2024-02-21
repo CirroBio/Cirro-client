@@ -20,10 +20,10 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip setuptools
-          pip install poetry pdoc
+          pip install poetry
           poetry install --all-extras
 
-      - run: python make_docs.py
+      - run: poetry run python ./make_docs.py
 
       - uses: actions/upload-pages-artifact@v3
         with:
