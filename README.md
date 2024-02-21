@@ -105,6 +105,8 @@ See the following set of Jupyter notebooks that contain examples on the followin
 
 ## Advanced Usage
 
+View the API documentation for this library [here](https://cirrobio.github.io/Cirro-client/).
+
 ### Supported environment variables
 
 | Name           | Description                   | Default   |

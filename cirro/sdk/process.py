@@ -1,4 +1,6 @@
-from cirro_api_client.v1.models import Process
+from typing import List
+
+from cirro_api_client.v1.models import Process, Executor
 
 from cirro.cirro_client import Cirro
 from cirro.models.form_specification import ParameterSpecification
@@ -7,36 +9,38 @@ from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 
 class DataPortalProcess(DataPortalAsset):
     """Helper functions for interacting with analysis processes."""
+    data: Process
+
     def __init__(self, process: Process, client: Cirro):
         self.data = process
         self._client = client
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self.data.id
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.data.name
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self.data.description
 
     @property
-    def child_process_ids(self):
+    def child_process_ids(self) -> List[str]:
         return self.data.child_process_ids
 
     @property
-    def executor(self):
+    def executor(self) -> Executor:
         return self.data.executor
 
     @property
-    def documentation_url(self):
+    def documentation_url(self) -> str:
         return self.data.documentation_url
 
     @property
-    def file_requirements_message(self):
+    def file_requirements_message(self) -> str:
         return self.data.file_requirements_message
 
     def __str__(self):
