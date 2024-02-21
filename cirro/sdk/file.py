@@ -28,6 +28,10 @@ class DataPortalFile(DataPortalAsset):
 
     @property
     def name(self):
+        return self._file.relative_path
+
+    @property
+    def file_name(self):
         return self._file.name
 
     @property
