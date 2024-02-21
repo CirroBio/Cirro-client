@@ -3,7 +3,7 @@ from typing import List
 
 from cirro_api_client.v1.api.projects import get_projects, create_project, get_project, set_user_project_role, \
     update_project, update_project_tags, get_project_users
-from cirro_api_client.v1.models import ProjectRequest, SetUserProjectRoleRequest, Tag
+from cirro_api_client.v1.models import ProjectRequest, SetUserProjectRoleRequest, Tag, ProjectRole
 
 from cirro.services.base import BaseService
 
@@ -47,8 +47,14 @@ class ProjectService(BaseService):
         """
         return get_project_users.sync(project_id=project_id, client=self._api_client)
 
-    def set_user_role(self, project_id: str, request: SetUserProjectRoleRequest):
+    def set_user_role(self, project_id: str, username: str, role: ProjectRole, supress_notification=False):
         """
-        Sets a user's role within a project
+        Sets a user's role within a project.
+        Set to ProjectRole.NONE if removing the user from a project
         """
-        set_user_project_role.sync_detailed(project_id=project_id, body=request, client=self._api_client)
+        request_body = SetUserProjectRoleRequest(
+            username=username,
+            role=role,
+            supress_notification=supress_notification
+        )
+        set_user_project_role.sync_detailed(project_id=project_id, body=request_body, client=self._api_client)
