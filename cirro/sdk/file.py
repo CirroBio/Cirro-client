@@ -58,7 +58,7 @@ class DataPortalFile(DataPortalAsset):
         return convert_size(self._file.size)
 
     def __str__(self):
-        return f"{self.relative_path} ({self.size} bytes)"
+        return f"{self.relative_path} ({self.size})"
 
     def _get(self) -> bytes:
         """Internal method to call client.file.get_file"""
