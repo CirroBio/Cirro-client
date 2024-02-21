@@ -14,6 +14,29 @@ class BillingService(BaseService):
     def update(self, billing_account_id: str, request: BillingAccountRequest):
         """
         Updates a billing account
+
+        Args:
+            billing_account_id (str): Billing account ID
+            request (cirro_api_client.v1.models.BillingAccountRequest):
+
+        Returns:
+            `cirro_api_client.v1.models.CreateResponse`
+
+            ```
+            from cirro_api_client.v1.models import BillingAccountRequest
+            from cirro.cirro_client import Cirro
+
+            cirro = Cirro()
+            request = BillingAccountRequest(
+                name="New billing account name",
+                primary_budget_number="new-budget-number",
+                owner"New Owner"
+            )
+            cirro.billing.update("billing-account-id", request)
+            )
         """
-        update_billing_account.sync_detailed(billing_account_id=billing_account_id,
-                                             body=request, client=self._api_client)
+        update_billing_account.sync_detailed(
+            billing_account_id=billing_account_id,
+            body=request,
+            client=self._api_client
+        )

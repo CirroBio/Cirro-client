@@ -45,13 +45,38 @@ class DatasetService(FileEnabledService):
 
     def create(self, project_id: str, upload_request: UploadDatasetRequest):
         """
-        Registers a dataset in the system that you upload files into
+        Registers a dataset in Cirro, which can subsequently have files uploaded to it
+
+        Args:
+            project_id (str): ID of the Project
+            upload_request (cirro_api_client.v1.models.UploadDatasetRequest):
+
+        Returns:
+            `cirro_api_client.v1.models.CreateResponse`
+
+            ```
+            from cirro_api_client.v1.models import UploadDatasetRequest
+            from cirro.cirro_client import Cirro
+
+            cirro = Cirro()
+            request = UploadDatasetRequest(
+                name="Name of new dataset",
+                process_id="paired_dnaseq",
+                expected_files=["read_1.fastq.gz", "read_2.fastq.gz"],
+                description="Description of the dataset"
+            )
+            cirro.dataset.create("project-id", request)
+            )
         """
         return upload_dataset.sync(project_id=project_id, client=self._api_client, body=upload_request)
 
     def get(self, project_id: str, dataset_id: str):
         """
         Gets detailed information about a dataset
+
+        Args:
+            project_id (str): ID of the Project
+            dataset_id (str): ID of the Dataset
         """
         return get_dataset.sync(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
 

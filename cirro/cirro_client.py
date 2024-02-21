@@ -16,9 +16,27 @@ from cirro.services.references import ReferenceService
 
 class Cirro:
     """
-    Client for interacting with Cirro
+    Client for interacting directly with the Cirro API
     """
     def __init__(self, auth_info: AuthInfo = None, base_url: str = None):
+        """
+        Instantiates the Cirro API object
+
+        Args:
+            auth_info (cirro.auth.base.AuthInfo):
+            base_url (str): Optional base URL for connection (default: `CIRRO_HOME` or 'cirro.bio')
+
+        Returns:
+            Authenticated Cirro API object which can be used to call endpoint functions.
+            For example:
+
+            ```
+            from cirro.cirro_client import Cirro
+            cirro = Cirro()
+            print(cirro.projects.list())
+            ```
+        """
+
         self._configuration = AppConfig(base_url=base_url)
         if not auth_info:
             auth_info = get_auth_info_from_config(self._configuration, auth_io=None)
@@ -45,38 +63,65 @@ class Cirro:
 
     @property
     def datasets(self) -> DatasetService:
+        """
+        Create, list, delete, and modify Datasets
+        """
         return self._dataset_service
 
     @property
     def projects(self) -> ProjectService:
+        """
+        Create, list, delete, and modify Projects
+        """
         return self._project_service
 
     @property
     def processes(self) -> ProcessService:
+        """
+        List and retrieve detailed information about Processes
+        """
         return self._process_service
 
     @property
     def execution(self) -> ExecutionService:
+        """
+        List, run, stop, and describe the analysis jobs (executing Processes to create new Datasets)
+        """
         return self._execution_service
 
     @property
     def metrics(self) -> MetricsService:
+        """
+        Project-level summary metrics
+        """
         return self._metrics_service
 
     @property
     def metadata(self) -> MetadataService:
+        """
+        List and modify Sample metadata or metadata schemas
+        """
         return self._metadata_service
 
     @property
     def billing(self) -> BillingService:
+        """
+        List and update billing accounts
+        """
         return self._billing_service
 
     @property
     def references(self) -> ReferenceService:
+        """
+        List References and Reference types
+        """
         return self._references_service
 
     @property
     def file(self) -> FileService:
+        """
+        Read, download, and create file objects
+        """
         return self._file_service
 
     @property
