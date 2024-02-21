@@ -25,15 +25,16 @@ class ExecutionService(BaseService):
 
     def get_project_summary(self, project_id: str):
         """
-        Gets an overview of the executions currently running in the project
+        Gets an overview of the executions currently running in the project, by job queue
         """
-        return get_project_summary.sync(project_id=project_id, client=self._api_client)
+        return get_project_summary.sync(project_id=project_id, client=self._api_client).additional_properties
 
     def get_execution_logs(self, project_id: str, dataset_id: str):
         """
         Gets live logs from main execution task
         """
-        return get_execution_logs.sync(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
+        resp = get_execution_logs.sync(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
+        return '\n'.join(e.message for e in resp.events)
 
     def get_tasks_for_execution(self, project_id: str, dataset_id: str):
         """
@@ -45,5 +46,6 @@ class ExecutionService(BaseService):
         """
         Gets the log output from an individual task
         """
-        return get_task_logs.sync(project_id=project_id, dataset_id=dataset_id,
+        resp = get_task_logs.sync(project_id=project_id, dataset_id=dataset_id,
                                   task_id=task_id, client=self._api_client)
+        return '\n'.join(e.message for e in resp.events)

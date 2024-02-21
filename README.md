@@ -95,6 +95,7 @@ See the following set of Jupyter notebooks that contain examples on the followin
 | [Interacting with a dataset](samples/Interacting_with_files.ipynb) | Calling data and reading into tables |
 | [Analyzing a dataset](samples/Analyzing_a_dataset.ipynb)           | Running analysis pipelines           |
 | [Using references](samples/Using_references.ipynb)                 | Managing reference data              |
+| [Advanced usage](samples/Advanced_usage.ipynb)                     | Advanced operations                  |
 
 ## R Usage
 

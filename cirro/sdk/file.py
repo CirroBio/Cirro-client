@@ -7,6 +7,7 @@ from cirro.cirro_client import Cirro
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
+from cirro.utils import convert_size
 
 
 class DataPortalFile(DataPortalAsset):
@@ -27,6 +28,10 @@ class DataPortalFile(DataPortalAsset):
 
     @property
     def name(self):
+        return self._file.relative_path
+
+    @property
+    def file_name(self):
         return self._file.name
 
     @property
@@ -42,14 +47,22 @@ class DataPortalFile(DataPortalAsset):
         return self._file.metadata
 
     @property
-    def size(self):
+    def size_bytes(self):
         """
         File size (in bytes)
         """
         return self._file.size
 
+    @property
+    def size(self):
+        """
+        File size converted to human-readable
+        (e.g., 4.50 GB)
+        """
+        return convert_size(self._file.size)
+
     def __str__(self):
-        return f"{self.relative_path} ({self.size} bytes)"
+        return f"{self.relative_path} ({self.size})"
 
     def _get(self) -> bytes:
         """Internal method to call client.file.get_file"""
