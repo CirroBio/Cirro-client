@@ -4,10 +4,10 @@ from io import BytesIO, StringIO
 import pandas as pd
 
 from cirro.cirro_client import Cirro
-from cirro.clients.s3 import convert_size
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
+from cirro.utils import convert_size
 
 
 class DataPortalFile(DataPortalAsset):

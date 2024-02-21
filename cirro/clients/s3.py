@@ -1,4 +1,3 @@
-import math
 import threading
 from pathlib import Path
 from typing import Callable
@@ -10,15 +9,7 @@ from botocore.session import get_session
 from cirro_api_client.v1.models import AWSCredentials
 from tqdm import tqdm
 
-
-def convert_size(size):
-    if size == 0:
-        return '0B'
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size, 1024)))
-    p = math.pow(1024, i)
-    s = round(size/p, 2)
-    return '%.2f %s' % (s, size_name[i])
+from cirro.utils import convert_size
 
 
 def format_creds_for_session(creds: AWSCredentials):
