@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 from cirro_api_client.v1.api.projects import get_projects, create_project, get_project, set_user_project_role, \
@@ -6,8 +5,6 @@ from cirro_api_client.v1.api.projects import get_projects, create_project, get_p
 from cirro_api_client.v1.models import ProjectRequest, SetUserProjectRoleRequest, Tag, ProjectRole
 
 from cirro.services.base import BaseService
-
-logger = logging.getLogger()
 
 
 class ProjectService(BaseService):

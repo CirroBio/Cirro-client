@@ -1,4 +1,3 @@
-import logging
 from typing import List, Union
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
@@ -9,18 +8,19 @@ from cirro.models.file import FileAccessContext, File
 from cirro.services.base import get_all_records
 from cirro.services.file import FileEnabledService
 
-logger = logging.getLogger()
-
 
 class DatasetService(FileEnabledService):
     def list(self, project_id: str, max_items: int = 10000) -> List[Dataset]:
         """List datasets
 
-         Retrieves a list of datasets for a given project
+        Retrieves a list of datasets for a given project
 
         Args:
             project_id (str): ID of the Project
             max_items (int): Maximum number of records to get (default 10,000)
+
+        Returns:
+            `List[cirro_api_client.v1.models.Dataset]`
         """
         return get_all_records(
             records_getter=lambda page_args: get_datasets.sync(project_id=project_id,
@@ -33,6 +33,13 @@ class DatasetService(FileEnabledService):
     def import_public(self, project_id: str, import_request: ImportDataRequest):
         """
         Download data from public repositories
+
+        Args:
+            project_id (str): ID of the Project
+            import_request (cirro_api_client.v1.models.ImportDataRequest):
+
+        Returns:
+            `cirro_api_client.v1.models.CreateResponse`
         """
         return import_public_dataset.sync(project_id=project_id, client=self._api_client, body=import_request)
 
