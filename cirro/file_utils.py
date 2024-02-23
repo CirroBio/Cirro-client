@@ -14,12 +14,17 @@ if os.name == 'nt':
     import win32api
     import win32con
 
-DEFAULT_TRANSFER_SPEED = 160
 
-
-def filter_files_by_pattern(files: Union[List[File], List[str]], pattern: str) -> List[File]:
+def filter_files_by_pattern(files: Union[List[File], List[str]], pattern: str) -> Union[List[File], List[str]]:
     """
     Filters a list of files by a glob pattern
+
+    Args:
+        files (Union[List[File], List[str]]): List of Files or file paths
+        pattern (str): Glob pattern (i.e., *.fastq)
+
+    Returns:
+        The filtered list of files
     """
     def matches_glob(file: Union[File, str]):
         return PurePath(file if isinstance(file, str) else file.relative_path).match(pattern)
@@ -40,15 +45,19 @@ def _is_hidden_file(file_path: Path):
 
 
 def get_files_in_directory(
-    directory,
+    directory: Union[str, Path],
     include_hidden=False
 ) -> List[str]:
     """
     Returns a list of strings containing the relative path of
     each file within the indicated directory.
 
-    include_hidden: bool
-        Include hidden files in the returned list
+    Args:
+        directory (Union[str, Path]): The path to the directory
+        include_hidden (bool): include hidden files in the returned list
+
+    Returns:
+        List of files in the directory
     """
     path = Path(directory).expanduser()
     path_posix = str(path.as_posix())
@@ -74,6 +83,9 @@ def get_files_in_directory(
 
 
 def get_files_stats(files: List[Path]) -> DirectoryStatistics:
+    """
+    @private
+    """
     sizes = [f.stat().st_size for f in files]
     total_size = sum(sizes) / float(1 << 30)
     return {
@@ -84,6 +96,9 @@ def get_files_stats(files: List[Path]) -> DirectoryStatistics:
 
 
 def upload_directory(directory: str, files: List[str], s3_client: S3Client, bucket: str, prefix: str, max_retries=10):
+    """
+    @private
+    """
     for file in files:
         key = f'{prefix}/{file}'
         local_path = Path(directory, file)
@@ -115,6 +130,9 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
 
 
 def download_directory(directory: str, files: List[str], s3_client: S3Client, bucket: str, prefix: str):
+    """
+    @private
+    """
     for file in files:
         key = f'{prefix}/{file}'.lstrip('/')
         local_path = Path(directory, file)
@@ -123,13 +141,3 @@ def download_directory(directory: str, files: List[str], s3_client: S3Client, bu
         s3_client.download_file(local_path=local_path,
                                 bucket=bucket,
                                 key=key)
-
-
-def estimate_token_lifetime(data_size_gb: float, speed_mbps: float = DEFAULT_TRANSFER_SPEED) -> int:
-    """
-    :param data_size_gb: Gigabytes
-    :param speed_mbps: Megabits per second
-    """
-    transfer_time_seconds = (data_size_gb * 8 * 1000) / speed_mbps
-    transfer_time_hours = transfer_time_seconds / 60 / 60
-    return max(round(transfer_time_hours), 1)
