@@ -3,7 +3,7 @@ from io import BytesIO, StringIO
 
 import pandas as pd
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroAPI
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError

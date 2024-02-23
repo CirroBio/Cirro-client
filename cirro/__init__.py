@@ -1,7 +1,15 @@
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroAPI
 from cirro.sdk.portal import DataPortal
+from cirro.sdk.project import DataPortalProject
+from cirro.sdk.process import DataPortalProcess
+from cirro.sdk.dataset import DataPortalDataset
+from cirro.sdk.reference import DataPortalReference
 
 __all__ = [
     'DataPortal',
-    'Cirro'
+    'DataPortalProject',
+    'DataPortalProcess',
+    'DataPortalDataset',
+    'DataPortalReference',
+    'CirroAPI'
 ]

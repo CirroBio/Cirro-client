@@ -2,7 +2,7 @@ from typing import List
 
 from cirro_api_client.v1.models import Process, Executor
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroAPI
 from cirro.models.form_specification import ParameterSpecification
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 

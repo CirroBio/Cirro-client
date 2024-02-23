@@ -24,9 +24,9 @@ class BillingService(BaseService):
 
             ```
             from cirro_api_client.v1.models import BillingAccountRequest
-            from cirro.cirro_client import Cirro
+            from cirro.cirro_client import CirroAPI
 
-            cirro = Cirro()
+            cirro = CirroAPI()
             request = BillingAccountRequest(
                 name="New billing account name",
                 primary_budget_number="new-budget-number",

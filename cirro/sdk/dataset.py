@@ -2,7 +2,7 @@ from typing import Union, List, Optional
 
 from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, FileEntry, RunAnalysisRequestParams
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroAPI
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.file import DataPortalFile, DataPortalFiles
@@ -17,7 +17,14 @@ class DataPortalDataset(DataPortalAsset):
     an analysis pipeline or notebook.
     """
 
-    def __init__(self, dataset: Union[Dataset, DatasetDetail], client: Cirro):
+    def __init__(self, dataset: Union[Dataset, DatasetDetail], client: CirroAPI):
+        """
+        Instantiate a dataset object
+
+        Args:
+            dataset (`cirro_api_client.v1.models.Dataset` | `cirro_api_client.v1.models.DatasetDetail`)
+
+        """
         assert dataset.project_id is not None, "Must provide dataset with project_id attribute"
         self.data = dataset
         self._files: Optional[List[FileEntry]] = None
@@ -25,14 +32,17 @@ class DataPortalDataset(DataPortalAsset):
 
     @property
     def id(self):
+        """Unique identifier for the dataset"""
         return self.data.id
 
     @property
     def name(self):
+        """Editible name for the dataset"""
         return self.data.name
 
     @property
     def description(self):
+        """Longer name for the dataset"""
         return self.data.description
 
     @property

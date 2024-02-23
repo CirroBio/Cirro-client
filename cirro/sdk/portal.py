@@ -1,6 +1,6 @@
 from cirro_api_client.v1.models import Executor
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroAPI
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
 from cirro.sdk.project import DataPortalProject, DataPortalProjects
 from cirro.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes

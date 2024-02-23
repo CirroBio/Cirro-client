@@ -14,7 +14,7 @@ from cirro.services.projects import ProjectService
 from cirro.services.references import ReferenceService
 
 
-class Cirro:
+class CirroAPI:
     """
     Client for interacting directly with the Cirro API
     """
@@ -31,8 +31,8 @@ class Cirro:
             For example:
 
             ```
-            from cirro.cirro_client import Cirro
-            cirro = Cirro()
+            from cirro.cirro_client import CirroAPI
+            cirro = CirroAPI()
             print(cirro.projects.list())
             ```
         """

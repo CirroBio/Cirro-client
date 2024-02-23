@@ -39,9 +39,9 @@ class ProjectService(BaseService):
 
             ```
             from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact
-            from cirro.cirro_client import Cirro
+            from cirro.cirro_client import CirroAPI
 
-            cirro = Cirro()
+            cirro = CirroAPI()
             request = ProjectRequest(
                 name="New Project Name",
                 description="Description of new project",

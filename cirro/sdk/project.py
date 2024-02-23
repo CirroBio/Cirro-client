@@ -4,7 +4,7 @@ from typing import Union
 
 from cirro_api_client.v1.models import Project, UploadDatasetRequest
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroAPI
 from cirro.file_utils import get_files_in_directory
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets

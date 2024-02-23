@@ -1,6 +1,6 @@
 from cirro_api_client.v1.models import Reference
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroAPI
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.file import DataPortalFile
