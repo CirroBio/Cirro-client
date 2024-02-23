@@ -1,43 +1,63 @@
-from cirro_api_client.v1.models import Process
+from typing import List
 
-from cirro.cirro_client import Cirro
+from cirro_api_client.v1.models import Process, Executor
+
+from cirro.cirro_client import CirroApi
 from cirro.models.form_specification import ParameterSpecification
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 
 
 class DataPortalProcess(DataPortalAsset):
     """Helper functions for interacting with analysis processes."""
-    def __init__(self, process: Process, client: Cirro):
-        self.data = process
+    _data: Process
+
+    def __init__(self, process: Process, client: CirroApi):
+        """
+        Instantiate with helper method
+
+        ```python
+        from cirro import DataPortal()
+        portal = DataPortal()
+        process = portal.get_process_by_name("Process Name")
+        ```
+        """
+        self._data = process
         self._client = client
 
     @property
-    def id(self):
-        return self.data.id
+    def id(self) -> str:
+        """Unique identifier"""
+        return self._data.id
 
     @property
-    def name(self):
-        return self.data.name
+    def name(self) -> str:
+        """Readable name"""
+        return self._data.name
 
     @property
-    def description(self):
-        return self.data.description
+    def description(self) -> str:
+        """Longer description of process"""
+        return self._data.description
 
     @property
-    def child_process_ids(self):
-        return self.data.child_process_ids
+    def child_process_ids(self) -> List[str]:
+        """List of processes which can be run on the output of this process"""
+        return self._data.child_process_ids
 
     @property
-    def executor(self):
-        return self.data.executor
+    def executor(self) -> Executor:
+        """INGEST, CROMWELL, or NEXTFLOW"""
+        return self._data.executor
 
     @property
-    def documentation_url(self):
-        return self.data.documentation_url
+    def documentation_url(self) -> str:
+        """Documentation URL"""
+        return self._data.documentation_url
 
     @property
-    def file_requirements_message(self):
-        return self.data.file_requirements_message
+    def file_requirements_message(self) -> str:
+        """Description of files required for INGEST processes"""
+        return self._data.file_requirements_message
 
     def __str__(self):
         return '\n'.join([

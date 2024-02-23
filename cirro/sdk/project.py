@@ -1,10 +1,10 @@
 from functools import cache
 from time import sleep
-from typing import Union
+from typing import List, Union
 
-from cirro_api_client.v1.models import Project, UploadDatasetRequest
+from cirro_api_client.v1.models import Project, UploadDatasetRequest, Dataset
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroApi
 from cirro.file_utils import get_files_in_directory
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets
@@ -21,22 +21,40 @@ class DataPortalProject(DataPortalAsset):
     Users are granted permissions at the project-level, allowing them
     to view and/or modify all the datasets in that collection.
     """
-    def __init__(self, proj: Project, client: Cirro):
-        """Initialize the Project from the base Cirro model."""
-        self.data = proj
+    def __init__(self, proj: Project, client: CirroApi):
+        """
+        Instantiate with helper method
+
+        ```python
+        from cirro import DataPortal()
+        portal = DataPortal()
+        project = portal.get_project_by_name("Project Name")
+        ```
+
+        """
+        self._data = proj
         self._client = client
 
     @property
-    def id(self):
-        return self.data.id
+    def id(self) -> str:
+        """
+        Unique identifier
+        """
+        return self._data.id
 
     @property
-    def name(self):
-        return self.data.name
+    def name(self) -> str:
+        """
+        Readable name
+        """
+        return self._data.name
 
     @property
-    def description(self):
-        return self.data.description
+    def description(self) -> str:
+        """
+        Longer description of the project
+        """
+        return self._data.description
 
     def __str__(self):
         """Control how the Project is rendered as a string."""
@@ -47,7 +65,7 @@ class DataPortalProject(DataPortalAsset):
         ])
 
     @cache
-    def _get_datasets(self):
+    def _get_datasets(self) -> List[Dataset]:
         return self._client.datasets.list(self.id)
 
     def list_datasets(self, force_refresh=False) -> DataPortalDatasets:
@@ -131,6 +149,13 @@ class DataPortalProject(DataPortalAsset):
         Upload a set of files to the Data Portal, creating a new dataset.
 
         If the files parameter is not provided, it will upload all files in the upload folder
+
+        Args:
+            name (str): Name of newly created dataset
+            description (str): Description of newly created dataset
+            process (str | DataPortalProcess): Process to run may be referenced by name, ID, or object
+            upload_folder (str): Folder containing files to upload
+            files (List[str]): Optional subset of files to upload from the folder
         """
 
         if name is None:
@@ -187,4 +212,5 @@ class DataPortalProject(DataPortalAsset):
 
 
 class DataPortalProjects(DataPortalAssets[DataPortalProject]):
+    """Collection of DataPortalProject objects"""
     asset_name = "project"

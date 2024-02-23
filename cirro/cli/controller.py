@@ -1,8 +1,9 @@
 import logging
+
 import pandas as pd
 from cirro_api_client.v1.models import UploadDatasetRequest, Status
 
-from cirro.cirro_client import Cirro
+from cirro.cirro_client import CirroApi
 from cirro.cli.interactive.auth_args import gather_auth_config
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
@@ -19,7 +20,7 @@ NO_PROJECTS = "No projects available"
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
     _check_configure()
-    cirro = Cirro()
+    cirro = CirroApi()
     logger = _get_logger()
     logger.info(f"Collecting data from {cirro._configuration.base_url}")
 
@@ -47,7 +48,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 def run_ingest(input_params: UploadArguments, interactive=False):
     _check_configure()
-    cirro = Cirro()
+    cirro = CirroApi()
     logger = _get_logger()
     logger.info(f"Collecting data from {cirro._configuration.base_url}")
     processes = cirro.processes.list()
@@ -100,7 +101,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 def run_download(input_params: DownloadArguments, interactive=False):
     _check_configure()
-    cirro = Cirro()
+    cirro = CirroApi()
     logger = _get_logger()
     logger.info(f"Collecting data from {cirro._configuration.base_url}")
 

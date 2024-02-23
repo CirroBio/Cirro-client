@@ -11,6 +11,7 @@ class DataPortalAsset:
     @property
     @abstractmethod
     def name(self):
+        """Asset name"""
         pass
 
     def __repr__(self):
@@ -22,7 +23,7 @@ T = TypeVar('T', bound=DataPortalAsset)
 
 class DataPortalAssets(List[T]):
     """
-    Generic class with helper functions for any group of assets (projects, datasets, etc.) in the Data Portal.
+    Generic class with helper functions for any group of assets (projects, datasets, etc.)
     """
 
     # Overridden by child classes

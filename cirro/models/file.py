@@ -15,8 +15,8 @@ class DirectoryStatistics(TypedDict):
 
 class FileAccessContext:
     """
-    Context holder for accessing various files in Cirro and abstracting out their location
-    Prefer to use the class methods to instantiate
+    Context holder for accessing various files in Cirro and abstracting out their location.
+    Prefer to use the class methods to instantiate.
     """
     def __init__(self,
                  file_access_request: FileAccessRequest,
@@ -72,11 +72,13 @@ class FileAccessContext:
         )
 
     @property
-    def bucket(self):
+    def bucket(self) -> str:
+        """ S3 Bucket """
         return self._s3_path.bucket
 
     @property
-    def prefix(self):
+    def prefix(self) -> str:
+        """ S3 Prefix """
         return self._s3_path.key
 
 

@@ -44,4 +44,7 @@ def get_all_records(records_getter: Callable[[PageArgs], Optional[PageResp[D]]],
 
 @define
 class BaseService(ABC):
+    """
+    Not to be instantiated directly
+    """
     _api_client: CirroApiClient

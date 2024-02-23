@@ -9,23 +9,25 @@ class DataPortalReferenceType(DataPortalAsset):
     """
 
     def __init__(self, ref_type: ReferenceType):
-        self.data = ref_type
+        self._data = ref_type
 
     @property
     def name(self):
-        return self.data.name
+        """Name of reference type"""
+        return self._data.name
 
     @property
     def description(self):
-        return self.data.description
+        """Description of reference type"""
+        return self._data.description
 
     @property
     def directory(self):
-        return self.data.directory
+        return self._data.directory
 
     @property
     def validation(self):
-        return self.data.validation
+        return self._data.validation
 
     def __str__(self):
         return '\n'.join([
