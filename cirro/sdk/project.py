@@ -23,20 +23,20 @@ class DataPortalProject(DataPortalAsset):
     """
     def __init__(self, proj: Project, client: CirroAPI):
         """Initialize the Project from the base Cirro model."""
-        self.data = proj
+        self._data = proj
         self._client = client
 
     @property
     def id(self):
-        return self.data.id
+        return self._data.id
 
     @property
     def name(self):
-        return self.data.name
+        return self._data.name
 
     @property
     def description(self):
-        return self.data.description
+        return self._data.description
 
     def __str__(self):
         """Control how the Project is rendered as a string."""

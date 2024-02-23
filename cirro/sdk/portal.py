@@ -55,7 +55,7 @@ class DataPortal:
         Returns:
             `cirro.sdk.dataset.DataPortalDataset`
 
-            ```
+            ```python
             from cirro import DataPortal()
             portal = DataPortal()
             dataset = portal.get_dataset(
@@ -82,9 +82,6 @@ class DataPortal:
 
         Args:
             ingest (bool): If True, only list those processes which can be used to ingest datasets directly
-
-        Returns:
-            `cirro.sdk.process.DataPortalProcesses`
         """
 
         return DataPortalProcesses(
@@ -101,9 +98,6 @@ class DataPortal:
 
         Args:
             name (str): Name of process
-
-        Returns:
-            `cirro.sdk.process.DataPortalProcess`
         """
 
         return self.list_processes(ingest=ingest).get_by_name(name)
@@ -114,9 +108,6 @@ class DataPortal:
 
         Args:
             id (str): ID of process
-
-        Returns:
-            `cirro.sdk.process.DataPortalProcess`
         """
 
         return self.list_processes(ingest=ingest).get_by_id(id)
@@ -124,9 +115,6 @@ class DataPortal:
     def list_reference_types(self) -> DataPortalReferenceTypes:
         """
         Return the list of all available reference types
-
-        Returns:
-            `cirro.sdk.reference_type.DataPortalReferenceTypes`
         """
 
         return DataPortalReferenceTypes(

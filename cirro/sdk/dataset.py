@@ -26,7 +26,7 @@ class DataPortalDataset(DataPortalAsset):
 
         Should be invoked from a top-level constructor, for example:
 
-        ```
+        ```python
         from cirro import DataPortal()
         portal = DataPortal()
         dataset = portal.get_dataset(
@@ -65,9 +65,6 @@ class DataPortalDataset(DataPortalAsset):
     def process(self) -> ProcessDetail:
         """
         Object representing the process used to create the dataset
-
-        Returns:
-            `cirro_api_client.v1.models.ProcessDetail`
         """
         return self._client.processes.get(self.process_id)
 
@@ -80,9 +77,6 @@ class DataPortalDataset(DataPortalAsset):
     def status(self) -> Status:
         """
         Status of the dataset
-
-        Returns:
-            `cirro_api_client.v1.models.Status`
         """
         return self._data.status
 
@@ -108,9 +102,6 @@ class DataPortalDataset(DataPortalAsset):
     def params(self) -> DatasetDetailParams:
         """
         Parameters used to generate the dataset
-
-        Returns:
-            `cirro_api_client.v1.models.DatasetDetailParams`
         """
         return self._get_detail().params
 
@@ -118,9 +109,6 @@ class DataPortalDataset(DataPortalAsset):
     def info(self) -> DatasetDetailInfo:
         """
         Detailed information about the dataset
-
-        Returns:
-            `cirro_api_client.v1.models.DatasetDetailInfo`
         """
         return self._get_detail().info
 
@@ -128,9 +116,6 @@ class DataPortalDataset(DataPortalAsset):
     def tags(self) -> List[Tag]:
         """
         Tags applied to the dataset
-
-        Returns:
-            `List[cirro_api_client.v1.models.Tag]`
         """
         return self._data.tags
 
@@ -158,9 +143,6 @@ class DataPortalDataset(DataPortalAsset):
     def list_files(self) -> DataPortalFiles:
         """
         Return the list of files which make up the dataset.
-
-        Returns:
-            `cirro.sdk.file.DataPortalFiles`
         """
         if not self._files:
             self._files = DataPortalFiles(
@@ -207,7 +189,7 @@ class DataPortalDataset(DataPortalAsset):
             notifications_emails (List[str]): Notification email address(es)
 
         Returns:
-            ID of newly created dataset
+            dataset_id (str): ID of newly created dataset
         """
         if name is None:
             raise DataPortalInputError("Must specify 'name' for run_analysis")

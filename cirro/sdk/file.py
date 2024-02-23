@@ -1,5 +1,6 @@
 import gzip
 from io import BytesIO, StringIO
+from typing import List
 
 import pandas as pd
 
@@ -16,6 +17,19 @@ class DataPortalFile(DataPortalAsset):
     """
 
     def __init__(self, file: File, client: CirroAPI):
+        """
+        Instantiate by listing files from a dataset.
+
+        ```python
+        from cirro import DataPortal()
+        portal = DataPortal()
+        dataset = portal.get_dataset(
+            project="id-or-name-of-project",
+            dataset="id-or-name-of-dataset"
+        )
+        files = dataset.list_files()
+        ```
+        """
         # Attach the file object
         self._file = file
         self._client = client
@@ -23,42 +37,43 @@ class DataPortalFile(DataPortalAsset):
     # Note that the 'name' and 'id' attributes are set to the relative path
     # The purpose of this is to support the DataPortalAssets class functions
     @property
-    def id(self):
+    def id(self) -> str:
+        """Relative path of file within the dataset"""
         return self._file.relative_path
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """Relative path of file within the dataset"""
         return self._file.relative_path
 
     @property
-    def file_name(self):
+    def file_name(self) -> str:
+        """Name of file, excluding the full folder path within the dataset"""
         return self._file.name
 
     @property
-    def relative_path(self):
+    def relative_path(self) -> str:
+        """Relative path of file within the dataset"""
         return self._file.relative_path
 
     @property
-    def absolute_path(self):
+    def absolute_path(self) -> str:
+        """Fully URI to file object in AWS S3"""
         return self._file.absolute_path
 
     @property
-    def metadata(self):
+    def metadata(self) -> dict:
+        """File metadata"""
         return self._file.metadata
 
     @property
     def size_bytes(self) -> int:
-        """
-        File size (in bytes)
-        """
+        """File size (in bytes)"""
         return self._file.size
 
     @property
-    def size(self):
-        """
-        File size converted to human-readable
-        (e.g., 4.50 GB)
-        """
+    def size(self) -> str:
+        """File size converted to human-readable (e.g., 4.50 GB)"""
         return convert_size(self._file.size)
 
     def __str__(self):
@@ -69,7 +84,7 @@ class DataPortalFile(DataPortalAsset):
 
         return self._client.file.get_file(self._file)
 
-    def read_csv(self, compression='infer', encoding='utf-8', **kwargs):
+    def read_csv(self, compression='infer', encoding='utf-8', **kwargs) -> pd.DataFrame:
         """
         Parse the file as a Pandas DataFrame.
 
@@ -80,9 +95,6 @@ class DataPortalFile(DataPortalAsset):
 
         All other keyword arguments are passed to pandas.read_csv
         https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
-
-        Returns:
-            `pandas.DataFrame`
         """
 
         if compression == 'infer':
@@ -112,7 +124,7 @@ class DataPortalFile(DataPortalAsset):
         handle.close()
         return df
 
-    def readlines(self, encoding='utf-8', compression=None):
+    def readlines(self, encoding='utf-8', compression=None) -> List[str]:
         """Read the file contents as a list of lines."""
 
         return self.read(

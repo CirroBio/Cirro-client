@@ -9,39 +9,55 @@ from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 
 class DataPortalProcess(DataPortalAsset):
     """Helper functions for interacting with analysis processes."""
-    data: Process
+    _data: Process
 
     def __init__(self, process: Process, client: CirroAPI):
-        self.data = process
+        """
+        Instantiate with helper method
+
+        ```python
+        from cirro import DataPortal()
+        portal = DataPortal()
+        process = portal.get_process_by_name("Process Name")
+        ```
+        """
+        self._data = process
         self._client = client
 
     @property
     def id(self) -> str:
-        return self.data.id
+        """Unique identifier"""
+        return self._data.id
 
     @property
     def name(self) -> str:
-        return self.data.name
+        """Readable name"""
+        return self._data.name
 
     @property
     def description(self) -> str:
-        return self.data.description
+        """Longer description of process"""
+        return self._data.description
 
     @property
     def child_process_ids(self) -> List[str]:
-        return self.data.child_process_ids
+        """List of processes which can be run on the output of this process"""
+        return self._data.child_process_ids
 
     @property
     def executor(self) -> Executor:
-        return self.data.executor
+        """INGEST, CROMWELL, or NEXTFLOW"""
+        return self._data.executor
 
     @property
     def documentation_url(self) -> str:
-        return self.data.documentation_url
+        """Documentation URL"""
+        return self._data.documentation_url
 
     @property
     def file_requirements_message(self) -> str:
-        return self.data.file_requirements_message
+        """Description of files required for INGEST processes"""
+        return self._data.file_requirements_message
 
     def __str__(self):
         return '\n'.join([

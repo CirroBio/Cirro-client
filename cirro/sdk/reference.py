@@ -1,3 +1,4 @@
+from typing import List
 from cirro_api_client.v1.models import Reference
 
 from cirro.cirro_client import CirroAPI
@@ -11,24 +12,30 @@ class DataPortalReference(DataPortalAsset):
     Reference data is organized by project, categorized by type.
     """
     def __init__(self, ref: Reference, project_id: str, client: CirroAPI):
-        self.data = ref
-        self.files = [
+        self._data = ref
+        self._files = [
             DataPortalFile(File.from_file_entry(f, project_id), client) for f in ref.files
         ]
 
     @property
-    def name(self):
-        return self.data.name
+    def files(self) -> List[DataPortalFile]:
+        """File(s) contained in the reference"""
+        return self._files
+
+    @property
+    def name(self) -> str:
+        """Reference name"""
+        return self._data.name
 
     @property
     def type(self):
-        return self.data.type
+        return self._data.type
 
     @property
     def absolute_path(self):
-        if len(self.files) == 0:
+        if len(self._files) == 0:
             return None
-        return self.files[0].absolute_path
+        return self._files[0].absolute_path
 
     def __str__(self):
         return self.name
