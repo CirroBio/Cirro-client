@@ -1,7 +1,8 @@
 from typing import List
+
 from cirro_api_client.v1.models import Reference
 
-from cirro.cirro_client import CirroAPI
+from cirro.cirro_client import CirroApi
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.file import DataPortalFile
@@ -11,7 +12,7 @@ class DataPortalReference(DataPortalAsset):
     """
     Reference data object containing files which can be used for analysis in a particular project.
     """
-    def __init__(self, ref: Reference, project_id: str, client: CirroAPI):
+    def __init__(self, ref: Reference, project_id: str, client: CirroApi):
         """
         Instantiate by listing the references which have been added to a particular project
         ```python

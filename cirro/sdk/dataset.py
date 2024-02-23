@@ -5,7 +5,7 @@ from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisReques
     ProcessDetail, Status, DatasetDetailParams, RunAnalysisRequestParams, DatasetDetailInfo, \
     Tag
 
-from cirro.cirro_client import CirroAPI
+from cirro.cirro_client import CirroApi
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.file import DataPortalFile, DataPortalFiles
@@ -20,7 +20,7 @@ class DataPortalDataset(DataPortalAsset):
     an analysis pipeline or notebook.
     """
 
-    def __init__(self, dataset: Union[Dataset, DatasetDetail], client: CirroAPI):
+    def __init__(self, dataset: Union[Dataset, DatasetDetail], client: CirroApi):
         """
         Instantiate a dataset object
 

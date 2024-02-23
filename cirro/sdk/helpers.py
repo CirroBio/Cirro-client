@@ -3,13 +3,12 @@ from typing import Union
 from cirro_api_client.v1.errors import UnexpectedStatus
 from cirro_api_client.v1.models import ProcessDetail
 
-from cirro.cirro_client import CirroAPI
-
+from cirro.cirro_client import CirroApi
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.process import DataPortalProcess
 
 
-def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: CirroAPI):
+def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: CirroApi):
     """
     If the process is a string, try to parse it as a process name or ID.
     """

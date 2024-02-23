@@ -2,7 +2,7 @@ from typing import List
 
 from cirro_api_client.v1.models import Process, Executor
 
-from cirro.cirro_client import CirroAPI
+from cirro.cirro_client import CirroApi
 from cirro.models.form_specification import ParameterSpecification
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 
@@ -11,7 +11,7 @@ class DataPortalProcess(DataPortalAsset):
     """Helper functions for interacting with analysis processes."""
     _data: Process
 
-    def __init__(self, process: Process, client: CirroAPI):
+    def __init__(self, process: Process, client: CirroApi):
         """
         Instantiate with helper method
 

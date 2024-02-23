@@ -7,7 +7,7 @@ from cirro.services import FileService, DatasetService, ProjectService, ProcessS
     MetricsService, MetadataService, BillingService, ReferenceService
 
 
-class CirroAPI:
+class CirroApi:
     """
     Client for interacting directly with the Cirro API
     """
@@ -24,8 +24,8 @@ class CirroAPI:
             For example:
 
         ```python
-        from cirro.cirro_client import CirroAPI
-        cirro = CirroAPI()
+        from cirro.cirro_client import CirroApi
+        cirro = CirroApi()
         print(cirro.projects.list())
         ```
         """

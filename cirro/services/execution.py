@@ -26,7 +26,7 @@ class ExecutionService(BaseService):
 
         ```python
         from cirro_api_client.v1.models import RunAnalysisRequest, RunAnalysisRequestParams
-        from cirro.cirro_client import CirroAPI
+        from cirro.cirro_client import CirroApi
 
         # Example:
         # Run the "process-nf-core-rnaseq-3_8" process using input data
@@ -38,7 +38,7 @@ class ExecutionService(BaseService):
             "param_b": "val_b"
         })
 
-        cirro = CirroAPI()
+        cirro = CirroApi()
         request = RunAnalysisRequest(
             name="Name of the newly created dataset",
             description="Longer description of newly created dataset",

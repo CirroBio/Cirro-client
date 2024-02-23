@@ -1,6 +1,6 @@
 from cirro_api_client.v1.models import Executor
 
-from cirro.cirro_client import CirroAPI
+from cirro.cirro_client import CirroApi
 from cirro.sdk.dataset import DataPortalDataset
 from cirro.sdk.exceptions import DataPortalAssetNotFound
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
@@ -14,7 +14,7 @@ class DataPortal:
     available in the Data Portal.
     """
 
-    def __init__(self, client: CirroAPI = None):
+    def __init__(self, client: CirroApi = None):
         """Set up the DataPortal object, establishing an authenticated connection."""
 
         if client is not None:
@@ -22,7 +22,7 @@ class DataPortal:
 
         # Set up default client if not provided
         else:
-            self._client = CirroAPI()
+            self._client = CirroApi()
 
     def list_projects(self) -> DataPortalProjects:
         """List all the projects available in the Data Portal."""

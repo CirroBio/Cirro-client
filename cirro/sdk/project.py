@@ -4,7 +4,7 @@ from typing import List, Union
 
 from cirro_api_client.v1.models import Project, UploadDatasetRequest, Dataset
 
-from cirro.cirro_client import CirroAPI
+from cirro.cirro_client import CirroApi
 from cirro.file_utils import get_files_in_directory
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.dataset import DataPortalDataset, DataPortalDatasets
@@ -21,7 +21,7 @@ class DataPortalProject(DataPortalAsset):
     Users are granted permissions at the project-level, allowing them
     to view and/or modify all the datasets in that collection.
     """
-    def __init__(self, proj: Project, client: CirroAPI):
+    def __init__(self, proj: Project, client: CirroApi):
         """
         Instantiate with helper method
 

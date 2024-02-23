@@ -59,9 +59,9 @@ class DatasetService(FileEnabledService):
 
         ```python
         from cirro_api_client.v1.models import UploadDatasetRequest
-        from cirro.cirro_client import CirroAPI
+        from cirro.cirro_client import CirroApi
 
-        cirro = CirroAPI()
+        cirro = CirroApi()
         request = UploadDatasetRequest(
             name="Name of new dataset",
             process_id="paired_dnaseq",
@@ -100,9 +100,9 @@ class DatasetService(FileEnabledService):
 
         ```python
         from cirro_api_client.v1.models import UpdateDatasetRequest
-        from cirro.cirro_client import CirroAPI
+        from cirro.cirro_client import CirroApi
 
-        cirro = CirroAPI()
+        cirro = CirroApi()
         request = UpdateDatasetRequest(
             name="Name of new dataset",
             process_id="paired_dnaseq",

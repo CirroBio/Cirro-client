@@ -4,7 +4,7 @@ from typing import List
 
 import pandas as pd
 
-from cirro.cirro_client import CirroAPI
+from cirro.cirro_client import CirroApi
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
@@ -16,7 +16,7 @@ class DataPortalFile(DataPortalAsset):
     Datasets are made up of a collection of File objects in the Data Portal.
     """
 
-    def __init__(self, file: File, client: CirroAPI):
+    def __init__(self, file: File, client: CirroApi):
         """
         Instantiate by listing files from a dataset.
 
