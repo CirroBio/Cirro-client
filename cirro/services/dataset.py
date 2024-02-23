@@ -68,7 +68,7 @@ class DatasetService(FileEnabledService):
             expected_files=["read_1.fastq.gz", "read_2.fastq.gz"],
             description="Description of the dataset"
         )
-        cirro.dataset.create("project-id", request)
+        cirro.datasets.create("project-id", request)
         ```
         """
         return upload_dataset.sync(project_id=project_id, client=self._api_client, body=upload_request)
@@ -108,7 +108,7 @@ class DatasetService(FileEnabledService):
             process_id="paired_dnaseq",
             description="Description of the dataset"
         )
-        cirro.dataset.update("project-id", "dataset-id", request)
+        cirro.datasets.update("project-id", "dataset-id", request)
         ```
         """
         return update_dataset.sync(project_id=project_id, dataset_id=dataset_id, body=request, client=self._api_client)

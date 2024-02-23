@@ -57,7 +57,7 @@ class ProjectService(BaseService):
                 )
             ],
         )
-        cirro.dataset.update("project-id", "dataset-id", request)
+        cirro.projects.create(request)
         ```
         """
         return create_project.sync(client=self._api_client, body=request)
