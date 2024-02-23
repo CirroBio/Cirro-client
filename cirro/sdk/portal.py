@@ -1,11 +1,11 @@
 from cirro_api_client.v1.models import Executor
 
 from cirro.cirro_client import CirroAPI
+from cirro.sdk.dataset import DataPortalDataset
+from cirro.sdk.exceptions import DataPortalAssetNotFound
 from cirro.sdk.process import DataPortalProcess, DataPortalProcesses
 from cirro.sdk.project import DataPortalProject, DataPortalProjects
-from cirro.sdk.dataset import DataPortalDataset
 from cirro.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
-from cirro.sdk.exceptions import DataPortalAssetNotFound
 
 
 class DataPortal:
@@ -78,7 +78,7 @@ class DataPortal:
         """
         List all the processes available in the Data Portal.
         By default, only list non-ingest processes (those which can be run on existing datasets).
-        To list the processes which can be used to upload datasets, use ingest = True.
+        To list the processes which can be used to upload datasets, use `ingest = True`.
 
         Args:
             ingest (bool): If True, only list those processes which can be used to ingest datasets directly

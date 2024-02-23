@@ -1,4 +1,4 @@
-import cirro.file_utils
+import cirro.file_utils  # noqa
 from cirro.cirro_client import CirroAPI
 from cirro.sdk.dataset import DataPortalDataset
 from cirro.sdk.portal import DataPortal

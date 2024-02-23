@@ -27,15 +27,24 @@ class DataPortalProject(DataPortalAsset):
         self._client = client
 
     @property
-    def id(self):
+    def id(self) -> str:
+        """
+        Unique identifier
+        """
         return self._data.id
 
     @property
-    def name(self):
+    def name(self) -> str:
+        """
+        Readable name
+        """
         return self._data.name
 
     @property
-    def description(self):
+    def description(self) -> str:
+        """
+        Longer description of the project
+        """
         return self._data.description
 
     def __str__(self):
