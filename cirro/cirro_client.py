@@ -3,15 +3,8 @@ from cirro_api_client import CirroApiClient
 from cirro.auth import get_auth_info_from_config
 from cirro.auth.base import AuthInfo
 from cirro.config import AppConfig
-from cirro.services.billing import BillingService
-from cirro.services.dataset import DatasetService
-from cirro.services.execution import ExecutionService
-from cirro.services.file import FileService
-from cirro.services.metadata import MetadataService
-from cirro.services.metrics import MetricsService
-from cirro.services.process import ProcessService
-from cirro.services.projects import ProjectService
-from cirro.services.references import ReferenceService
+from cirro.services import FileService, DatasetService, ProjectService, ProcessService, ExecutionService, \
+    MetricsService, MetadataService, BillingService, ReferenceService
 
 
 class CirroAPI:
@@ -30,11 +23,11 @@ class CirroAPI:
             Authenticated Cirro API object which can be used to call endpoint functions.
             For example:
 
-            ```
-            from cirro.cirro_client import CirroAPI
-            cirro = CirroAPI()
-            print(cirro.projects.list())
-            ```
+        ```python
+        from cirro.cirro_client import CirroAPI
+        cirro = CirroAPI()
+        print(cirro.projects.list())
+        ```
         """
 
         self._configuration = AppConfig(base_url=base_url)

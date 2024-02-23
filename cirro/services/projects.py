@@ -9,6 +9,9 @@ from cirro.services.base import BaseService
 
 
 class ProjectService(BaseService):
+    """
+    Service for interacting with the Project endpoints
+    """
     def list(self):
         """
         Retrieve a list of projects
@@ -21,9 +24,6 @@ class ProjectService(BaseService):
 
         Args:
             project_id (str): Project ID
-
-        Returns:
-            `cirro_api_client.v1.models.ProjectDetail`
         """
         return get_project.sync(project_id=project_id, client=self._api_client)
 
@@ -34,35 +34,31 @@ class ProjectService(BaseService):
         Args:
             request (`cirro_api_client.v1.models.ProjectRequest`): Detailed information about the project to create
 
-        Returns:
-            `cirro_api_client.v1.models.CreateResponse`
+        ```python
+        from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact
+        from cirro.cirro_client import CirroAPI
 
-            ```
-            from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact
-            from cirro.cirro_client import CirroAPI
-
-            cirro = CirroAPI()
-            request = ProjectRequest(
-                name="New Project Name",
-                description="Description of new project",
-                billing_account_id="billing-account-id",
-                settings=ProjectSettings(
-                    budget_period="MONTHLY",
-                    max_spot_vcpu=300,
-                    budget_amount=1000
-                ),
-                contacts=[
-                    Contact(
-                        name="Contact Name",
-                        organization="Contact Organization",
-                        email="contact@email.com",
-                        phone="987-654-3210"
-                    )
-                ],
-            )
-            cirro.dataset.update("project-id", "dataset-id", request)
-            ```
-
+        cirro = CirroAPI()
+        request = ProjectRequest(
+            name="New Project Name",
+            description="Description of new project",
+            billing_account_id="billing-account-id",
+            settings=ProjectSettings(
+                budget_period="MONTHLY",
+                max_spot_vcpu=300,
+                budget_amount=1000
+            ),
+            contacts=[
+                Contact(
+                    name="Contact Name",
+                    organization="Contact Organization",
+                    email="contact@email.com",
+                    phone="987-654-3210"
+                )
+            ],
+        )
+        cirro.dataset.update("project-id", "dataset-id", request)
+        ```
         """
         return create_project.sync(client=self._api_client, body=request)
 
@@ -73,9 +69,6 @@ class ProjectService(BaseService):
         Args:
             project_id (str): ID of project to update
             request (`cirro_api_client.v1.models.ProjectRequest`): New details for the project
-
-        Returns:
-            `cirro_api_client.v1.models.ProjectDetail`
         """
         return update_project.sync(project_id=project_id, body=request, client=self._api_client)
 
@@ -95,9 +88,6 @@ class ProjectService(BaseService):
 
         Args:
             project_id (str): Project ID
-
-        Returns:
-            `cirro_api_client.v1.models.ProjectUser`
         """
         return get_project_users.sync(project_id=project_id, client=self._api_client)
 
@@ -105,7 +95,7 @@ class ProjectService(BaseService):
         """
         Sets a user's role within a project.
 
-        Set to ProjectRole.NONE if removing the user from a project.
+        Set to `ProjectRole.NONE` if removing the user from a project.
 
         Args:
             project_id (str): Project ID

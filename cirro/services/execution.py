@@ -1,4 +1,5 @@
 from typing import List, Optional
+
 from cirro_api_client.v1.api.execution import run_analysis, stop_analysis, get_project_summary, \
     get_tasks_for_execution, get_task_logs, get_execution_logs
 from cirro_api_client.v1.api.processes import get_process_parameters
@@ -9,6 +10,9 @@ from cirro.services.base import BaseService
 
 
 class ExecutionService(BaseService):
+    """
+    Service for interacting with the Execution endpoints
+    """
     def run_analysis(self, project_id: str, request: RunAnalysisRequest) -> CreateResponse:
         """
         Launch an analysis job running a process on a set of inputs
@@ -18,32 +22,32 @@ class ExecutionService(BaseService):
             request (cirro_api_client.v1.models.RunAnalysisRequest):
 
         Returns:
-            `cirro_api_client.v1.models.CreateResponse`
+            The ID of the created dataset
 
-            ```
-            from cirro_api_client.v1.models import RunAnalysisRequest, RunAnalysisRequestParams
-            from cirro.cirro_client import CirroAPI
+        ```python
+        from cirro_api_client.v1.models import RunAnalysisRequest, RunAnalysisRequestParams
+        from cirro.cirro_client import CirroAPI
 
-            # Example:
-            # Run the "process-nf-core-rnaseq-3_8" process using input data
-            # from a dataset with the id "source-dataset-id"
+        # Example:
+        # Run the "process-nf-core-rnaseq-3_8" process using input data
+        # from a dataset with the id "source-dataset-id"
 
-            # Optional analysis parameters
-            params = RunAnalysisRequestParams.from_dict({
-                "param_a": "val_a",
-                "param_b": "val_b"
-            })
+        # Optional analysis parameters
+        params = RunAnalysisRequestParams.from_dict({
+            "param_a": "val_a",
+            "param_b": "val_b"
+        })
 
-            cirro = CirroAPI()
-            request = RunAnalysisRequest(
-                name="Name of the newly created dataset",
-                description="Longer description of newly created dataset",
-                process_id="process-nf-core-rnaseq-3_8",
-                source_dataset_ids=["source-dataset-id"],
-                params=params
-            )
-            cirro.execution.run_analysis("project-id", request)
-            ```
+        cirro = CirroAPI()
+        request = RunAnalysisRequest(
+            name="Name of the newly created dataset",
+            description="Longer description of newly created dataset",
+            process_id="process-nf-core-rnaseq-3_8",
+            source_dataset_ids=["source-dataset-id"],
+            params=params
+        )
+        cirro.execution.run_analysis("project-id", request)
+        ```
         """
 
         form_spec = get_process_parameters.sync(

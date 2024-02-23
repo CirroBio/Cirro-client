@@ -8,6 +8,9 @@ from cirro.services.base import BaseService, get_all_records
 
 
 class MetadataService(BaseService):
+    """
+    Service for interacting with the Metadata endpoints
+    """
     def get_project_samples(self, project_id: str, max_items: int = 10000) -> List[Sample]:
         """
         Retrieves a list of samples associated with a project along with their metadata
@@ -15,9 +18,6 @@ class MetadataService(BaseService):
         Args:
             project_id (str): ID of the Project
             max_items (int): Maximum number of records to get (default 10,000)
-
-        Returns:
-            `typing.List[cirro_api_client.v1.models.Sample]`
         """
         return get_all_records(
             records_getter=lambda page_args: get_project_samples.sync(project_id=project_id,
@@ -33,7 +33,6 @@ class MetadataService(BaseService):
 
         Args:
             project_id (str): ID of the Project
-
         """
         return get_project_schema.sync(project_id=project_id, client=self._api_client)
 
@@ -55,9 +54,6 @@ class MetadataService(BaseService):
             project_id (str): ID of the Project
             sample_id (str): ID of the sample
             sample (cirro_api_client.v1.models.SampleRequest): Metadata information for the sample
-
-        Returns:
-            `cirro_api_client.v1.models.Sample`: Updated sample metadata
         """
         return update_sample.sync(
             project_id=project_id,

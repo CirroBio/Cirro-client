@@ -1,11 +1,16 @@
+from typing import List
+
 from cirro_api_client.v1.api.billing import get_billing_accounts, update_billing_account
-from cirro_api_client.v1.models import BillingAccountRequest
+from cirro_api_client.v1.models import BillingAccountRequest, BillingAccount
 
 from cirro.services.base import BaseService
 
 
 class BillingService(BaseService):
-    def list(self):
+    """
+    Service for interacting with the Billing endpoints
+    """
+    def list(self) -> List[BillingAccount]:
         """
         Gets a list of billing accounts the current user has access to
         """
@@ -19,21 +24,18 @@ class BillingService(BaseService):
             billing_account_id (str): Billing account ID
             request (cirro_api_client.v1.models.BillingAccountRequest):
 
-        Returns:
-            `cirro_api_client.v1.models.CreateResponse`
+        ```python
+        from cirro_api_client.v1.models import BillingAccountRequest
+        from cirro.cirro_client import CirroAPI
 
-            ```
-            from cirro_api_client.v1.models import BillingAccountRequest
-            from cirro.cirro_client import CirroAPI
-
-            cirro = CirroAPI()
-            request = BillingAccountRequest(
-                name="New billing account name",
-                primary_budget_number="new-budget-number",
-                owner"New Owner"
-            )
-            cirro.billing.update("billing-account-id", request)
-            )
+        cirro = CirroAPI()
+        request = BillingAccountRequest(
+            name="New billing account name",
+            primary_budget_number="new-budget-number",
+            owner="New Owner"
+        )
+        cirro.billing.update("billing-account-id", request)
+        ```
         """
         update_billing_account.sync_detailed(
             billing_account_id=billing_account_id,

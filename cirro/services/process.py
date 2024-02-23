@@ -10,15 +10,15 @@ from cirro.services.base import BaseService
 
 
 class ProcessService(BaseService):
+    """
+    Service for interacting with the Process endpoints
+    """
     def list(self, process_type: Executor = None) -> List[Process]:
         """
         Retrieves a list of available processes
 
         Args:
             process_type (`cirro_api_client.v1.models.Executor`): Optional process type (INGEST, CROMWELL, or NEXTFLOW)
-
-        Returns:
-            `typing.List[cirro_api_client.v1.models.Process]`
         """
         processes = get_processes.sync(client=self._api_client)
         return [p for p in processes if not process_type or process_type == p.executor]
@@ -29,9 +29,6 @@ class ProcessService(BaseService):
 
         Args:
             process_id (str): Process ID
-
-        Returns:
-            `cirro_api_client.v1.models.ProcessDetail`
         """
         return get_process.sync(process_id=process_id, client=self._api_client)
 
@@ -41,9 +38,6 @@ class ProcessService(BaseService):
 
         Args:
             name (str): Process name
-
-        Returns:
-            `cirro_api_client.v1.models.ProcessDetail`
         """
         matched_process = next((p for p in self.list() if p.name == name), None)
         if not matched_process:
@@ -57,9 +51,6 @@ class ProcessService(BaseService):
 
         Args:
             process_id (str): Process ID
-
-        returns:
-            `cirro_api_client.v1.models.ParameterSpecification`
         """
         form_spec = get_process_parameters.sync(process_id=process_id, client=self._api_client)
         return ParameterSpecification(form_spec)

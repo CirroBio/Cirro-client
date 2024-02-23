@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
     update_dataset, delete_dataset, get_dataset_manifest
 from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest, Dataset, \
-    DatasetDetail
+    DatasetDetail, CreateResponse, UploadDatasetCreateResponse
 
 from cirro.models.file import FileAccessContext, File
 from cirro.services.base import get_all_records
@@ -11,6 +11,9 @@ from cirro.services.file import FileEnabledService
 
 
 class DatasetService(FileEnabledService):
+    """
+    Service for interacting with the Dataset endpoints
+    """
     def list(self, project_id: str, max_items: int = 10000) -> List[Dataset]:
         """List datasets
 
@@ -19,9 +22,6 @@ class DatasetService(FileEnabledService):
         Args:
             project_id (str): ID of the Project
             max_items (int): Maximum number of records to get (default 10,000)
-
-        Returns:
-            `List[cirro_api_client.v1.models.Dataset]`
         """
         return get_all_records(
             records_getter=lambda page_args: get_datasets.sync(
@@ -33,7 +33,7 @@ class DatasetService(FileEnabledService):
             max_items=max_items
         )
 
-    def import_public(self, project_id: str, import_request: ImportDataRequest):
+    def import_public(self, project_id: str, import_request: ImportDataRequest) -> CreateResponse:
         """
         Download data from public repositories
 
@@ -42,11 +42,11 @@ class DatasetService(FileEnabledService):
             import_request (cirro_api_client.v1.models.ImportDataRequest):
 
         Returns:
-            `cirro_api_client.v1.models.CreateResponse`
+            ID of the created dataset
         """
         return import_public_dataset.sync(project_id=project_id, client=self._api_client, body=import_request)
 
-    def create(self, project_id: str, upload_request: UploadDatasetRequest):
+    def create(self, project_id: str, upload_request: UploadDatasetRequest) -> UploadDatasetCreateResponse:
         """
         Registers a dataset in Cirro, which can subsequently have files uploaded to it
 
@@ -55,20 +55,21 @@ class DatasetService(FileEnabledService):
             upload_request (cirro_api_client.v1.models.UploadDatasetRequest):
 
         Returns:
-            `cirro_api_client.v1.models.CreateResponse`
+            ID of the created dataset and the path to upload files
 
-            ```
-            from cirro_api_client.v1.models import UploadDatasetRequest
-            from cirro.cirro_client import CirroAPI
+        ```python
+        from cirro_api_client.v1.models import UploadDatasetRequest
+        from cirro.cirro_client import CirroAPI
 
-            cirro = CirroAPI()
-            request = UploadDatasetRequest(
-                name="Name of new dataset",
-                process_id="paired_dnaseq",
-                expected_files=["read_1.fastq.gz", "read_2.fastq.gz"],
-                description="Description of the dataset"
-            )
-            cirro.dataset.create("project-id", request)
+        cirro = CirroAPI()
+        request = UploadDatasetRequest(
+            name="Name of new dataset",
+            process_id="paired_dnaseq",
+            expected_files=["read_1.fastq.gz", "read_2.fastq.gz"],
+            description="Description of the dataset"
+        )
+        cirro.dataset.create("project-id", request)
+        ```
         """
         return upload_dataset.sync(project_id=project_id, client=self._api_client, body=upload_request)
 
@@ -81,7 +82,7 @@ class DatasetService(FileEnabledService):
             dataset_id (str): ID of the Dataset
 
         Returns:
-            `cirro_api_client.v1.models.DatasetDetail`
+            The dataset, if found
         """
         return get_dataset.sync(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
 
@@ -95,24 +96,24 @@ class DatasetService(FileEnabledService):
             request (cirro_api_client.v1.models.UpdateDatasetRequest):
 
         Returns:
-            `cirro_api_client.v1.models.DatasetDetail`
+            The updated dataset
 
-            ```
-            from cirro_api_client.v1.models import UpdateDatasetRequest
-            from cirro.cirro_client import CirroAPI
+        ```python
+        from cirro_api_client.v1.models import UpdateDatasetRequest
+        from cirro.cirro_client import CirroAPI
 
-            cirro = CirroAPI()
-            request = UpdateDatasetRequest(
-                name="Name of new dataset",
-                process_id="paired_dnaseq",
-                description="Description of the dataset"
-            )
-            cirro.dataset.update("project-id", "dataset-id", request)
-
+        cirro = CirroAPI()
+        request = UpdateDatasetRequest(
+            name="Name of new dataset",
+            process_id="paired_dnaseq",
+            description="Description of the dataset"
+        )
+        cirro.dataset.update("project-id", "dataset-id", request)
+        ```
         """
         return update_dataset.sync(project_id=project_id, dataset_id=dataset_id, body=request, client=self._api_client)
 
-    def delete(self, project_id: str, dataset_id: str):
+    def delete(self, project_id: str, dataset_id: str) -> None:
         """
         Delete a dataset
 
@@ -132,9 +133,6 @@ class DatasetService(FileEnabledService):
         Args:
             project_id (str): ID of the Project
             dataset_id (str): ID of the Dataset
-
-        Returns:
-            `typing.List[cirro.models.file.File]`
         """
         manifest = get_dataset_manifest.sync(
             project_id=project_id,
@@ -152,7 +150,7 @@ class DatasetService(FileEnabledService):
         ]
         return files
 
-    def upload_files(self, project_id: str, dataset_id: str, local_directory: str, files: List[str]):
+    def upload_files(self, project_id: str, dataset_id: str, local_directory: str, files: List[str]) -> None:
         """
         Uploads files to a given dataset from the specified local directory
 
@@ -183,19 +181,18 @@ class DatasetService(FileEnabledService):
         dataset_id: str,
         download_location: str,
         files: Union[List[File], List[str]] = None
-    ):
+    ) -> None:
         """
         Downloads files from a dataset
 
         The `files` argument is used to optionally specify a subset of files
-        to be downloaded. By default all files are downloaded.
+        to be downloaded. By default, all files are downloaded.
 
         Args:
             project_id (str): ID of the Project
             dataset_id (str): ID of the Dataset
             download_location (str): Local destination for downloaded files
             files (typing.List[str]): Optional list of files to download
-
         """
         if files is None:
             files = self.get_file_listing(project_id, dataset_id)

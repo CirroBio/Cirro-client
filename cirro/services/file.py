@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from functools import partial
 from typing import List, Dict
 
-from attr import define
 from cirro_api_client import CirroApiClient
 from cirro_api_client.v1.api.file import generate_project_file_access_token
 from cirro_api_client.v1.models import AWSCredentials, AccessType
@@ -14,12 +13,22 @@ from cirro.models.file import FileAccessContext, File
 from cirro.services.base import BaseService
 
 
-@define
 class FileService(BaseService):
+    """
+    Service for interacting with files
+    """
     enable_additional_checksum: bool
     transfer_retries: int
     _get_token_lock = threading.Lock()
     _read_token_cache: Dict[str, AWSCredentials] = {}
+
+    def __init__(self, api_client, enable_additional_checksum, transfer_retries):
+        """
+        Instantiates the file service class
+        """
+        self._api_client = api_client
+        self.enable_additional_checksum = enable_additional_checksum
+        self.transfer_retries = transfer_retries
 
     def get_access_credentials(self, access_context: FileAccessContext) -> AWSCredentials:
         """
@@ -66,6 +75,9 @@ class FileService(BaseService):
 
         Args:
             file (cirro.models.file.File):
+
+        Returns:
+            The raw bytes of the file
         """
         return self.get_file_from_path(file.access_context, file.relative_path)
 
@@ -76,6 +88,9 @@ class FileService(BaseService):
         Args:
             access_context (cirro.models.file.FileAccessContext): File access context, use class methods to generate
             file_path (str): Relative path to file within dataset
+
+        Returns:
+            The raw bytes of the file
         """
 
         s3_client = S3Client(
@@ -88,7 +103,7 @@ class FileService(BaseService):
         return s3_client.get_file(access_context.bucket, full_path)
 
     def create_file(self, access_context: FileAccessContext, key: str,
-                    contents: str, content_type: str):
+                    contents: str, content_type: str) -> None:
         """
         Creates a file at the specified path
 
@@ -111,7 +126,7 @@ class FileService(BaseService):
             bucket=access_context.bucket
         )
 
-    def upload_files(self, access_context: FileAccessContext, directory: str, files: List[str]):
+    def upload_files(self, access_context: FileAccessContext, directory: str, files: List[str]) -> None:
         """
         Uploads a list of files from the specified directory
 
@@ -135,7 +150,7 @@ class FileService(BaseService):
             max_retries=self.transfer_retries
         )
 
-    def download_files(self, access_context: FileAccessContext, directory: str, files: List[str]):
+    def download_files(self, access_context: FileAccessContext, directory: str, files: List[str]) -> None:
         """
         Download a list of files to the specified directory
 
