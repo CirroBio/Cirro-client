@@ -13,10 +13,12 @@ class DataPortalReferenceType(DataPortalAsset):
 
     @property
     def name(self):
+        """Name of reference type"""
         return self._data.name
 
     @property
     def description(self):
+        """Description of reference type"""
         return self._data.description
 
     @property

@@ -9,9 +9,18 @@ from cirro.sdk.file import DataPortalFile
 
 class DataPortalReference(DataPortalAsset):
     """
-    Reference data is organized by project, categorized by type.
+    Reference data object containing files which can be used for analysis in a particular project.
     """
     def __init__(self, ref: Reference, project_id: str, client: CirroAPI):
+        """
+        Instantiate by listing the references which have been added to a particular project
+        ```python
+        from cirro import DataPortal()
+        portal = DataPortal()
+        project = portal.get_project_by_name("Project Name")
+        references = project.list_references()
+        ```
+        """
         self._data = ref
         self._files = [
             DataPortalFile(File.from_file_entry(f, project_id), client) for f in ref.files
@@ -28,7 +37,8 @@ class DataPortalReference(DataPortalAsset):
         return self._data.name
 
     @property
-    def type(self):
+    def type(self) -> str:
+        """Type of reference data (e.g. genome_fasta)"""
         return self._data.type
 
     @property
