@@ -9,7 +9,7 @@ from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.process import DataPortalProcess
 
 
-def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Cirro):
+def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: CirroAPI):
     """
     If the process is a string, try to parse it as a process name or ID.
     """

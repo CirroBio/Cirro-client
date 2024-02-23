@@ -11,7 +11,7 @@ class DataPortalProcess(DataPortalAsset):
     """Helper functions for interacting with analysis processes."""
     data: Process
 
-    def __init__(self, process: Process, client: Cirro):
+    def __init__(self, process: Process, client: CirroAPI):
         self.data = process
         self._client = client
 

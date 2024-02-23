@@ -1,6 +1,9 @@
+import datetime
 from typing import Union, List, Optional
 
-from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, FileEntry, RunAnalysisRequestParams
+from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, FileEntry, \
+    ProcessDetail, Status, DatasetDetailParams, RunAnalysisRequestParams, DatasetDetailInfo, \
+    Tag
 
 from cirro.cirro_client import CirroAPI
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
@@ -21,52 +24,78 @@ class DataPortalDataset(DataPortalAsset):
         """
         Instantiate a dataset object
 
-        Args:
-            dataset (`cirro_api_client.v1.models.Dataset` | `cirro_api_client.v1.models.DatasetDetail`)
+        Should be invoked from a top-level constructor, for example:
+
+        ```
+        from cirro import DataPortal()
+        portal = DataPortal()
+        dataset = portal.get_dataset(
+            project="id-or-name-of-project",
+            dataset="id-or-name-of-dataset"
+        )
+        ```
 
         """
         assert dataset.project_id is not None, "Must provide dataset with project_id attribute"
-        self.data = dataset
+        self._data = dataset
         self._files: Optional[List[FileEntry]] = None
         self._client = client
 
     @property
-    def id(self):
+    def id(self) -> str:
         """Unique identifier for the dataset"""
-        return self.data.id
+        return self._data.id
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Editible name for the dataset"""
-        return self.data.name
+        return self._data.name
 
     @property
-    def description(self):
+    def description(self) -> str:
         """Longer name for the dataset"""
-        return self.data.description
+        return self._data.description
 
     @property
-    def process_id(self):
-        return self.data.process_id
+    def process_id(self) -> str:
+        """Unique ID of process used to create the dataset"""
+        return self._data.process_id
 
     @property
-    def process(self):
+    def process(self) -> ProcessDetail:
+        """
+        Object representing the process used to create the dataset
+
+        Returns:
+            `cirro_api_client.v1.models.ProcessDetail`
+        """
         return self._client.processes.get(self.process_id)
 
     @property
-    def project_id(self):
-        return self.data.project_id
+    def project_id(self) -> str:
+        """ID of the project containing the dataset"""
+        return self._data.project_id
 
     @property
-    def status(self):
-        return self.data.status
+    def status(self) -> Status:
+        """
+        Status of the dataset
+
+        Returns:
+            `cirro_api_client.v1.models.Status`
+        """
+        return self._data.status
 
     @property
-    def source_dataset_ids(self):
-        return self.data.source_dataset_ids
+    def source_dataset_ids(self) -> List[str]:
+        """IDs of the datasets used as sources for this dataset (if any)"""
+        return self._data.source_dataset_ids
 
     @property
-    def source_datasets(self):
+    def source_datasets(self) -> List['DataPortalDataset']:
+        """
+        Objects representing the datasets used as sources for this dataset (if any)
+        """
         return [
             DataPortalDataset(
                 dataset=self._client.datasets.get(project_id=self.project_id, dataset_id=dataset_id),
@@ -76,29 +105,49 @@ class DataPortalDataset(DataPortalAsset):
         ]
 
     @property
-    def params(self):
+    def params(self) -> DatasetDetailParams:
+        """
+        Parameters used to generate the dataset
+
+        Returns:
+            `cirro_api_client.v1.models.DatasetDetailParams`
+        """
         return self._get_detail().params
 
     @property
-    def info(self):
+    def info(self) -> DatasetDetailInfo:
+        """
+        Detailed information about the dataset
+
+        Returns:
+            `cirro_api_client.v1.models.DatasetDetailInfo`
+        """
         return self._get_detail().info
 
     @property
-    def tags(self):
-        return self.data.tags
+    def tags(self) -> List[Tag]:
+        """
+        Tags applied to the dataset
+
+        Returns:
+            `List[cirro_api_client.v1.models.Tag]`
+        """
+        return self._data.tags
 
     @property
-    def created_by(self):
-        return self.data.created_by
+    def created_by(self) -> str:
+        """User who created the dataset"""
+        return self._data.created_by
 
     @property
-    def created_at(self):
-        return self.data.created_at
+    def created_at(self) -> datetime.datetime:
+        """Timestamp of dataset creation"""
+        return self._data.created_at
 
     def _get_detail(self):
-        if not isinstance(self.data, DatasetDetail):
-            self.data = self._client.datasets.get(project_id=self.project_id, dataset_id=self.id)
-        return self.data
+        if not isinstance(self._data, DatasetDetail):
+            self._data = self._client.datasets.get(project_id=self.project_id, dataset_id=self.id)
+        return self._data
 
     def __str__(self):
         return '\n'.join([
@@ -107,7 +156,12 @@ class DataPortalDataset(DataPortalAsset):
         ])
 
     def list_files(self) -> DataPortalFiles:
-        """Return the list of files which make up the dataset."""
+        """
+        Return the list of files which make up the dataset.
+
+        Returns:
+            `cirro.sdk.file.DataPortalFiles`
+        """
         if not self._files:
             self._files = DataPortalFiles(
                 [
@@ -121,7 +175,12 @@ class DataPortalDataset(DataPortalAsset):
         return self._files
 
     def download_files(self, download_location: str = None) -> None:
-        """Download all the files from the dataset to a local directory."""
+        """
+        Download all the files from the dataset to a local directory.
+
+        Args:
+            download_location (str): Path to local directory
+        """
 
         # Alias for internal method
         self.list_files().download(download_location)
@@ -135,9 +194,20 @@ class DataPortalDataset(DataPortalAsset):
             notifications_emails=None
     ) -> str:
         """
-        Runs an analysis on a dataset, returns the ID of the new dataset.
+        Runs an analysis on a dataset, returns the ID of the newly created dataset.
+
         The process can be provided as either a DataPortalProcess object,
         or a string which corresponds to the name or ID of the process.
+
+        Args:
+            name (str): Name of newly created dataset
+            description (str): Description of newly created dataset
+            process (DataPortalProcess or str): Process to run
+            params (dict): Analysis parameters
+            notifications_emails (List[str]): Notification email address(es)
+
+        Returns:
+            ID of newly created dataset
         """
         if name is None:
             raise DataPortalInputError("Must specify 'name' for run_analysis")

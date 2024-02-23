@@ -15,7 +15,7 @@ class DataPortalFile(DataPortalAsset):
     Datasets are made up of a collection of File objects in the Data Portal.
     """
 
-    def __init__(self, file: File, client: Cirro):
+    def __init__(self, file: File, client: CirroAPI):
         # Attach the file object
         self._file = file
         self._client = client
@@ -47,7 +47,7 @@ class DataPortalFile(DataPortalAsset):
         return self._file.metadata
 
     @property
-    def size_bytes(self):
+    def size_bytes(self) -> int:
         """
         File size (in bytes)
         """
@@ -80,6 +80,9 @@ class DataPortalFile(DataPortalAsset):
 
         All other keyword arguments are passed to pandas.read_csv
         https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
+
+        Returns:
+            `pandas.DataFrame`
         """
 
         if compression == 'infer':

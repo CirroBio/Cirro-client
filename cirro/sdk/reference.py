@@ -10,7 +10,7 @@ class DataPortalReference(DataPortalAsset):
     """
     Reference data is organized by project, categorized by type.
     """
-    def __init__(self, ref: Reference, project_id: str, client: Cirro):
+    def __init__(self, ref: Reference, project_id: str, client: CirroAPI):
         self.data = ref
         self.files = [
             DataPortalFile(File.from_file_entry(f, project_id), client) for f in ref.files

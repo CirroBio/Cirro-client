@@ -21,7 +21,7 @@ class DataPortalProject(DataPortalAsset):
     Users are granted permissions at the project-level, allowing them
     to view and/or modify all the datasets in that collection.
     """
-    def __init__(self, proj: Project, client: Cirro):
+    def __init__(self, proj: Project, client: CirroAPI):
         """Initialize the Project from the base Cirro model."""
         self.data = proj
         self._client = client
