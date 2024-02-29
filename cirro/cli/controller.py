@@ -1,7 +1,7 @@
 import logging
 
 import pandas as pd
-from cirro_api_client.v1.models import UploadDatasetRequest, Status
+from cirro_api_client.v1.models import UploadDatasetRequest, Status, Executor
 
 from cirro.cirro_client import CirroApi
 from cirro.cli.interactive.auth_args import gather_auth_config
@@ -51,7 +51,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     cirro = CirroApi()
     logger = _get_logger()
     logger.info(f"Collecting data from {cirro._configuration.base_url}")
-    processes = cirro.processes.list()
+    processes = cirro.processes.list(process_type=Executor.INGEST)
 
     logger.info("Listing available projects")
     projects = cirro.projects.list()

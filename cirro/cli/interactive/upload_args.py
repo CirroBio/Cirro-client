@@ -77,11 +77,7 @@ def confirm_data_files(data_directory: str, files: List[str]):
 
 
 def ask_process(processes: List[Process], input_value: str) -> str:
-    process_names = [
-        process.name
-        for process in processes
-        if process.executor == "INGEST"
-    ]
+    process_names = [process.name for process in processes]
     process_names.sort()
     return ask(
         'select',
