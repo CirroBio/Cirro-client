@@ -14,6 +14,7 @@ class UploadArguments(TypedDict):
     project: str
     process: str
     data_directory: str
+    include_hidden: bool
     interactive: bool
     files: Optional[List[str]]
 
