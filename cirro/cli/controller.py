@@ -22,7 +22,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     _check_configure()
     cirro = CirroApi()
     logger = _get_logger()
-    logger.info(f"Collecting data from {cirro._configuration.base_url}")
+    logger.info(f"Collecting data from {cirro.configuration.base_url}")
 
     # If the user provided the --interactive flag
     if interactive:
@@ -50,7 +50,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     _check_configure()
     cirro = CirroApi()
     logger = _get_logger()
-    logger.info(f"Collecting data from {cirro._configuration.base_url}")
+    logger.info(f"Collecting data from {cirro.configuration.base_url}")
     processes = cirro.processes.list(process_type=Executor.INGEST)
 
     logger.info("Listing available projects")
@@ -92,7 +92,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
                                 local_directory=directory,
                                 files=files)
 
-    if cirro._configuration.enable_additional_checksum:
+    if cirro.configuration.enable_additional_checksum:
         checksum_method = "SHA256"
     else:
         checksum_method = "MD5"
@@ -103,7 +103,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
     _check_configure()
     cirro = CirroApi()
     logger = _get_logger()
-    logger.info(f"Collecting data from {cirro._configuration.base_url}")
+    logger.info(f"Collecting data from {cirro.configuration.base_url}")
 
     logger.info("Listing available projects")
     projects = cirro.projects.list()
@@ -130,7 +130,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
         files_to_download = ask_dataset_files(files)
 
     logger.info("Downloading files")
-    if cirro._configuration.enable_additional_checksum:
+    if cirro.configuration.enable_additional_checksum:
         checksum_method = "SHA256"
     else:
         checksum_method = "MD5"

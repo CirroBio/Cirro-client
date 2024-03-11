@@ -59,6 +59,9 @@ def download(**kwargs):
 @click.option('-i', '--interactive',
               help='Gather arguments interactively',
               is_flag=True, default=False)
+@click.option('--include-hidden',
+              help='Include hidden files in the upload (e.g., files starting with .)',
+              is_flag=True, default=False)
 def upload(**kwargs):
     check_required_args(kwargs)
     run_ingest(kwargs, interactive=kwargs.get('interactive'))
