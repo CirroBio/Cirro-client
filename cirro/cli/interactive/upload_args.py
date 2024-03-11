@@ -88,20 +88,7 @@ def ask_process(processes: List[Process], input_value: str) -> str:
     )
 
 
-def ask_include_hidden() -> bool:
-    return prompt_wrapper({
-        'type': 'confirm',
-        'message': "Include hidden files (expert: e.g. Zarr)",
-        'name': 'include_hidden',
-        'default': False
-    })['include_hidden']
-
-
-def ask_files_in_directory(data_directory) -> List[str]:
-
-    # Ask whether hidden files should be included
-    include_hidden = ask_include_hidden()
-
+def ask_files_in_directory(data_directory: str, include_hidden: bool) -> List[str]:
     # Get the list of all files in the directory
     # (relative to the data_directory)
     files = get_files_in_directory(
@@ -188,7 +175,7 @@ def gather_upload_arguments(input_params: UploadArguments, projects: List[Projec
     input_params['project'] = ask_project(projects, input_params.get('project'))
 
     input_params['data_directory'] = ask_data_directory(input_params.get('data_directory'))
-    files = ask_files_in_directory(input_params['data_directory'])
+    files = ask_files_in_directory(input_params['data_directory'], input_params['include_hidden'])
 
     confirm_data_files(input_params['data_directory'], files)
 
