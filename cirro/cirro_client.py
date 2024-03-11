@@ -123,3 +123,10 @@ class CirroApi:
         Gets the underlying API client
         """
         return self._api_client
+
+    @property
+    def configuration(self) -> AppConfig:
+        """
+        Gets the configuration of the instance
+        """
+        return self._configuration
