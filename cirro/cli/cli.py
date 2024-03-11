@@ -60,7 +60,7 @@ def download(**kwargs):
               help='Gather arguments interactively',
               is_flag=True, default=False)
 @click.option('--include-hidden',
-              help='Include hidden files in the upload',
+              help='Include hidden files in the upload (e.g., files starting with .)',
               is_flag=True, default=False)
 def upload(**kwargs):
     check_required_args(kwargs)
