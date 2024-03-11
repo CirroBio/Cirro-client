@@ -18,10 +18,17 @@ jobs:
         python-version: [ "3.9", "3.10", "3.11", "3.12" ]
 
     steps:
-      - uses: actions/checkout@v2
+      # For SonarCloud scan
+      - uses: actions/checkout@v4
+        if: matrix.python-version == '3.12'
+        with:
+          fetch-depth: 0
+
+      - uses: actions/checkout@v4
+        if: matrix.python-version != '3.12'
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -39,3 +46,10 @@ jobs:
         working-directory: tests
         run: |
           poetry run pytest --cov --cov-report=xml --cov-branch -o junit_family=xunit2 --junitxml=junit/test-results.xml
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        if: matrix.python-version == '3.12'  # Only run once
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
