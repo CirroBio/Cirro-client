@@ -34,19 +34,34 @@ class ProjectService(BaseService):
         Args:
             request (`cirro_api_client.v1.models.ProjectRequest`): Detailed information about the project to create
 
+        Examples:
         ```python
-        from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact
+        from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact, BudgetPeriod
         from cirro.cirro_client import CirroApi
 
         cirro = CirroApi()
-        request = ProjectRequest(
+
+        # Bring your own account projects are hosted by the user
+        # You must provide the account details and VPC information
+        # Please view the ProjectSettings model for more information on the attributes required
+        byoa_project = ProjectRequest(
             name="New Project Name",
             description="Description of new project",
             billing_account_id="billing-account-id",
             settings=ProjectSettings(
-                budget_period="MONTHLY",
+                budget_period=BudgetPeriod.MONTHLY,
+                budget_amount=1000,
                 max_spot_vcpu=300,
-                budget_amount=1000
+                service_connections=[],
+                retention_policy_days=7
+                vpc_id="vpc-000000000000",
+                batch_subnets=["subnet-000000000000", "subnet-000000000001"]
+                kms_arn="arn:aws:kms:us-west-2:000000000000:key/00000000-0000-0000-0000-000000000000"
+            ),
+            account=CloudAccount(
+                account_id="<AWS_ACCOUNT_ID>",
+                region_name="us-west-2",
+                account_name="Cirro Lab Project"
             ),
             contacts=[
                 Contact(
@@ -55,9 +70,32 @@ class ProjectService(BaseService):
                     email="contact@email.com",
                     phone="987-654-3210"
                 )
-            ],
+            ]
         )
-        cirro.projects.create(request)
+
+        # Hosted projects are managed by Cirro
+        hosted_project = ProjectRequest(
+            name="New Project Name",
+            description="Description of new project",
+            billing_account_id="billing-account-id",
+            settings=ProjectSettings(
+                budget_period=BudgetPeriod.MONTHLY,
+                budget_amount=1000,
+                max_spot_vcpu=300,
+                service_connections=[],
+                retention_policy_days=7
+            ),
+            contacts=[
+                Contact(
+                    name="Contact Name",
+                    organization="Contact Organization",
+                    email="contact@email.com",
+                    phone="987-654-3210"
+                )
+            ]
+        )
+
+        cirro.projects.create(byoa_project)
         ```
         """
         return create_project.sync(client=self._api_client, body=request)
