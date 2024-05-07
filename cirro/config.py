@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import NamedTuple, Dict, Optional, List
 
 import requests
-from requests import HTTPError
+from requests import RequestException
 
 from cirro.models.tenant import Tenant
 
@@ -39,7 +39,6 @@ def save_user_config(user_config: UserConfig):
         'transfer_max_retries': Constants.default_max_retries
     }
     if original_user_config:
-        ini_config['General']['base_url'] = original_user_config.base_url
         ini_config['General']['transfer_max_retries'] = str(original_user_config.transfer_max_retries)
 
     ini_config[user_config.auth_method] = user_config.auth_method_config
@@ -91,7 +90,7 @@ class AppConfig:
         self._init_config()
 
     def _init_config(self):
-        self.rest_endpoint = f'https://{self.base_url}/api/'
+        self.rest_endpoint = f'https://{self.base_url}/api'
         self.auth_endpoint = f'https://{self.base_url}/api/auth'
 
         try:
@@ -104,5 +103,5 @@ class AppConfig:
             self.references_bucket = info['referencesBucket']
             self.resources_bucket = info['resourcesBucket']
             self.region = info['region']
-        except HTTPError:
-            raise RuntimeError('Failed to get system metadata')
+        except RequestException:
+            raise RuntimeError(f'Failed connecting to {self.base_url}, please check your configuration')
