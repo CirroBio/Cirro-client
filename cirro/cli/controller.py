@@ -160,6 +160,7 @@ def _check_configure():
     config = load_user_config()
     if config is None:
         run_configure()
+        return
 
     # Legacy check for old config
     if config.base_url == 'cirro.bio':
