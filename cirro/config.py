@@ -1,10 +1,12 @@
 import configparser
 import os
 from pathlib import Path
-from typing import NamedTuple, Dict, Optional
+from typing import NamedTuple, Dict, Optional, List
 
 import requests
-from requests import HTTPError
+from requests import RequestException
+
+from cirro.models.tenant import Tenant
 
 
 class Constants:
@@ -22,16 +24,21 @@ class UserConfig(NamedTuple):
     enable_additional_checksum: Optional[bool]
 
 
+def list_tenants() -> List[Tenant]:
+    resp = requests.get(f'https://nexus.{Constants.default_base_url}/info')
+    resp.raise_for_status()
+    return resp.json()['tenants']
+
+
 def save_user_config(user_config: UserConfig):
     original_user_config = load_user_config()
     ini_config = configparser.ConfigParser()
     ini_config['General'] = {
         'auth_method': user_config.auth_method,
-        'base_url': Constants.default_base_url,
+        'base_url': user_config.base_url,
         'transfer_max_retries': Constants.default_max_retries
     }
     if original_user_config:
-        ini_config['General']['base_url'] = original_user_config.base_url
         ini_config['General']['transfer_max_retries'] = str(original_user_config.transfer_max_retries)
 
     ini_config[user_config.auth_method] = user_config.auth_method_config
@@ -83,8 +90,8 @@ class AppConfig:
         self._init_config()
 
     def _init_config(self):
-        self.rest_endpoint = f'https://api.{self.base_url}'
-        self.auth_endpoint = f'https://api.{self.base_url}/auth'
+        self.rest_endpoint = f'https://{self.base_url}/api'
+        self.auth_endpoint = f'https://{self.base_url}/api/auth'
 
         try:
             info_resp = requests.get(f'{self.rest_endpoint}/info/system')
@@ -96,5 +103,5 @@ class AppConfig:
             self.references_bucket = info['referencesBucket']
             self.resources_bucket = info['resourcesBucket']
             self.region = info['region']
-        except HTTPError:
-            raise RuntimeError('Failed to get system metadata')
+        except RequestException:
+            raise RuntimeError(f'Failed connecting to {self.base_url}, please check your configuration')

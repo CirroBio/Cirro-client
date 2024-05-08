@@ -145,10 +145,10 @@ def run_download(input_params: DownloadArguments, interactive=False):
 
 
 def run_configure():
-    auth_method, auth_method_config, enable_additional_checksum = gather_auth_config()
+    auth_method, base_url, auth_method_config, enable_additional_checksum = gather_auth_config()
     save_user_config(UserConfig(auth_method=auth_method,
                                 auth_method_config=auth_method_config,
-                                base_url=None,
+                                base_url=base_url,
                                 transfer_max_retries=None,
                                 enable_additional_checksum=enable_additional_checksum))
 
@@ -157,10 +157,14 @@ def _check_configure():
     """
     Prompts the user to do initial configuration if needed
     """
-    if load_user_config() is not None:
+    config = load_user_config()
+    if config is None:
+        run_configure()
         return
 
-    run_configure()
+    # Legacy check for old config
+    if config.base_url == 'cirro.bio':
+        run_configure()
 
 
 def _get_logger() -> logging.Logger:
