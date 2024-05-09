@@ -17,15 +17,17 @@ class CirroApi:
 
         Args:
             auth_info (cirro.auth.base.AuthInfo):
-            base_url (str): Optional base URL for connection (default: `CIRRO_HOME` or 'cirro.bio')
+            base_url (str): Optional base URL of the Cirro instance
+             (if not provided, it uses the `CIRRO_BASE_URL` environment variable, or the config file)
 
         Returns:
-            Authenticated Cirro API object which can be used to call endpoint functions.
-            For example:
+            Authenticated Cirro API object, which can be used to call endpoint functions.
 
+        Example:
         ```python
         from cirro.cirro_client import CirroApi
-        cirro = CirroApi()
+
+        cirro = CirroApi(base_url="app.cirro.bio")
         print(cirro.projects.list())
         ```
         """

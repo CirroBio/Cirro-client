@@ -1,5 +1,6 @@
 import configparser
 import os
+import re
 from pathlib import Path
 from typing import NamedTuple, Dict, Optional, List
 
@@ -81,8 +82,12 @@ class AppConfig:
         self.user_config = load_user_config()
         self.base_url = (base_url or
                          os.environ.get('CIRRO_BASE_URL') or
-                         (self.user_config.base_url if self.user_config else None) or
-                         Constants.default_base_url)
+                         (self.user_config.base_url if self.user_config else None))
+        if not self.base_url:
+            raise RuntimeError('No base URL provided, please run cirro configure,'
+                               ' set the CIRRO_BASE_URL environment variable, or provide the base_url parameter.')
+        # remove http(s):// if it's there
+        self.base_url = re.compile(r'https?://').sub('', self.base_url).strip()
         self.transfer_max_retries = self.user_config.transfer_max_retries\
             if self.user_config else Constants.default_max_retries
         self.enable_additional_checksum = self.user_config.enable_additional_checksum\
