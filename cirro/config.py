@@ -84,8 +84,8 @@ class AppConfig:
                          os.environ.get('CIRRO_BASE_URL') or
                          (self.user_config.base_url if self.user_config else None))
         if not self.base_url:
-            raise RuntimeError('No base URL provided, please provide the base_url parameter,'
-                               ' set the CIRRO_BASE_URL environment variable, or run cirro configure')
+            raise RuntimeError('No base URL provided, please run cirro configure,'
+                               ' set the CIRRO_BASE_URL environment variable, or provide the base_url parameter.')
         # remove http(s):// if it's there
         self.base_url = re.compile(r'https?://').sub('', self.base_url).strip()
         self.transfer_max_retries = self.user_config.transfer_max_retries\

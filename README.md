@@ -19,7 +19,7 @@ or you can install the main branch of the repo by running:
 
 ## Authentication
 
-Upon first use, the Cirro client will ask if you what Cirro instance to use and if you would like to save your login information.
+Upon first use, the Cirro client will ask you what Cirro instance to use and if you would like to save your login information.
 It will then give you a link to authenticate through the web browser.
 
 You can change your Cirro instance by running `cirro configure` and selecting the desired instance.
