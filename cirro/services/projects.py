@@ -142,7 +142,7 @@ class ProjectService(BaseService):
             project_id (str): Project ID
             username (str): Username
             role (`cirro_api_client.v1.models.ProjectRole`): New role to apply
-            supress_notification (bool):
+            supress_notification (bool): Suppress email notification
         """
         request_body = SetUserProjectRoleRequest(
             username=username,
