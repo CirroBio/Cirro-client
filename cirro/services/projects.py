@@ -36,7 +36,8 @@ class ProjectService(BaseService):
 
         Examples:
         ```python
-        from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact, BudgetPeriod
+        from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact, BudgetPeriod, CloudAccount, \
+            CloudAccountType
         from cirro.cirro_client import CirroApi
 
         cirro = CirroApi()
@@ -53,15 +54,17 @@ class ProjectService(BaseService):
                 budget_amount=1000,
                 max_spot_vcpu=300,
                 service_connections=[],
-                retention_policy_days=7
+                retention_policy_days=7,
                 vpc_id="vpc-000000000000",
-                batch_subnets=["subnet-000000000000", "subnet-000000000001"]
+                batch_subnets=["subnet-000000000000", "subnet-000000000001"],
+                sagemaker_subnets=["subnet-000000000000", "subnet-000000000001"],
                 kms_arn="arn:aws:kms:us-west-2:000000000000:key/00000000-0000-0000-0000-000000000000"
             ),
             account=CloudAccount(
                 account_id="<AWS_ACCOUNT_ID>",
                 region_name="us-west-2",
-                account_name="Cirro Lab Project"
+                account_name="Cirro Lab Project",
+                account_type=CloudAccountType.BYOA
             ),
             contacts=[
                 Contact(
