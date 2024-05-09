@@ -1,4 +1,6 @@
-from cirro_api_client.v1.api.metrics import get_project_metrics
+from typing import List
+
+from cirro_api_client.v1.api.metrics import get_project_metrics, get_all_metrics
 from cirro_api_client.v1.models import ProjectMetrics
 
 from cirro.services.base import BaseService
@@ -19,3 +21,9 @@ class MetricsService(BaseService):
             project_id=project_id,
             client=self._api_client
         )
+
+    def get_all_metrics(self) -> List[ProjectMetrics]:
+        """
+        Retrieves all available metrics
+        """
+        return get_all_metrics.sync(client=self._api_client)
