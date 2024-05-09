@@ -21,10 +21,9 @@ from cirro.auth.oauth_models import DeviceTokenResponse, OAuthTokenResponse
 from cirro.config import Constants
 
 logger = logging.getLogger()
-TOKEN_PATH = Path(Constants.home, '.token.dat').expanduser()
 
 
-def _build_token_persistence(location, fallback_to_plaintext=False):
+def _build_token_persistence(location: str, fallback_to_plaintext=False):
     try:
         if sys.platform.startswith('win'):
             from msal_extensions import FilePersistenceWithDataProtection
@@ -99,9 +98,10 @@ class DeviceCodeAuth(AuthInfo):
         self.region = region
         self._token_info: Optional[OAuthTokenResponse] = None
         self._persistence: Optional[BasePersistence] = None
+        self._token_path = Path(Constants.home, f'{client_id}.token.dat').expanduser()
 
         if enable_cache:
-            self._persistence = _build_token_persistence(str(TOKEN_PATH), fallback_to_plaintext=True)
+            self._persistence = _build_token_persistence(str(self._token_path), fallback_to_plaintext=True)
             self._token_info = self._load_token_info()
 
         # Check saved token for change in endpoint
@@ -167,7 +167,7 @@ class DeviceCodeAuth(AuthInfo):
         self._username = decoded_access_token['username']
 
     def _load_token_info(self) -> Optional[OAuthTokenResponse]:
-        if not self._persistence or not TOKEN_PATH.exists():
+        if not self._persistence or not self._token_path.exists():
             return None
 
         token_info = json.loads(self._persistence.load())
