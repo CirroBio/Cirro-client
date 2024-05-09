@@ -14,15 +14,30 @@ class DataPortal:
     available in the Data Portal.
     """
 
-    def __init__(self, client: CirroApi = None):
-        """Set up the DataPortal object, establishing an authenticated connection."""
+    def __init__(self, base_url: str = None, client: CirroApi = None):
+        """
+        Set up the DataPortal object, establishing an authenticated connection.
+
+        Args:
+            base_url (str): Optional base URL of the Cirro instance
+             (if not provided, it uses the `CIRRO_BASE_URL` environment variable, or the config file)
+            client (`cirro.cirro_client.CirroApi`): Optional pre-configured client
+
+        Example:
+        ```python
+        from cirro import DataPortal
+
+        Portal = DataPortal(base_url="app.cirro.bio")
+        portal.list_projects()
+        ```
+        """
 
         if client is not None:
             self._client = client
 
         # Set up default client if not provided
         else:
-            self._client = CirroApi()
+            self._client = CirroApi(base_url=base_url)
 
     def list_projects(self) -> DataPortalProjects:
         """List all the projects available in the Data Portal."""

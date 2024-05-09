@@ -19,7 +19,10 @@ or you can install the main branch of the repo by running:
 
 ## Authentication
 
-Upon first use, the Cirro client will ask if you would like to save your login information and give you a link to authenticate through the web browser.
+Upon first use, the Cirro client will ask if you what Cirro instance to use and if you would like to save your login information.
+It will then give you a link to authenticate through the web browser.
+
+You can change your Cirro instance by running `cirro configure` and selecting the desired instance.
 
 If you need to change your credentials after this point, and you've opted to save your login, please see the [clearing saved login](#clearing-saved-login) section.
 
@@ -109,10 +112,10 @@ View the API documentation for this library [here](https://cirrobio.github.io/Ci
 
 ### Supported environment variables
 
-| Name           | Description                   | Default   |
-|----------------|-------------------------------|-----------|
-| CIRRO_HOME     | Local configuration directory | ~/.cirro  |
-| CIRRO_BASE_URL | Base URL of the data portal   | cirro.bio |
+| Name           | Description                   | Default  |
+|----------------|-------------------------------|----------|
+| CIRRO_HOME     | Local configuration directory | ~/.cirro |
+| CIRRO_BASE_URL | Base URL of the data portal   |          |
 
 ### Configuration
 
