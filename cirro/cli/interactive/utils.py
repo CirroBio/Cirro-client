@@ -1,4 +1,4 @@
-from typing import List, Union, Callable
+from typing import List, Union, Callable, TypeVar, Optional
 
 import questionary
 from questionary import prompt
@@ -80,12 +80,19 @@ def ask_yes_no(msg):
     return ask("select", msg, choices=["Yes", "No"]) == "Yes"
 
 
-def get_id_from_name(items, name_or_id: str) -> str:
-    return get_item_from_name_or_id(items, name_or_id).id
+T = TypeVar('T')
 
 
-def get_item_from_name_or_id(items, name_or_id: str):
+def get_id_from_name(items: List[T], name_or_id: str) -> Optional[str]:
+    matched = get_item_from_name_or_id(items, name_or_id)
+    if not matched:
+        item_type = type(items[0]).__name__
+        raise InputError(f"Could not find {item_type} {name_or_id}")
+    return matched.id
+
+
+def get_item_from_name_or_id(items: List[T], name_or_id: str) -> Optional[T]:
     matched = next((p for p in items if p.id == name_or_id), None)
     if matched:
         return matched
-    return next(p for p in items if p.name == name_or_id)
+    return next((p for p in items if p.name == name_or_id), None)
