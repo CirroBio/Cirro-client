@@ -7,7 +7,8 @@ from cirro.services.base import BaseService
 class UserService(BaseService):
     def invite_user(self, name: str, organization: str, email: str):
         """
-        Invite a user to the system
+        Invite a user to the system.
+        If the user already exists, it will return a message that the user already exists.
 
         Args:
             name (str): Name of the user
