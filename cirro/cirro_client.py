@@ -4,7 +4,7 @@ from cirro.auth import get_auth_info_from_config
 from cirro.auth.base import AuthInfo
 from cirro.config import AppConfig
 from cirro.services import FileService, DatasetService, ProjectService, ProcessService, ExecutionService, \
-    MetricsService, MetadataService, BillingService, ReferenceService
+    MetricsService, MetadataService, BillingService, ReferenceService, UserService
 
 
 class CirroApi:
@@ -55,6 +55,7 @@ class CirroApi:
         self._metadata_service = MetadataService(self._api_client)
         self._billing_service = BillingService(self._api_client)
         self._references_service = ReferenceService(self._api_client)
+        self._users_service = UserService(self._api_client)
 
     @property
     def datasets(self) -> DatasetService:
@@ -111,6 +112,13 @@ class CirroApi:
         List References and Reference types
         """
         return self._references_service
+
+    @property
+    def users(self) -> UserService:
+        """
+        List and update user information
+        """
+        return self._users_service
 
     @property
     def file(self) -> FileService:
