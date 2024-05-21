@@ -22,7 +22,7 @@ def gather_auth_config() -> Tuple[str, str, Dict, bool]:
         meta_information={tenant['domain']: tenant['displayName'] for tenant in tenant_options}
     )
     # remove http(s):// if it's there
-    base_url = re.compile(r'https?://').sub('', base_url).strip()
+    base_url = re.compile(r'https?://').sub('', base_url).strip('/').strip()
 
     auth_method_config = {
         'enable_cache': ask_yes_no('Would you like to save your login? (do not use this on shared devices)')
