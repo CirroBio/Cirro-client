@@ -111,7 +111,8 @@ class PreprocessDataset:
             f"Cannot remove parameter {name}, does not exist (and force=False)"
 
         self.logger.info(f"Removing parameter {name}")
-        del self.params[name]
+        if name in self.params:
+            del self.params[name]
 
         self.logger.info("Saving parameters")
         _write_json(self.params, "nextflow.json")
