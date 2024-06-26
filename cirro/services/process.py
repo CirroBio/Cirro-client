@@ -84,7 +84,7 @@ class ProcessService(BaseService):
             raise ValueError(error_msg)
 
         errors = [
-            f'{entry.description}: {entry.error_msg}. We accept any of the following naming conventions: \n\t- ' +
+            f'{entry.description}. {entry.error_msg}. We accept any of the following naming conventions: \n\t- ' +
             '\n\t- '.join([
                 e.example_name
                 for e in entry.allowed_patterns
