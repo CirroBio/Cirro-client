@@ -25,6 +25,14 @@ class UserConfig(NamedTuple):
     enable_additional_checksum: Optional[bool]
 
 
+def extract_base_url(base_url: str):
+    # remove http(s):// if it's there
+    base_url = re.compile(r'https?://').sub('', base_url).strip()
+    # remove anything after the first slash if it's there
+    base_url = base_url.split('/')[0]
+    return base_url
+
+
 def list_tenants() -> List[Tenant]:
     resp = requests.get(f'https://nexus.{Constants.default_base_url}/info')
     resp.raise_for_status()
