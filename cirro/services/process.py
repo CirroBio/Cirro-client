@@ -83,19 +83,20 @@ class ProcessService(BaseService):
         if error_msg := requirements.error_msg:
             raise ValueError(error_msg)
 
-        # These will be errors for missing files
-        all_errors = [
-            entry.error_msg for entry in requirements.allowed_data_types
-            if entry.error_msg is not None
-        ]
-        patterns = [
-            ' or '.join([
+        errors = [
+            f'{entry.description}: {entry.error_msg}. We accept any of the following naming conventions: \n\t- ' +
+            '\n\t- '.join([
                 e.example_name
                 for e in entry.allowed_patterns
             ])
             for entry in requirements.allowed_data_types
+            if entry.error_msg is not None
         ]
 
-        if len(all_errors) != 0:
-            raise ValueError("Files do not meet dataset type requirements. The expected files are: \n" +
-                             "\n".join(patterns))
+        files_provided = ', '.join(files)
+
+        if len(errors) != 0:
+            raise ValueError(f"The files you have provided are: {files_provided} \n\n"
+                             "They do not meet the dataset requirements. "
+                             "The required file types are: \n" +
+                             "\n".join(errors))

@@ -78,7 +78,10 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
     process = get_item_from_name_or_id(processes, input_params['process'])
     logger.info(f"Validating expected files: {process.name}")
-    cirro.processes.check_dataset_files(process_id=process.id, files=files, directory=directory)
+    try:
+        cirro.processes.check_dataset_files(process_id=process.id, files=files, directory=directory)
+    except ValueError as e:
+        raise InputError(e)
     logger.info("Creating new dataset")
 
     upload_dataset_request = UploadDatasetRequest(
