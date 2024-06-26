@@ -8,7 +8,7 @@ from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
 
 from cirro.cli.interactive.common_args import ask_project
-from cirro.cli.interactive.utils import ask, prompt_wrapper
+from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError
 from cirro.cli.models import UploadArguments
 from cirro.file_utils import get_files_in_directory, get_files_stats
 
@@ -140,7 +140,7 @@ def ask_dataset_files_glob(files: List[str]) -> List[str]:
         )
 
     if len(selected_files) == 0:
-        raise RuntimeWarning("No files selected")
+        raise InputError("No files selected")
 
     return selected_files
 
