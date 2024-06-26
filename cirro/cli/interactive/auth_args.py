@@ -1,9 +1,8 @@
 import logging
-import re
 from typing import Tuple, Dict
 
 from cirro.cli.interactive.utils import ask_yes_no, ask
-from cirro.config import list_tenants
+from cirro.config import list_tenants, extract_base_url
 
 logger = logging.getLogger()
 
@@ -21,8 +20,8 @@ def gather_auth_config() -> Tuple[str, str, Dict, bool]:
         choices=[tenant['domain'] for tenant in tenant_options],
         meta_information={tenant['domain']: tenant['displayName'] for tenant in tenant_options}
     )
-    # remove http(s):// if it's there
-    base_url = re.compile(r'https?://').sub('', base_url).strip('/').strip()
+    # Fix user-provided base URL, if necessary
+    base_url = extract_base_url(base_url)
 
     auth_method_config = {
         'enable_cache': ask_yes_no('Would you like to save your login? (do not use this on shared devices)')
