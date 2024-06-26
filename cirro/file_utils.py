@@ -110,7 +110,7 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
             # Try the upload
             try:
                 s3_client.upload_file(
-                    local_path=local_path,
+                    file_path=local_path,
                     bucket=bucket,
                     key=key
                 )
