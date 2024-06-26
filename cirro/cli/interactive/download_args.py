@@ -4,16 +4,16 @@ from typing import List
 
 from cirro_api_client.v1.models import Dataset, Project
 
-from cirro.models.file import File
 from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError
 from cirro.cli.models import DownloadArguments
+from cirro.models.file import File
 from cirro.utils import format_date
 
 
 def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     if len(datasets) == 0:
-        raise RuntimeWarning("No datasets available")
+        raise InputError("No datasets available")
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
     dataset_prompt = {
         'type': 'autocomplete',
@@ -99,7 +99,7 @@ def ask_dataset_files_list(files: List[File]) -> List[File]:
         ):
             return ask_dataset_files_list(files)
         else:
-            raise RuntimeWarning("No files selected")
+            raise InputError("No files selected")
     else:
         return selected_files
 
@@ -115,7 +115,7 @@ def ask_dataset_files_glob(files: List[File]) -> List[File]:
         )
 
     if len(selected_files) == 0:
-        raise RuntimeWarning("No files selected")
+        raise InputError("No files selected")
 
     return selected_files
 

@@ -1,6 +1,8 @@
 import click
 
 from cirro.cli import run_ingest, run_download, run_configure, run_list_datasets
+from cirro.cli.controller import handle_error
+from cirro.cli.interactive.utils import InputError
 
 
 def check_required_args(args):
@@ -75,6 +77,8 @@ def configure():
 def main():
     try:
         run()
+    except InputError as e:
+        handle_error(e)
     except KeyboardInterrupt:
         pass
 
