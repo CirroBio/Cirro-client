@@ -1,4 +1,5 @@
 import logging
+import sys
 
 import pandas as pd
 from cirro_api_client.v1.models import UploadDatasetRequest, Status, Executor
@@ -9,19 +10,27 @@ from cirro.cli.interactive.download_args import gather_download_arguments, ask_d
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
 from cirro.cli.interactive.list_dataset_args import gather_list_arguments
 from cirro.cli.interactive.upload_args import gather_upload_arguments
-from cirro.cli.interactive.utils import get_id_from_name, get_item_from_name_or_id
+from cirro.cli.interactive.utils import get_id_from_name, get_item_from_name_or_id, InputError
 from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
 from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.file_utils import get_files_in_directory
 
 NO_PROJECTS = "No projects available"
+# Log to STDOUT
+log_formatter = logging.Formatter(
+    '%(asctime)s %(levelname)-8s [Cirro CLI] %(message)s'
+)
+logger = logging.getLogger("CLI")
+logger.setLevel(logging.INFO)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(log_formatter)
+logger.addHandler(console_handler)
 
 
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
     _check_configure()
     cirro = CirroApi()
-    logger = _get_logger()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
 
     # If the user provided the --interactive flag
@@ -31,8 +40,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
         projects = cirro.projects.list()
 
         if len(projects) == 0:
-            logger.warning(NO_PROJECTS)
-            return
+            raise InputError(NO_PROJECTS)
 
         # Prompt the user for the project
         input_params = gather_list_arguments(input_params, projects)
@@ -49,7 +57,6 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 def run_ingest(input_params: UploadArguments, interactive=False):
     _check_configure()
     cirro = CirroApi()
-    logger = _get_logger()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
     processes = cirro.processes.list(process_type=Executor.INGEST)
 
@@ -57,8 +64,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     projects = cirro.projects.list()
 
     if len(projects) == 0:
-        logger.warning(NO_PROJECTS)
-        return
+        raise InputError(NO_PROJECTS)
 
     if interactive:
         input_params, files = gather_upload_arguments(input_params, projects, processes)
@@ -68,7 +74,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         files = get_files_in_directory(directory)
 
     if len(files) == 0:
-        raise RuntimeWarning("No files to upload, exiting")
+        raise InputError("No files to upload")
 
     process = get_item_from_name_or_id(processes, input_params['process'])
     logger.info(f"Validating expected files: {process.name}")
@@ -102,15 +108,13 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 def run_download(input_params: DownloadArguments, interactive=False):
     _check_configure()
     cirro = CirroApi()
-    logger = _get_logger()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
 
     logger.info("Listing available projects")
     projects = cirro.projects.list()
 
     if len(projects) == 0:
-        logger.warning(NO_PROJECTS)
-        return
+        raise InputError(NO_PROJECTS)
 
     files_to_download = None
     if interactive:
@@ -124,8 +128,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
         files = cirro.datasets.get_file_listing(input_params['project'], input_params['dataset'])
 
         if len(files) == 0:
-            logger.info('There are no files in this dataset')
-            return
+            raise InputError('There are no files in this dataset to download')
 
         files_to_download = ask_dataset_files(files)
 
@@ -167,14 +170,6 @@ def _check_configure():
         run_configure()
 
 
-def _get_logger() -> logging.Logger:
-    # Log to STDOUT
-    log_formatter = logging.Formatter(
-        '%(asctime)s %(levelname)-8s [Cirro CLI] %(message)s'
-    )
-    logger = logging.getLogger("CLI")
-    logger.setLevel(logging.INFO)
-    console_handler = logging.StreamHandler()
-    console_handler.setFormatter(log_formatter)
-    logger.addHandler(console_handler)
-    return logger
+def handle_error(e: Exception):
+    logger.error(e)
+    sys.exit(1)
