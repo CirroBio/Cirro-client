@@ -1,7 +1,6 @@
 import threading
 from datetime import datetime, timezone
 from functools import partial
-from pathlib import Path
 from typing import List, Dict
 
 from cirro_api_client import CirroApiClient

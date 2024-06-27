@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List, Optional, Union
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
