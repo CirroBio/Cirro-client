@@ -83,10 +83,10 @@ def get_files_in_directory(
 
 
 def _bytes_to_human_readable(num_bytes: int) -> str:
-    for unit in ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']:
-        if num_bytes < 1024.0 or unit == 'PiB':
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB', 'PB']:
+        if num_bytes < 1000.0 or unit == 'PB':
             break
-        num_bytes /= 1024.0
+        num_bytes /= 1000.0
     return f"{num_bytes:,.2f} {unit}"
 
 

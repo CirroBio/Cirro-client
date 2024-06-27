@@ -13,12 +13,13 @@ class TestFileUtils(unittest.TestCase):
         self.test_prefix = 'datasets/1a1a/data'
 
     def test_get_file_stats(self):
-        files = get_files_in_directory(Path('.'))
-        files = [Path(f) for f in files]
+        directory = Path(__file__).parent / 'data'
+        files = get_files_in_directory(directory)
+        files = [Path(directory, f) for f in files]
         stats = get_files_stats(files=files)
         self.assertGreater(stats.size, 0)
         self.assertGreater(stats.number_of_files, 0)
-        self.assertIn('KiB', stats.size_friendly)
+        self.assertIn('KB', stats.size_friendly)
 
     def test_upload_directory_pathlike(self):
         test_path = Path('/Users/test/Documents/dataset1')

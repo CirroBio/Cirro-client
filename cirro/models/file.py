@@ -13,7 +13,7 @@ class DirectoryStatistics(NamedTuple):
     size: float
     " Size in bytes"
     size_friendly: str
-    " Size in GB"
+    " Size in user friendly format (e.g. 1.2 KB)"
     number_of_files: int
     " Number of files"
 
