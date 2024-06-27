@@ -9,7 +9,7 @@ from cirro_api_client.v1.models import AWSCredentials, AccessType
 
 from cirro.clients.s3 import S3Client
 from cirro.file_utils import upload_directory, download_directory
-from cirro.models.file import FileAccessContext, File
+from cirro.models.file import FileAccessContext, File, PathLike
 from cirro.services.base import BaseService
 
 
@@ -126,14 +126,18 @@ class FileService(BaseService):
             bucket=access_context.bucket
         )
 
-    def upload_files(self, access_context: FileAccessContext, directory: str, files: List[str]) -> None:
+    def upload_files(self,
+                     access_context: FileAccessContext,
+                     directory: PathLike,
+                     files: List[PathLike]) -> None:
         """
         Uploads a list of files from the specified directory
 
         Args:
             access_context (cirro.models.file.FileAccessContext): File access context, use class methods to generate
-            directory (str): base path to upload from
-            files (List[str]): relative path of files to upload
+            directory (str|Path): Path to directory
+            files (typing.List[str|Path]): List of paths to files within the directory
+                must be the same type as directory.
         """
 
         s3_client = S3Client(

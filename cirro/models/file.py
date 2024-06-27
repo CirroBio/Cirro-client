@@ -1,16 +1,21 @@
 from dataclasses import dataclass
-from pathlib import PurePath
-from typing import TypedDict, Dict, Optional
+from pathlib import PurePath, Path
+from typing import Dict, Optional, TypeVar, NamedTuple
 
 from cirro_api_client.v1.models import FileAccessRequest, AccessType, FileEntry
 
 from cirro.models.s3_path import S3Path
 
+PathLike = TypeVar('PathLike', str, Path)
 
-class DirectoryStatistics(TypedDict):
+
+class DirectoryStatistics(NamedTuple):
     size: float
-    sizeFriendly: str
-    numberOfFiles: int
+    " Size in bytes"
+    size_friendly: str
+    " Size in user friendly format (e.g. 1.2 KB)"
+    number_of_files: int
+    " Number of files"
 
 
 class FileAccessContext:

@@ -98,7 +98,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
     logger.info("Uploading files")
     cirro.datasets.upload_files(project_id=project_id,
                                 dataset_id=create_resp.id,
-                                local_directory=directory,
+                                directory=directory,
                                 files=files)
 
     if cirro.configuration.enable_additional_checksum:

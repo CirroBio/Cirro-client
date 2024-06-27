@@ -43,7 +43,6 @@ jobs:
           poetry run flake8 cirro
 
       - name: Run Tests
-        working-directory: tests
         run: |
           poetry run pytest --cov --cov-report=xml --cov-branch -o junit_family=xunit2 --junitxml=junit/test-results.xml
 
