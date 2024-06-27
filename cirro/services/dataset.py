@@ -14,6 +14,7 @@ class DatasetService(FileEnabledService):
     """
     Service for interacting with the Dataset endpoints
     """
+
     def list(self, project_id: str, max_items: int = 10000) -> List[Dataset]:
         """List datasets
 
@@ -126,27 +127,42 @@ class DatasetService(FileEnabledService):
         """
         delete_dataset.sync_detailed(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
 
-    def get_file_listing(self, project_id: str, dataset_id: str) -> List[File]:
+    def get_file_listing(self, project_id: str, dataset_id: str, file_limit: int = 100000) -> List[File]:
         """
         Gets a listing of files, charts, and other assets available for the dataset
 
         Args:
             project_id (str): ID of the Project
             dataset_id (str): ID of the Dataset
+            file_limit (int): Maximum number of files to get (default 100,000)
         """
-        manifest = get_dataset_manifest.sync(
-            project_id=project_id,
-            dataset_id=dataset_id,
-            client=self._api_client
-        )
+        if file_limit < 1:
+            raise ValueError("file_limit must be greater than 0")
+        all_files = []
+        file_offset = 0
+        domain = None
+
+        while len(all_files) < file_limit:
+            manifest = get_dataset_manifest.sync(
+                project_id=project_id,
+                dataset_id=dataset_id,
+                file_offset=file_offset,
+                client=self._api_client
+            )
+            all_files.extend(manifest.files)
+            file_offset += len(manifest.files)
+
+            if len(all_files) >= manifest.total_files or len(manifest.files) == 0:
+                break
+            domain = manifest.domain
 
         files = [
             File.from_file_entry(
                 f,
                 project_id=project_id,
-                domain=manifest.domain
+                domain=domain
             )
-            for f in manifest.files
+            for f in all_files
         ]
         return files
 
