@@ -3,11 +3,10 @@ from pathlib import PurePath, Path
 from typing import Dict, Optional, TypeVar, NamedTuple
 
 from cirro_api_client.v1.models import FileAccessRequest, AccessType, FileEntry
-from pathlib_abc import PathBase
 
 from cirro.models.s3_path import S3Path
 
-PathLike = TypeVar('PathLike', str, Path, PathBase)
+PathLike = TypeVar('PathLike', str, Path)
 
 
 class DirectoryStatistics(NamedTuple):
