@@ -38,19 +38,19 @@ class S3Client:
         self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict()
         self._download_args = dict(ChecksumMode='ENABLED') if enable_additional_checksum else dict()
 
-    def upload_file(self, local_path: Path, bucket: str, key: str):
-        file_size = local_path.stat().st_size
-        file_name = local_path.name
+    def upload_file(self, file_path: Path, bucket: str, key: str):
+        file_size = file_path.stat().st_size
+        file_name = file_path.name
 
         with tqdm(total=file_size,
                   desc=f'Uploading file {file_name} ({convert_size(file_size)})',
                   bar_format="{desc} | {percentage:.1f}%|{bar:25} | {rate_fmt}",
                   unit='B', unit_scale=True,
                   unit_divisor=1024) as progress:
-            absolute_path = str(local_path.absolute())
-            self._client.upload_file(absolute_path, bucket, key,
-                                     Callback=ProgressPercentage(progress),
-                                     ExtraArgs=self._upload_args)
+            with file_path.open('rb') as file:
+                self._client.upload_fileobj(file, bucket, key,
+                                            Callback=ProgressPercentage(progress),
+                                            ExtraArgs=self._upload_args)
 
     def download_file(self, local_path: Path, bucket: str, key: str):
         file_size = self.get_file_stats(bucket, key)['ContentLength']
