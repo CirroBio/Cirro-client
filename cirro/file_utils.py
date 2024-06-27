@@ -8,7 +8,7 @@ from boto3.exceptions import S3UploadFailedError
 from botocore.exceptions import ConnectionError
 
 from cirro.clients import S3Client
-from cirro.models.file import DirectoryStatistics, File
+from cirro.models.file import DirectoryStatistics, File, PathLike
 
 if os.name == 'nt':
     import win32api
@@ -82,26 +82,58 @@ def get_files_in_directory(
     return paths
 
 
-def get_files_stats(files: List[Path]) -> DirectoryStatistics:
+def _bytes_to_human_readable(num_bytes: int) -> str:
+    for unit in ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB']:
+        if num_bytes < 1024.0 or unit == 'PiB':
+            break
+        num_bytes /= 1024.0
+    return f"{num_bytes:,.2f} {unit}"
+
+
+def get_files_stats(files: List[PathLike]) -> DirectoryStatistics:
     """
-    @private
+    Returns information about the list of files provided, such as the total size and number of files.
     """
     sizes = [f.stat().st_size for f in files]
-    total_size = sum(sizes) / float(1 << 30)
-    return {
-        'sizeFriendly': f'{total_size:,.3f} GB',
-        'size': total_size,
-        'numberOfFiles': len(sizes)
-    }
+    total_size = sum(sizes)
+    return DirectoryStatistics(
+        size_friendly=_bytes_to_human_readable(total_size),
+        size=total_size,
+        number_of_files=len(sizes)
+    )
 
 
-def upload_directory(directory: str, files: List[str], s3_client: S3Client, bucket: str, prefix: str, max_retries=10):
+def upload_directory(directory: PathLike,
+                     files: List[PathLike],
+                     s3_client: S3Client,
+                     bucket: str,
+                     prefix: str,
+                     max_retries=10):
     """
     @private
+
+    Uploads a list of files from the specified directory
+    Args:
+        directory (str|Path): Path to directory
+        files (typing.List[str|Path]): List of paths to files within the directory
+            must be the same type as directory.
+        s3_client (cirro.clients.S3Client): S3 client
+        bucket (str): S3 bucket
+        prefix (str): S3 prefix
+        max_retries (int): Number of retries
     """
+    # Ensure all files are of the same type as the directory
+    if not all(isinstance(file, type(directory)) for file in files):
+        raise ValueError("All files must be of the same type as the directory (str or Path)")
+
     for file in files:
-        key = f'{prefix}/{file}'
-        local_path = Path(directory, file)
+        if isinstance(file, str):
+            file_path = Path(directory, file)
+        else:
+            file_path = file
+
+        file_relative = file_path.relative_to(directory).as_posix()
+        key = f'{prefix}/{file_relative}'
         success = False
 
         # Retry up to max_retries times
@@ -110,7 +142,7 @@ def upload_directory(directory: str, files: List[str], s3_client: S3Client, buck
             # Try the upload
             try:
                 s3_client.upload_file(
-                    file_path=local_path,
+                    file_path=file_path,
                     bucket=bucket,
                     key=key
                 )

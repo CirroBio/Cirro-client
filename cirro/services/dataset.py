@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List, Optional, Union
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
@@ -5,7 +6,7 @@ from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_p
 from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest, Dataset, \
     DatasetDetail, CreateResponse, UploadDatasetCreateResponse
 
-from cirro.models.file import FileAccessContext, File
+from cirro.models.file import FileAccessContext, File, PathLike
 from cirro.services.base import get_all_records
 from cirro.services.file import FileEnabledService
 
@@ -166,16 +167,20 @@ class DatasetService(FileEnabledService):
         ]
         return files
 
-    def upload_files(self, project_id: str, dataset_id: str, local_directory: str, files: List[str]) -> None:
+    def upload_files(self,
+                     project_id: str,
+                     dataset_id: str,
+                     directory: PathLike,
+                     files: List[PathLike]) -> None:
         """
-        Uploads files to a given dataset from the specified local directory
+        Uploads files to a given dataset from the specified directory.
 
         Args:
             project_id (str): ID of the Project
             dataset_id (str): ID of the Dataset
-            local_directory (str): Path to local directory
-            files (typing.List[str]): List of relative paths to files within the local directory
-
+            directory (str|Path): Path to directory
+            files (typing.List[str|Path]): List of paths to files within the directory,
+                must be the same type as directory.
         """
         dataset = self.get(project_id, dataset_id)
 
@@ -186,9 +191,9 @@ class DatasetService(FileEnabledService):
         )
 
         self._file_service.upload_files(
-            access_context,
-            local_directory,
-            files
+            access_context=access_context,
+            directory=directory,
+            files=files
         )
 
     def download_files(

@@ -195,7 +195,7 @@ class DataPortalProject(DataPortalAsset):
         self._client.datasets.upload_files(
             project_id=self.id,
             dataset_id=create_response.id,
-            local_directory=upload_folder,
+            directory=upload_folder,
             files=files
         )
 
