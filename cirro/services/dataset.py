@@ -152,9 +152,9 @@ class DatasetService(FileEnabledService):
             all_files.extend(manifest.files)
             file_offset += len(manifest.files)
 
+            domain = manifest.domain
             if len(all_files) >= manifest.total_files or len(manifest.files) == 0:
                 break
-            domain = manifest.domain
 
         files = [
             File.from_file_entry(
