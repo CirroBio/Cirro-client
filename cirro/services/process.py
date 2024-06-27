@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from cirro_api_client.v1.api.processes import get_processes, get_process, get_process_parameters, \
-    validate_file_requirements
+    validate_file_requirements, archive_custom_process
 from cirro_api_client.v1.models import ValidateFileRequirementsRequest, Executor, Process, ProcessDetail
 
 from cirro.models.form_specification import ParameterSpecification
@@ -31,6 +31,18 @@ class ProcessService(BaseService):
             process_id (str): Process ID
         """
         return get_process.sync(process_id=process_id, client=self._api_client)
+
+    def archive(self, process_id: str):
+        """
+        Removes a custom process from the list of available processes.
+
+        Error will be raised if the requested process does not exist. No value
+        is returned, and no error raised if process exists and request is satisfied.
+
+        Args:
+            process_id (str): Process ID
+        """
+        archive_custom_process.sync_detailed(process_id=process_id, client=self._api_client)
 
     def find_by_name(self, name: str) -> Optional[ProcessDetail]:
         """
