@@ -14,6 +14,7 @@ class DatasetService(FileEnabledService):
     """
     Service for interacting with the Dataset endpoints
     """
+
     def list(self, project_id: str, max_items: int = 10000) -> List[Dataset]:
         """List datasets
 
@@ -135,6 +136,8 @@ class DatasetService(FileEnabledService):
             dataset_id (str): ID of the Dataset
             file_limit (int): Maximum number of files to get (default 100,000)
         """
+        if file_limit < 1:
+            raise ValueError("file_limit must be greater than 0")
         all_files = []
         file_offset = 0
         domain = None
@@ -189,11 +192,11 @@ class DatasetService(FileEnabledService):
         )
 
     def download_files(
-            self,
-            project_id: str,
-            dataset_id: str,
-            download_location: str,
-            files: Union[List[File], List[str]] = None
+        self,
+        project_id: str,
+        dataset_id: str,
+        download_location: str,
+        files: Union[List[File], List[str]] = None
     ) -> None:
         """
         Downloads files from a dataset
