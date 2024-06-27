@@ -71,7 +71,7 @@ def confirm_data_files(data_directory: str, files: List[str]):
 
     if not ask(
         "confirm",
-        f'Please confirm that you wish to upload {stats["numberOfFiles"]} files ({stats["sizeFriendly"]})'
+        f'Please confirm that you wish to upload {stats.number_of_files} files ({stats.size_friendly})'
     ):
         sys.exit(1)
 
