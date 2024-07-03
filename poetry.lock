@@ -426,14 +426,14 @@ files = [
 
 [[package]]
 name = "cirro-api-client"
-version = "0.0.11"
+version = "0.1.0"
 description = "A client library for accessing Cirro"
 category = "main"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "cirro_api_client-0.0.11-py3-none-any.whl", hash = "sha256:3ff2ad478f61c4444de2978ef2afa147c6e226f69616d36af29e36f09ae074ed"},
-    {file = "cirro_api_client-0.0.11.tar.gz", hash = "sha256:f3a5fbc7043dbfb03aa3752f0e1c50f416dc21a41b266088e8db9531bf83a80e"},
+    {file = "cirro_api_client-0.1.0-py3-none-any.whl", hash = "sha256:4fd2435f78c1f7ae59cd6e74b48c6459fc7156dc6419dc863c5d9a7e9ad83f48"},
+    {file = "cirro_api_client-0.1.0.tar.gz", hash = "sha256:0e308708d33e8c39979799379acf2e6f9b46505a42eaab54ece505691b05dbc6"},
 ]
 
 [package.dependencies]
@@ -1257,7 +1257,7 @@ xml = ["lxml (>=4.9.2)"]
 
 [[package]]
 name = "pdoc"
-version = "14.4.0"
+version = "14.5.0"
 description = "API Documentation for Python Projects"
 category = "dev"
 optional = false
@@ -2011,4 +2011,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7678cbf2f6653dc0232ddc3ebab95cfef228a22ee713c78dcb9a30207ebb0a3b"
+content-hash = "df4fe703e7572477cc05f1a72132ee08990b68ba39af44697a9b9f70cace7c9d"
