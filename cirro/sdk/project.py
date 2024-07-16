@@ -210,6 +210,15 @@ class DataPortalProject(DataPortalAsset):
                 else:
                     sleep(2)
 
+    def samples(self, max_items: int = 10000):
+        """
+        Retrieves a list of samples associated with a project along with their metadata
+
+        Args:
+            max_items (int): Maximum number of records to get (default 10,000)
+        """
+        return self._client.metadata.get_project_samples(self.id, max_items)
+
 
 class DataPortalProjects(DataPortalAssets[DataPortalProject]):
     """Collection of DataPortalProject objects"""
