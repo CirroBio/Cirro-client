@@ -414,13 +414,13 @@ files = [
 
 [[package]]
 name = "cirro-api-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "A client library for accessing Cirro"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "cirro_api_client-0.1.0-py3-none-any.whl", hash = "sha256:4fd2435f78c1f7ae59cd6e74b48c6459fc7156dc6419dc863c5d9a7e9ad83f48"},
-    {file = "cirro_api_client-0.1.0.tar.gz", hash = "sha256:0e308708d33e8c39979799379acf2e6f9b46505a42eaab54ece505691b05dbc6"},
+    {file = "cirro_api_client-0.1.1-py3-none-any.whl", hash = "sha256:82607d0f3fedafaeff766c079002498632875708e3db399eb621670419616b22"},
+    {file = "cirro_api_client-0.1.1.tar.gz", hash = "sha256:60a947729b5b6835d61640ef3d73d693eabc3152be9a811863e1af6f80105821"},
 ]
 
 [package.dependencies]
@@ -948,13 +948,13 @@ files = [
 
 [[package]]
 name = "msal"
-version = "1.29.0"
+version = "1.30.0"
 description = "The Microsoft Authentication Library (MSAL) for Python library enables your app to access the Microsoft Cloud by supporting authentication of users with Microsoft Azure Active Directory accounts (AAD) and Microsoft Accounts (MSA) using industry standard OAuth2 and OpenID Connect."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "msal-1.29.0-py3-none-any.whl", hash = "sha256:6b301e63f967481f0cc1a3a3bac0cf322b276855bc1b0955468d9deb3f33d511"},
-    {file = "msal-1.29.0.tar.gz", hash = "sha256:8f6725f099752553f9b2fe84125e2a5ebe47b49f92eacca33ebedd3a9ebaae25"},
+    {file = "msal-1.30.0-py3-none-any.whl", hash = "sha256:423872177410cb61683566dc3932db7a76f661a5d2f6f52f02a047f101e1c1de"},
+    {file = "msal-1.30.0.tar.gz", hash = "sha256:b4bf00850092e465157d814efa24a18f788284c9a479491024d62903085ea2fb"},
 ]
 
 [package.dependencies]
@@ -1942,4 +1942,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "8f52baae5454ee51ae2afce39b3dcd3fff37a8a8c302616d47e356643cd786fb"
+content-hash = "e287aa8b4cbf443ba7303f2db3add40cb3d30adcbf8813ef2fb53870b5c1f9f7"
