@@ -134,6 +134,13 @@ def run_download(input_params: DownloadArguments, interactive=False):
             raise InputError('There are no files in this dataset to download')
 
         files_to_download = ask_dataset_files(files)
+        project_id = input_params['project']
+        dataset_id = input_params['dataset']
+    else:
+
+        project_id = get_id_from_name(projects, input_params['project'])
+        datasets = cirro.datasets.list(input_params['project'])
+        dataset_id = get_id_from_name(datasets, input_params['dataset'])
 
     logger.info("Downloading files")
     if cirro.configuration.enable_additional_checksum:
@@ -142,8 +149,6 @@ def run_download(input_params: DownloadArguments, interactive=False):
         checksum_method = "MD5"
     logger.info(f"File content validated by {checksum_method}")
 
-    project_id = get_id_from_name(projects, input_params['project'])
-    dataset_id = input_params['dataset']
     cirro.datasets.download_files(project_id=project_id,
                                   dataset_id=dataset_id,
                                   download_location=input_params['data_directory'],
