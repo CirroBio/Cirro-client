@@ -32,18 +32,16 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     _check_configure()
     cirro = CirroApi()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
+    projects = cirro.projects.list()
 
-    # If the user provided the --interactive flag
+    if len(projects) == 0:
+        raise InputError(NO_PROJECTS)
+
     if interactive:
-
-        # Get the list of projects available to the user
-        projects = cirro.projects.list()
-
-        if len(projects) == 0:
-            raise InputError(NO_PROJECTS)
-
         # Prompt the user for the project
         input_params = gather_list_arguments(input_params, projects)
+    else:
+        input_params['project'] = get_id_from_name(projects, input_params['project'])
 
     # List the datasets available in that project
     datasets = cirro.datasets.list(input_params['project'])
