@@ -139,7 +139,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
 
     else:
         project_id = get_id_from_name(projects, input_params['project'])
-        datasets = cirro.datasets.list(input_params['project'])
+        datasets = cirro.datasets.list(project_id)
         dataset_id = get_id_from_name(datasets, input_params['dataset'])
 
     logger.info("Downloading files")
