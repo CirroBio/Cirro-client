@@ -68,6 +68,8 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         input_params, files = gather_upload_arguments(input_params, projects, processes)
         directory = input_params['data_directory']
     else:
+        input_params['project'] = get_id_from_name(projects, input_params['project'])
+        input_params['process'] = get_id_from_name(processes, input_params['process'])
         directory = input_params['data_directory']
         files = get_files_in_directory(directory)
 
@@ -134,8 +136,8 @@ def run_download(input_params: DownloadArguments, interactive=False):
         files_to_download = ask_dataset_files(files)
         project_id = input_params['project']
         dataset_id = input_params['dataset']
-    else:
 
+    else:
         project_id = get_id_from_name(projects, input_params['project'])
         datasets = cirro.datasets.list(input_params['project'])
         dataset_id = get_id_from_name(datasets, input_params['dataset'])
