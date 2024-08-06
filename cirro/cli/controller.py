@@ -32,18 +32,16 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     _check_configure()
     cirro = CirroApi()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
+    projects = cirro.projects.list()
 
-    # If the user provided the --interactive flag
+    if len(projects) == 0:
+        raise InputError(NO_PROJECTS)
+
     if interactive:
-
-        # Get the list of projects available to the user
-        projects = cirro.projects.list()
-
-        if len(projects) == 0:
-            raise InputError(NO_PROJECTS)
-
         # Prompt the user for the project
         input_params = gather_list_arguments(input_params, projects)
+    else:
+        input_params['project'] = get_id_from_name(projects, input_params['project'])
 
     # List the datasets available in that project
     datasets = cirro.datasets.list(input_params['project'])
@@ -70,6 +68,8 @@ def run_ingest(input_params: UploadArguments, interactive=False):
         input_params, files = gather_upload_arguments(input_params, projects, processes)
         directory = input_params['data_directory']
     else:
+        input_params['project'] = get_id_from_name(projects, input_params['project'])
+        input_params['process'] = get_id_from_name(processes, input_params['process'])
         directory = input_params['data_directory']
         files = get_files_in_directory(directory)
 
@@ -134,6 +134,13 @@ def run_download(input_params: DownloadArguments, interactive=False):
             raise InputError('There are no files in this dataset to download')
 
         files_to_download = ask_dataset_files(files)
+        project_id = input_params['project']
+        dataset_id = input_params['dataset']
+
+    else:
+        project_id = get_id_from_name(projects, input_params['project'])
+        datasets = cirro.datasets.list(project_id)
+        dataset_id = get_id_from_name(datasets, input_params['dataset'])
 
     logger.info("Downloading files")
     if cirro.configuration.enable_additional_checksum:
@@ -142,8 +149,6 @@ def run_download(input_params: DownloadArguments, interactive=False):
         checksum_method = "MD5"
     logger.info(f"File content validated by {checksum_method}")
 
-    project_id = get_id_from_name(projects, input_params['project'])
-    dataset_id = input_params['dataset']
     cirro.datasets.download_files(project_id=project_id,
                                   dataset_id=dataset_id,
                                   download_location=input_params['data_directory'],
