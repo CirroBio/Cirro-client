@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from cirro_api_client.v1.api.projects import get_projects, create_project, get_project, set_user_project_role, \
-    update_project, update_project_tags, get_project_users
+    update_project, update_project_tags, get_project_users, archive_project, unarchive_project
 from cirro_api_client.v1.models import ProjectRequest, SetUserProjectRoleRequest, Tag, ProjectRole, ProjectDetail, \
     CreateResponse, ProjectUser
 
@@ -150,3 +150,21 @@ class ProjectService(BaseService):
             supress_notification=supress_notification
         )
         set_user_project_role.sync_detailed(project_id=project_id, body=request_body, client=self._api_client)
+
+    def archive(self, project_id: str):
+        """
+        Sets the project status to archived (hidden from active projects)
+
+        Args:
+            project_id (str): Project ID
+        """
+        archive_project.sync_detailed(project_id=project_id, client=self._api_client)
+
+    def unarchive(self, project_id: str):
+        """
+        Sets the project status to active
+
+        Args:
+            project_id (str): Project ID
+        """
+        unarchive_project.sync_detailed(project_id=project_id, client=self._api_client)
