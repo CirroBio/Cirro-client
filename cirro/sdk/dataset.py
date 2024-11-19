@@ -218,7 +218,6 @@ class DataPortalDataset(DataPortalAsset):
             if compute_environment is None:
                 raise DataPortalInputError(f"Compute environment '{compute_environment}' not found")
 
-
         resp = self._client.execution.run_analysis(
             project_id=self.project_id,
             request=RunAnalysisRequest(
