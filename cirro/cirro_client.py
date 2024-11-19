@@ -4,7 +4,7 @@ from cirro.auth import get_auth_info_from_config
 from cirro.auth.base import AuthInfo
 from cirro.config import AppConfig
 from cirro.services import FileService, DatasetService, ProjectService, ProcessService, ExecutionService, \
-    MetricsService, MetadataService, BillingService, ReferenceService, UserService
+    MetricsService, MetadataService, BillingService, ReferenceService, UserService, ComputeEnvironmentService
 
 
 class CirroApi:
@@ -51,6 +51,7 @@ class CirroApi:
         self._project_service = ProjectService(self._api_client)
         self._process_service = ProcessService(self._api_client)
         self._execution_service = ExecutionService(self._api_client)
+        self._compute_environment_service = ComputeEnvironmentService(self._api_client)
         self._metrics_service = MetricsService(self._api_client)
         self._metadata_service = MetadataService(self._api_client)
         self._billing_service = BillingService(self._api_client)
@@ -84,6 +85,13 @@ class CirroApi:
         List, run, stop, and describe the analysis jobs (executing Processes to create new Datasets)
         """
         return self._execution_service
+
+    @property
+    def compute_environments(self) -> ComputeEnvironmentService:
+        """
+        List and update compute environments
+        """
+        return self._compute_environment_service
 
     @property
     def metrics(self) -> MetricsService:

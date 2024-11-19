@@ -173,7 +173,8 @@ class DataPortalDataset(DataPortalAsset):
             description: str = "",
             process: Union[DataPortalProcess, str] = None,
             params=None,
-            notifications_emails=None
+            notifications_emails=None,
+            compute_environment=None
     ) -> str:
         """
         Runs an analysis on a dataset, returns the ID of the newly created dataset.
@@ -187,6 +188,8 @@ class DataPortalDataset(DataPortalAsset):
             process (DataPortalProcess or str): Process to run
             params (dict): Analysis parameters
             notifications_emails (List[str]): Notification email address(es)
+            compute_environment (str): Name or ID of compute environment to use,
+             if blank it will run in AWS
 
         Returns:
             dataset_id (str): ID of newly created dataset
@@ -203,6 +206,19 @@ class DataPortalDataset(DataPortalAsset):
         # If the process is a string, try to parse it as a process name or ID
         process = parse_process_name_or_id(process, self._client)
 
+        if compute_environment:
+            compute_environments = self._client.compute_environments.list_environments_for_project(
+                project_id=self.project_id
+            )
+            compute_environment = next(
+                (env for env in compute_environments
+                 if env.name == compute_environment or env.id == compute_environment),
+                None
+            )
+            if compute_environment is None:
+                raise DataPortalInputError(f"Compute environment '{compute_environment}' not found")
+
+
         resp = self._client.execution.run_analysis(
             project_id=self.project_id,
             request=RunAnalysisRequest(
@@ -211,7 +227,8 @@ class DataPortalDataset(DataPortalAsset):
                 process_id=process.id,
                 source_dataset_ids=[self.id],
                 params=RunAnalysisRequestParams.from_dict(params),
-                notification_emails=notifications_emails
+                notification_emails=notifications_emails,
+                compute_environment_id=compute_environment.id if compute_environment else None
             )
         )
         return resp.id
