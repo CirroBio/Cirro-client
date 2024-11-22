@@ -1,11 +1,13 @@
-from cirro_api_client.v1.api.users import invite_user, list_users
-from cirro_api_client.v1.models import InviteUserRequest
+from typing import List
+
+from cirro_api_client.v1.api.users import invite_user, list_users, get_user
+from cirro_api_client.v1.models import InviteUserRequest, User, UserDetail
 
 from cirro.services.base import BaseService, get_all_records
 
 
 class UserService(BaseService):
-    def list(self, max_items: int = 10000):
+    def list(self, max_items: int = 10000) -> List[User]:
         """
         List users in the system
         """
@@ -17,6 +19,12 @@ class UserService(BaseService):
             ),
             max_items=max_items
         )
+
+    def get(self, username: str) -> UserDetail:
+        """
+        Get user details by username, including what projects they are assigned to
+        """
+        return get_user.sync(username=username, client=self._api_client)
 
     def invite_user(self, name: str, organization: str, email: str):
         """
