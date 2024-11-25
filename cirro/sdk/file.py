@@ -4,6 +4,10 @@ from typing import List
 
 import pandas as pd
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    import anndata
+
 from cirro.cirro_client import CirroApi
 from cirro.models.file import File
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
@@ -123,6 +127,19 @@ class DataPortalFile(DataPortalAsset):
         )
         handle.close()
         return df
+
+    def read_h5ad(self) -> 'anndata.AnnData':
+        """Read an AnnData object from a file."""
+        # Import the anndata library, and raise an error if it is not available
+        try:
+            import anndata as ad # noqa
+        except ImportError:
+            raise ImportError("The anndata library is required to read AnnData files. "
+                              "Please install it using 'pip install anndata'.")
+
+        # Download the file to a temporary file handle and parse the contents
+        with BytesIO(self._get()) as handle:
+            return ad.read_h5ad(handle)
 
     def readlines(self, encoding='utf-8', compression=None) -> List[str]:
         """Read the file contents as a list of lines."""
