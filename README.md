@@ -37,6 +37,7 @@ Usage: cirro download [OPTIONS]
 Options:
   --project TEXT         Name or ID of the project
   --dataset TEXT         ID of the dataset
+  --files TEXT           Comma-separated list of files to download (optional)
   --data-directory TEXT  Directory to store the files
   -i, --interactive      Gather arguments interactively
   --help                 Show this message and exit.

@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 
 import pandas as pd
@@ -141,6 +142,15 @@ def run_download(input_params: DownloadArguments, interactive=False):
         project_id = get_id_from_name(projects, input_params['project'])
         datasets = cirro.datasets.list(project_id)
         dataset_id = get_id_from_name(datasets, input_params['dataset'])
+
+        if (input_params['files']):
+            all_files = cirro.datasets.get_file_listing(project_id, dataset_id)
+            files_to_download =  []
+            for filepath in input_params['files'].split(','):
+                if not filepath.startswith('data/'): 
+                    filepath = os.path.join('data/', filepath)
+                file = [f for f in all_files if f.relative_path == filepath][0]
+                files_to_download.append(file)
 
     logger.info("Downloading files")
     if cirro.configuration.enable_additional_checksum:
