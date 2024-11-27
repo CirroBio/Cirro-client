@@ -39,7 +39,7 @@ def list_datasets(**kwargs):
 @click.option('--file',
               help='Name and relative path of the file (optional)',
               default=[],
-              multiple=True )
+              multiple=True)
 @click.option('--data-directory',
               help='Directory to store the files')
 @click.option('-i', '--interactive',
