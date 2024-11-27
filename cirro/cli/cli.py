@@ -36,6 +36,10 @@ def list_datasets(**kwargs):
               help='Name or ID of the project')
 @click.option('--dataset',
               help='ID of the dataset')
+@click.option('--file',
+              help='Name and relative path of the file (optional)',
+              default=[],
+              multiple=True)
 @click.option('--data-directory',
               help='Directory to store the files')
 @click.option('-i', '--interactive',

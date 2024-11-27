@@ -37,6 +37,7 @@ Usage: cirro download [OPTIONS]
 Options:
   --project TEXT         Name or ID of the project
   --dataset TEXT         ID of the dataset
+  --file... TEXT         Name and relative path of the file (optional)
   --data-directory TEXT  Directory to store the files
   -i, --interactive      Gather arguments interactively
   --help                 Show this message and exit.
@@ -91,7 +92,7 @@ $ cirro upload --interactive
 See the following set of Jupyter notebooks that contain examples on the following topics:
 
 | Jupyter Notebook                                                   | Topic                                |
-|--------------------------------------------------------------------|--------------------------------------|
+| ------------------------------------------------------------------ | ------------------------------------ |
 | [Introduction](samples/Getting_started.ipynb)                      | Installing and authenticating        |
 | [Uploading a dataset](samples/Uploading_a_dataset.ipynb)           | Uploading data                       |
 | [Downloading a dataset](samples/Downloading_a_dataset.ipynb)       | Downloading data                     |
@@ -103,7 +104,7 @@ See the following set of Jupyter notebooks that contain examples on the followin
 ## R Usage
 
 | Jupyter Notebook                                    | Topic               |
-|-----------------------------------------------------|---------------------|
+| --------------------------------------------------- | ------------------- |
 | [Downloading a dataset in R](samples/Using-R.ipynb) | Reading data with R |
 
 ## Advanced Usage
@@ -113,7 +114,7 @@ View the API documentation for this library [here](https://cirrobio.github.io/Ci
 ### Supported environment variables
 
 | Name           | Description                   | Default  |
-|----------------|-------------------------------|----------|
+| -------------- | ----------------------------- | -------- |
 | CIRRO_HOME     | Local configuration directory | ~/.cirro |
 | CIRRO_BASE_URL | Base URL of the data portal   |          |
 
