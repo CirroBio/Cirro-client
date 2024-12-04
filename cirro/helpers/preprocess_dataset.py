@@ -36,6 +36,10 @@ class PreprocessDataset:
             str(Path(config_directory, "params.json")),
         )
 
+        self.metadata = self._read_json(
+            str(Path(config_directory, "metadata.json")),
+        )
+
         # Log to STDOUT
         log_formatter = logging.Formatter(
             '%(asctime)s %(levelname)-8s [PreprocessDataset] %(message)s'
