@@ -132,7 +132,7 @@ class ProjectService(BaseService):
         """
         return get_project_users.sync(project_id=project_id, client=self._api_client)
 
-    def set_user_role(self, project_id: str, username: str, role: ProjectRole, supress_notification=False):
+    def set_user_role(self, project_id: str, username: str, role: ProjectRole, suppress_notification=False):
         """
         Sets a user's role within a project.
 
@@ -142,12 +142,12 @@ class ProjectService(BaseService):
             project_id (str): Project ID
             username (str): Username
             role (`cirro_api_client.v1.models.ProjectRole`): New role to apply
-            supress_notification (bool): Suppress email notification
+            suppress_notification (bool): Suppress email notification
         """
         request_body = SetUserProjectRoleRequest(
             username=username,
             role=role,
-            supress_notification=supress_notification
+            suppress_notification=suppress_notification
         )
         set_user_project_role.sync_detailed(project_id=project_id, body=request_body, client=self._api_client)
 
