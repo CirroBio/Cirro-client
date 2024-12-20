@@ -23,9 +23,9 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Cir
 
     # Try to get the process by ID
     try:
-        process = client.processes.get(process)
-        if isinstance(process, ProcessDetail):
-            return DataPortalProcess(process, client)
+        process_by_id = client.processes.get(process)
+        if isinstance(process_by_id, ProcessDetail):
+            return DataPortalProcess(process_by_id, client)
 
     # Catch the error if no process is found
     except UnexpectedStatus:
@@ -33,9 +33,9 @@ def parse_process_name_or_id(process: Union[DataPortalProcess, str], client: Cir
 
     # If that didn't work, try to parse it as a name
     try:
-        process = client.processes.find_by_name(process) or process
-        if isinstance(process, ProcessDetail):
-            return DataPortalProcess(process, client)
+        process_by_name = client.processes.find_by_name(process)
+        if isinstance(process_by_name, ProcessDetail):
+            return DataPortalProcess(process_by_name, client)
 
     # Catch the error if no process is found
     except UnexpectedStatus:
