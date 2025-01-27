@@ -7,14 +7,16 @@ from datetime import datetime, timedelta
 from io import StringIO
 from pathlib import Path
 from typing import Optional
+from typing import TYPE_CHECKING
 
 import boto3
 import jwt
 import requests
 from botocore.exceptions import ClientError
 from cirro_api_client.cirro_auth import AuthMethod, RefreshableTokenAuth
-from msal_extensions import FilePersistence
-from msal_extensions.persistence import BasePersistence
+
+if TYPE_CHECKING:
+    from msal_extensions.persistence import BasePersistence
 
 from cirro.auth.base import AuthInfo
 from cirro.auth.oauth_models import DeviceTokenResponse, OAuthTokenResponse
@@ -38,6 +40,7 @@ def _build_token_persistence(location: str, fallback_to_plaintext=False):
     except Exception:
         if not fallback_to_plaintext:
             raise
+        from msal_extensions import FilePersistence
         logger.debug("Encryption unavailable. Opting in to plain text.")
         return FilePersistence(location)
 
