@@ -7,13 +7,16 @@ from datetime import datetime, timedelta
 from io import StringIO
 from pathlib import Path
 from typing import Optional
+from typing import TYPE_CHECKING
 
 import boto3
 import jwt
 import requests
 from botocore.exceptions import ClientError
 from cirro_api_client.cirro_auth import AuthMethod, RefreshableTokenAuth
-from msal_extensions.persistence import BasePersistence
+
+if TYPE_CHECKING:
+    from msal_extensions.persistence import BasePersistence
 
 from cirro.auth.base import AuthInfo
 from cirro.auth.oauth_models import DeviceTokenResponse, OAuthTokenResponse
