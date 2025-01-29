@@ -144,6 +144,7 @@ class DeviceCodeAuth(AuthInfo):
         await_completion=True
     ):
         self.client_id = client_id
+        self.auth_endpoint = auth_endpoint
         self.region = region
         self._token_info: Optional[OAuthTokenResponse] = None
         self._persistence: Optional[BasePersistence] = None
@@ -191,7 +192,11 @@ class DeviceCodeAuth(AuthInfo):
 
     def await_completion(self):
         """Block until the user completes the authorization process."""
-        self._token_info = _await_completion(self._flow)
+        self._token_info = _await_completion(
+            client_id=self.client_id,
+            auth_endpoint=self.auth_endpoint,
+            flow=self._flow
+        )
         self._save_token_info()
         self._update_token_metadata()
         self._get_token_lock = threading.Lock()
