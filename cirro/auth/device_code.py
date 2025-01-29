@@ -45,6 +45,44 @@ def _build_token_persistence(location: str, fallback_to_plaintext=False):
         return FilePersistence(location)
 
 
+def _get_flow_message(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO] = None) -> DeviceTokenResponse:
+    params = {'client_id': client_id}
+    resp = requests.post(f'{auth_endpoint}/device-code', params=params)
+    resp.raise_for_status()
+    flow: DeviceTokenResponse = resp.json()
+    if auth_io is None:
+        print(flow['message'])
+    else:
+        auth_io.write(flow['message'])
+    return flow
+
+
+def _await_completion(client_id: str, auth_endpoint: str, flow = DeviceTokenResponse):
+    device_expiry = datetime.fromisoformat(flow['expiry'])
+
+    params = {
+        'client_id': client_id,
+        'device_code': flow['device_code'],
+        'grant_type': 'urn:ietf:params:oauth:grant-type:device_code'
+    }
+
+    auth_status = 'authorization_pending'
+    while auth_status == 'authorization_pending':
+        time.sleep(flow['interval'])
+        if device_expiry < datetime.now().astimezone():
+            raise RuntimeError('Authentication timed out')
+
+        resp = requests.post(f'{auth_endpoint}/token', params=params)
+        token_result: OAuthTokenResponse = resp.json()
+        auth_status = token_result.get('message')
+        logger.debug(auth_status)
+
+        if 'access_token' in token_result:
+            return token_result
+
+    raise RuntimeError(f'error authenticating {auth_status}')
+
+
 def _authenticate(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO] = None):
     params = {'client_id': client_id}
     resp = requests.post(f'{auth_endpoint}/device-code', params=params)
@@ -82,9 +120,11 @@ def _authenticate(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO
 class DeviceCodeAuth(AuthInfo):
     """
     Authenticates to Cirro by asking
-     the user to enter a verification code on the portal website
+    the user to enter a verification code on the portal website
 
     :param enable_cache: Optionally enable cache to avoid re-authentication
+    :param auth_io: Optionally provide an StringIO object for the authentication link
+    :param await_completion: If True, block until the user completes the authorization. If False, the await_completion() method must be run to complete the process.
 
     Implements the OAuth device code flow
     This is the preferred way to authenticate
@@ -95,12 +135,14 @@ class DeviceCodeAuth(AuthInfo):
         region: str,
         auth_endpoint: str,
         enable_cache=False,
-        auth_io: Optional[StringIO] = None
+        auth_io: Optional[StringIO] = None,
+        await_completion = True
     ):
         self.client_id = client_id
         self.region = region
         self._token_info: Optional[OAuthTokenResponse] = None
         self._persistence: Optional[BasePersistence] = None
+        self._flow: Optional[DeviceTokenResponse] = None
         self._token_path = Path(Constants.home, f'{client_id}.token.dat').expanduser()
 
         if enable_cache:
@@ -121,8 +163,19 @@ class DeviceCodeAuth(AuthInfo):
                 self._clear_token_info()
 
         if not self._token_info:
-            self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint, auth_io=auth_io)
+            if await_completion:
+                self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint, auth_io=auth_io)
+            else:
+                self._flow = _get_flow_message(client_id=client_id, auth_endpoint=auth_endpoint, auth_io=auth_io)
 
+        if self._token_info:
+            self._save_token_info()
+            self._update_token_metadata()
+            self._get_token_lock = threading.Lock()
+
+    def await_completion(self):
+        """Block until the user completes the authorization process."""
+        self._token_info = _await_completion(self._flow)
         self._save_token_info()
         self._update_token_metadata()
         self._get_token_lock = threading.Lock()
