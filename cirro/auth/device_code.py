@@ -190,6 +190,20 @@ class DeviceCodeAuth(AuthInfo):
         else:
             return self._flow["message"]
 
+    @property
+    def auth_message_md(self):
+        """
+        Markdown syntax for the authorization message, so that links are rendered appropriately.
+        """
+        return " ".join([
+            (
+                f"[{part}]({part})"
+                if part.startswith("http")
+                else part
+            )
+            for part in self.auth_message.split(" ")
+        ])
+
     def await_completion(self):
         """Block until the user completes the authorization process."""
         self._token_info = _await_completion(
