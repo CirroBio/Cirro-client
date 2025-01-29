@@ -123,7 +123,7 @@ class DeviceCodeAuth(AuthInfo):
     :param auth_endpoint: The endpoint for the OAuth authorization server
     :param enable_cache: Optionally enable cache to avoid re-authentication
     :param auth_io: Optionally provide a StringIO object for the authentication link
-    :param await_completion: 
+    :param await_completion:
         If True, block until the user completes the authorization.
             If auth_io is provided, the authorization message will be written to that buffer.
             If auth_io is not provided, the authorization message will be printed.
