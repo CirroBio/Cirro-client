@@ -80,37 +80,13 @@ def _await_completion(client_id: str, auth_endpoint: str, flow=DeviceTokenRespon
 
 
 def _authenticate(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO] = None):
-    params = {'client_id': client_id}
-    resp = requests.post(f'{auth_endpoint}/device-code', params=params)
-    resp.raise_for_status()
-    flow: DeviceTokenResponse = resp.json()
+
+    flow = _get_flow_message(client_id=client_id, auth_endpoint=auth_endpoint)
     if auth_io is None:
         print(flow['message'])
     else:
         auth_io.write(flow['message'])
-    device_expiry = datetime.fromisoformat(flow['expiry'])
-
-    params = {
-        'client_id': client_id,
-        'device_code': flow['device_code'],
-        'grant_type': 'urn:ietf:params:oauth:grant-type:device_code'
-    }
-
-    auth_status = 'authorization_pending'
-    while auth_status == 'authorization_pending':
-        time.sleep(flow['interval'])
-        if device_expiry < datetime.now().astimezone():
-            raise RuntimeError('Authentication timed out')
-
-        resp = requests.post(f'{auth_endpoint}/token', params=params)
-        token_result: OAuthTokenResponse = resp.json()
-        auth_status = token_result.get('message')
-        logger.debug(auth_status)
-
-        if 'access_token' in token_result:
-            return token_result
-
-    raise RuntimeError(f'error authenticating {auth_status}')
+    return _await_completion(client_id=client_id, auth_endpoint=auth_endpoint, flow=flow)
 
 
 class DeviceCodeAuth(AuthInfo):
