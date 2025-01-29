@@ -53,7 +53,7 @@ def _get_flow_message(client_id: str, auth_endpoint: str) -> DeviceTokenResponse
     return flow
 
 
-def _await_completion(client_id: str, auth_endpoint: str, flow = DeviceTokenResponse):
+def _await_completion(client_id: str, auth_endpoint: str, flow=DeviceTokenResponse):
     device_expiry = datetime.fromisoformat(flow['expiry'])
 
     params = {
@@ -141,7 +141,7 @@ class DeviceCodeAuth(AuthInfo):
         auth_endpoint: str,
         enable_cache=False,
         auth_io: Optional[StringIO] = None,
-        await_completion = True
+        await_completion=True
     ):
         self.client_id = client_id
         self.region = region
