@@ -45,6 +45,7 @@ def _build_token_persistence(location: str, fallback_to_plaintext=False):
         return FilePersistence(location)
 
 
+def _get_flow_message(client_id: str, auth_endpoint: str) -> DeviceTokenResponse:
     params = {'client_id': client_id}
     resp = requests.post(f'{auth_endpoint}/device-code', params=params)
     resp.raise_for_status()
@@ -117,9 +118,18 @@ class DeviceCodeAuth(AuthInfo):
     Authenticates to Cirro by asking
     the user to enter a verification code on the portal website
 
+    :param client_id: The client ID for the OAuth application
+    :param region: The AWS region where the Cognito user pool is located
+    :param auth_endpoint: The endpoint for the OAuth authorization server
     :param enable_cache: Optionally enable cache to avoid re-authentication
-    :param auth_io: Optionally provide an StringIO object for the authentication link
-    :param await_completion: If True, block until the user completes the authorization. If False, the await_completion() method must be run to complete the process.
+    :param auth_io: Optionally provide a StringIO object for the authentication link
+    :param await_completion: 
+        If True, block until the user completes the authorization.
+            If auth_io is provided, the authorization message will be written to that buffer.
+            If auth_io is not provided, the authorization message will be printed.
+        If False, the object will be instantiated without fully completing the authorization.
+            The authorization message can be accessed using the .auth_message property.
+            Then, the await_completion() method must be run to complete the process.
 
     Implements the OAuth device code flow
     This is the preferred way to authenticate
