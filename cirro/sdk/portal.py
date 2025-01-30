@@ -191,7 +191,7 @@ class DataPortalLogin:
         # Set up the client object
         cirro_client = CirroApi(
             auth_info=self.auth_info,
-            base_url="fredhutch.cirro.bio"
+            base_url=self.base_url
         )
 
         # Return the Data Portal object
