@@ -45,15 +45,15 @@ def _build_token_persistence(location: str, fallback_to_plaintext=False):
         return FilePersistence(location)
 
 
-def _get_flow_message(client_id: str, auth_endpoint: str) -> DeviceTokenResponse:
+def _initialize_auth_flow(client_id: str, auth_endpoint: str) -> DeviceTokenResponse:
     params = {'client_id': client_id}
     resp = requests.post(f'{auth_endpoint}/device-code', params=params)
     resp.raise_for_status()
     flow: DeviceTokenResponse = resp.json()
-    return flow
-
-
-def _await_completion(client_id: str, auth_endpoint: str, flow=DeviceTokenResponse):
+    if auth_io is None:
+        print(flow['message'])
+    else:
+        auth_io.write(flow['message'])
     device_expiry = datetime.fromisoformat(flow['expiry'])
 
     params = {
@@ -77,16 +77,6 @@ def _await_completion(client_id: str, auth_endpoint: str, flow=DeviceTokenRespon
             return token_result
 
     raise RuntimeError(f'error authenticating {auth_status}')
-
-
-def _authenticate(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO] = None):
-
-    flow = _get_flow_message(client_id=client_id, auth_endpoint=auth_endpoint)
-    if auth_io is None:
-        print(flow['message'])
-    else:
-        auth_io.write(flow['message'])
-    return _await_completion(client_id=client_id, auth_endpoint=auth_endpoint, flow=flow)
 
 
 class DeviceCodeAuth(AuthInfo):
@@ -145,48 +135,8 @@ class DeviceCodeAuth(AuthInfo):
                 self._clear_token_info()
 
         if not self._token_info:
-            if await_completion:
-                self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint, auth_io=auth_io)
-            else:
-                self._flow = _get_flow_message(client_id=client_id, auth_endpoint=auth_endpoint)
+            self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint, auth_io=auth_io)
 
-        if self._token_info:
-            self._save_token_info()
-            self._update_token_metadata()
-            self._get_token_lock = threading.Lock()
-
-    @property
-    def auth_message(self):
-        """
-        If the DeviceCodeAuth was instantiated with await_completion=False,
-        then the authorization message will be populated by this property.
-        """
-        if self._flow is None:
-            raise ValueError("The DeviceTokenResponse is not available")
-        else:
-            return self._flow["message"]
-
-    @property
-    def auth_message_md(self):
-        """
-        Markdown syntax for the authorization message, so that links are rendered appropriately.
-        """
-        return " ".join([
-            (
-                f"[{part}]({part})"
-                if part.startswith("http")
-                else part
-            )
-            for part in self.auth_message.split(" ")
-        ])
-
-    def await_completion(self):
-        """Block until the user completes the authorization process."""
-        self._token_info = _await_completion(
-            client_id=self.client_id,
-            auth_endpoint=self.auth_endpoint,
-            flow=self._flow
-        )
         self._save_token_info()
         self._update_token_metadata()
         self._get_token_lock = threading.Lock()
