@@ -31,6 +31,8 @@ class DataPortalLogin:
     def __init__(self, base_url: str = None, enable_cache=False):
         app_config = AppConfig(base_url=base_url)
 
+        self.base_url = base_url
+
         self.auth_info = DeviceCodeAuth(
             region=app_config.region,
             client_id=app_config.client_id,
