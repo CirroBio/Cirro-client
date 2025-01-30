@@ -45,7 +45,7 @@ def _build_token_persistence(location: str, fallback_to_plaintext=False):
         return FilePersistence(location)
 
 
-def _get_flow_message(client_id: str, auth_endpoint: str) -> DeviceTokenResponse:
+def _initialize_auth_flow(client_id: str, auth_endpoint: str) -> DeviceTokenResponse:
     params = {'client_id': client_id}
     resp = requests.post(f'{auth_endpoint}/device-code', params=params)
     resp.raise_for_status()
@@ -53,7 +53,7 @@ def _get_flow_message(client_id: str, auth_endpoint: str) -> DeviceTokenResponse
     return flow
 
 
-def _await_completion(client_id: str, auth_endpoint: str, flow=DeviceTokenResponse):
+def _await_completion(client_id: str, auth_endpoint: str, flow: DeviceTokenResponse):
     device_expiry = datetime.fromisoformat(flow['expiry'])
 
     params = {
@@ -80,8 +80,7 @@ def _await_completion(client_id: str, auth_endpoint: str, flow=DeviceTokenRespon
 
 
 def _authenticate(client_id: str, auth_endpoint: str, auth_io: Optional[StringIO] = None):
-
-    flow = _get_flow_message(client_id=client_id, auth_endpoint=auth_endpoint)
+    flow = _initialize_auth_flow(client_id=client_id, auth_endpoint=auth_endpoint)
     if auth_io is None:
         print(flow['message'])
     else:
@@ -148,7 +147,7 @@ class DeviceCodeAuth(AuthInfo):
             if await_completion:
                 self._token_info = _authenticate(client_id=client_id, auth_endpoint=auth_endpoint, auth_io=auth_io)
             else:
-                self._flow = _get_flow_message(client_id=client_id, auth_endpoint=auth_endpoint)
+                self._flow = _initialize_auth_flow(client_id=client_id, auth_endpoint=auth_endpoint)
 
         if self._token_info:
             self._save_token_info()
@@ -167,7 +166,7 @@ class DeviceCodeAuth(AuthInfo):
             return self._flow["message"]
 
     @property
-    def auth_message_md(self):
+    def auth_message_markdown(self):
         """
         Markdown syntax for the authorization message, so that links are rendered appropriately.
         """
