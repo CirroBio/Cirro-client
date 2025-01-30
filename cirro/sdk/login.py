@@ -1,6 +1,7 @@
-from cirro import DataPortal, CirroApi
 from cirro.auth import DeviceCodeAuth
+from cirro.cirro_client import CirroApi
 from cirro.config import AppConfig
+from cirro.sdk.portal import DataPortal
 
 
 class DataPortalLogin:
