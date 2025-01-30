@@ -8,6 +8,7 @@ from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisReques
 from cirro.cirro_client import CirroApi
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
+from cirro.sdk.exceptions import DataPortalAssetNotFound
 from cirro.sdk.file import DataPortalFile, DataPortalFiles
 from cirro.sdk.helpers import parse_process_name_or_id
 from cirro.sdk.process import DataPortalProcess
@@ -139,6 +140,34 @@ class DataPortalDataset(DataPortalAsset):
             f"{i.title()}: {self.__getattribute__(i)}"
             for i in ['name', 'id', 'description', 'status']
         ])
+
+    def get_file(self, relpath: str) -> DataPortalFile:
+        """
+        Get a file from the dataset using its relative path.
+
+        Args:
+            relpath (str): Relative path of file within the dataset
+
+        Returns:
+            `from cirro.sdk.file import DataPortalFile`
+        """
+
+        # Get the list of files in this dataset
+        files = self.list_files()
+
+        # Try getting the file using the relative path provided by the user
+        try:
+            return files.get_by_id(relpath)
+        except DataPortalAssetNotFound:
+            # Try getting the file with the 'data/' prefix prepended
+            try:
+                return files.get_by_id("data/" + relpath)
+            except DataPortalAssetNotFound:
+                # If not found, raise the exception using the string provided
+                # by the user, not the data/ prepended version (which may be
+                # confusing to the user)
+                msg = '\n'.join([f"No file found with path '{relpath}'."])
+                raise DataPortalAssetNotFound(msg)
 
     def list_files(self) -> DataPortalFiles:
         """
