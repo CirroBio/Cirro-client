@@ -60,6 +60,21 @@ class DataPortal:
 
         return self.list_projects().get_by_id(_id)
 
+    def get_project(self, project: str = None) -> DataPortalProject:
+        """
+        Return a project identified by ID or name.
+
+        Args:
+            project (str): ID or name of project
+
+        Returns:
+            `from cirro.sdk.project import DataPortalProject`
+        """
+        try:
+            return self.get_project_by_id(project)
+        except DataPortalAssetNotFound:
+            return self.get_project_by_name(project)
+
     def get_dataset(self, project: str = None, dataset: str = None) -> DataPortalDataset:
         """
         Return a dataset identified by ID or name.
