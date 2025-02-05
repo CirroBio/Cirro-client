@@ -29,5 +29,5 @@ class AccessTokenAuth(AuthInfo):
     def _update_token_metadata(self):
         decoded_access_token = jwt.decode(self._token,
                                           options={"verify_signature": False})
-        self.access_token_expiry = datetime.fromtimestamp(decoded_access_token['exp'])
+        self._access_token_expiry = datetime.fromtimestamp(decoded_access_token['exp'])
         self._username = decoded_access_token['username']
