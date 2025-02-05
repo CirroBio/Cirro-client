@@ -1,11 +1,13 @@
 from io import StringIO
 from typing import Optional
 
+from cirro.auth.access_token import AccessTokenAuth
 from cirro.auth.device_code import DeviceCodeAuth
 
 __all__ = [
     'get_auth_info_from_config',
-    "DeviceCodeAuth"
+    "DeviceCodeAuth",
+    "AccessTokenAuth",
 ]
 
 from cirro.config import AppConfig
