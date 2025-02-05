@@ -31,18 +31,21 @@ class HttpxToRequestsAuth(AuthBase):
 def _send_single_request(self: Client, request: Request) -> Response:
     auth_patched = HttpxToRequestsAuth(self.auth)
 
+    # Send the request using requests
     resp = requests.request(
         method=request.method,
         url=request.url,
         headers=request.headers,
         data=request.content,
         auth=auth_patched,
-
     )
 
+    # Remove content-encoding header to prevent httpx from trying to decode the content
+    # since requests already decodes the content
     if "content-encoding" in resp.headers:
         del resp.headers["content-encoding"]
 
+    # Transform the requests response to the httpx response
     response = Response(
         status_code=resp.status_code,
         headers=Headers(resp.headers),
@@ -50,7 +53,7 @@ def _send_single_request(self: Client, request: Request) -> Response:
         request=httpx.Request(method=resp.request.method, url=str(resp.url)),
     )
 
-    logger.info(
+    logger.debug(
         'HTTP Request: %s %s "%s %d %s"',
         request.method,
         request.url,
@@ -63,4 +66,7 @@ def _send_single_request(self: Client, request: Request) -> Response:
 
 
 def pyodide_patch_httpx():
+    """
+    Patch the httpx.Client to use requests to send requests
+    """
     Client._send_single_request = _send_single_request

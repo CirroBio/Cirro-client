@@ -1,28 +1,23 @@
-from cirro.sdk.file import DataPortalFile
 import requests
 
+from cirro.models.file import FileAccessContext
+from cirro.services import FileService
 
-def _get(self: DataPortalFile):
+
+def _get_file_from_path(self: FileService, access_context: FileAccessContext, file_path: str):
     # Load lazily -- must be installed with the pyodide extras
     try:
         from requests_aws4auth import AWS4Auth # noqa
     except ModuleNotFoundError:
         raise ModuleNotFoundError("Could not load requests_aws4auth -- make sure to install cirro[pyodide]")
 
-    # Get the access context and credentials
-    access_context = self._file.access_context
-    creds = (
-        self
-        ._client
-        ._file_service
-        .get_access_credentials(access_context)
-    )
+    creds = self.get_access_credentials(access_context)
 
     # Construct the URL endpoint to the file
     endpoint = "/".join([
         f"https://{access_context.bucket}.s3.{creds.region}.amazonaws.com",
         access_context.prefix,
-        self._file.relative_path
+        file_path
     ])
 
     # Set up the authorization
@@ -44,5 +39,9 @@ def _get(self: DataPortalFile):
     return response.content
 
 
-def pyodide_patch_requests():
-    DataPortalFile._get = _get
+def pyodide_patch_file():
+    """
+    Patch the FileService to use requests to get files from S3,
+     rather than S3Client (boto3)
+    """
+    FileService.get_file_from_path = _get_file_from_path
