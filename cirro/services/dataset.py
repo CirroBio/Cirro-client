@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
     update_dataset, delete_dataset, get_dataset_manifest
+from cirro_api_client.v1.api.sharing import get_shared_datasets
 from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest, Dataset, \
     DatasetDetail, CreateResponse, UploadDatasetCreateResponse
 
@@ -27,6 +28,26 @@ class DatasetService(FileEnabledService):
         return get_all_records(
             records_getter=lambda page_args: get_datasets.sync(
                 project_id=project_id,
+                client=self._api_client,
+                next_token=page_args.next_token,
+                limit=page_args.limit
+            ),
+            max_items=max_items
+        )
+
+    def list_shared(self, project_id: str, share_id: str, max_items: int = 10000) -> List[Dataset]:
+        """
+        Retrieves a list of shared datasets for a given project and share
+
+        Args:
+            project_id (str): ID of the Project
+            share_id (str): ID of the Share
+            max_items (int): Maximum number of records to get (default 10,000)
+        """
+        return get_all_records(
+            records_getter=lambda page_args: get_shared_datasets.sync(
+                project_id=project_id,
+                share_id=share_id,
                 client=self._api_client,
                 next_token=page_args.next_token,
                 limit=page_args.limit

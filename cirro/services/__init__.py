@@ -8,6 +8,7 @@ from .metrics import MetricsService
 from .process import ProcessService
 from .projects import ProjectService
 from .references import ReferenceService
+from .share import ShareService
 from .user import UserService
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     'ProcessService',
     'ProjectService',
     'ReferenceService',
+    'ShareService',
     'UserService'
 ]
