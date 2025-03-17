@@ -12,8 +12,8 @@ from cirro.models.file import File
 from cirro.utils import format_date
 
 
-def _format_share(dataset: DatasetWithShare | Dataset) -> str:
-    return f'({dataset.share.name})' if isinstance(dataset, DatasetWithShare) else ''
+def _format_share(dataset: DatasetWithShare) -> str:
+    return f'({dataset.share.name})' if dataset.share else ''
 
 
 def ask_dataset(datasets: List[DatasetWithShare], input_value: str) -> str:

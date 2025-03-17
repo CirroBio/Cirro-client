@@ -3,7 +3,7 @@ import os
 import sys
 
 import pandas as pd
-from cirro_api_client.v1.models import UploadDatasetRequest, Status, Executor, ShareType
+from cirro_api_client.v1.models import UploadDatasetRequest, Status, Executor
 
 from cirro.cirro_client import CirroApi
 from cirro.cli.interactive.auth_args import gather_auth_config
@@ -15,7 +15,7 @@ from cirro.cli.interactive.utils import get_id_from_name, get_item_from_name_or_
 from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
 from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.file_utils import get_files_in_directory
-from cirro.models.dataset import DatasetWithShare
+from cirro.services.service_helpers import list_all_datasets
 
 NO_PROJECTS = "No projects available"
 # Log to STDOUT
@@ -126,13 +126,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
         input_params = gather_download_arguments(input_params, projects)
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
-        datasets = cirro.datasets.list(input_params['project'])
-        # Pull datasets from subscribed shares
-        subscribed_shares = cirro.shares.list(project_id=input_params['project'], share_type=ShareType.SUBSCRIBER)
-        for share in subscribed_shares:
-            datasets_in_share = cirro.datasets.list_shared(input_params['project'], share.id)
-            datasets_in_share = [DatasetWithShare.from_dataset(d, share=share) for d in datasets_in_share]
-            datasets += datasets_in_share
+        datasets = list_all_datasets(project_id=input_params['project'], client=cirro)
         # Filter out datasets that are not complete
         datasets = [d for d in datasets if d.status == Status.COMPLETED]
         input_params = gather_download_arguments_dataset(input_params, datasets)
