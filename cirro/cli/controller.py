@@ -127,11 +127,12 @@ def run_download(input_params: DownloadArguments, interactive=False):
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
         datasets = cirro.datasets.list(input_params['project'])
+        # Pull datasets from subscribed shares
         subscribed_shares = cirro.shares.list(project_id=input_params['project'], share_type=ShareType.SUBSCRIBER)
         for share in subscribed_shares:
-            shared_datasets = cirro.datasets.list_shared(input_params['project'], share.id)
-            shared_datasets = [DatasetWithShare.from_dataset(d, share=share) for d in shared_datasets]
-            datasets += shared_datasets
+            datasets_in_share = cirro.datasets.list_shared(input_params['project'], share.id)
+            datasets_in_share = [DatasetWithShare.from_dataset(d, share=share) for d in datasets_in_share]
+            datasets += datasets_in_share
         # Filter out datasets that are not complete
         datasets = [d for d in datasets if d.status == Status.COMPLETED]
         input_params = gather_download_arguments_dataset(input_params, datasets)
