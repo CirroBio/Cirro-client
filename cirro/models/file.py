@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import PurePath, Path
 from typing import Dict, Optional, TypeVar, NamedTuple
 
-from cirro_api_client.v1.models import ProjectFileAccessRequest, ProjectAccessType, FileEntry
+from cirro_api_client.v1.models import ProjectFileAccessRequest, ProjectAccessType, FileEntry, DatasetDetail
 
 from cirro.models.s3_path import S3Path
 
@@ -37,6 +37,19 @@ class FileAccessContext:
         return cls(
             file_access_request=ProjectFileAccessRequest(
                 access_type=ProjectAccessType.PROJECT_DOWNLOAD,
+                token_lifetime_hours=token_lifetime_override
+            ),
+            base_url=base_url,
+            project_id=project_id
+        )
+
+    @classmethod
+    def download_shared_dataset(cls, project_id: str, dataset_id: str,
+                                base_url: str, token_lifetime_override: int = None):
+        return cls(
+            file_access_request=ProjectFileAccessRequest(
+                access_type=ProjectAccessType.SHARED_DATASET_DOWNLOAD,
+                dataset_id=dataset_id,
                 token_lifetime_hours=token_lifetime_override
             ),
             base_url=base_url,
@@ -86,6 +99,9 @@ class FileAccessContext:
         """ S3 Prefix """
         return self._s3_path.key
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.file_access_request.access_type}@base_url={self.base_url})'
+
 
 @dataclass(frozen=True)
 class File:
@@ -95,7 +111,7 @@ class File:
     metadata: Optional[Dict] = None
 
     @classmethod
-    def from_file_entry(cls, file: FileEntry, project_id: str, domain: str = None):
+    def from_file_entry(cls, file: FileEntry, project_id: str, dataset: DatasetDetail = None, domain: str = None):
         # Path is absolute rather than relative
         if 's3://' in file.path:
             parts = S3Path(file.path)
@@ -104,11 +120,23 @@ class File:
         else:
             path = file.path
 
+        if dataset and dataset.share:
+            access_context = FileAccessContext.download_shared_dataset(
+                project_id=project_id,
+                dataset_id=dataset.id,
+                base_url=domain
+            )
+        else:
+            access_context = FileAccessContext.download(
+                project_id=project_id,
+                base_url=domain
+            )
+
         return cls(
             relative_path=path,
             metadata=file.metadata.additional_properties,
             size=file.size,
-            access_context=FileAccessContext.download(project_id=project_id, base_url=domain)
+            access_context=access_context
         )
 
     @property

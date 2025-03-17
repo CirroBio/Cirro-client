@@ -169,6 +169,7 @@ class DatasetService(FileEnabledService):
             dataset_id (str): ID of the Dataset
             file_limit (int): Maximum number of files to get (default 100,000)
         """
+        dataset = self.get(project_id, dataset_id)
         if file_limit < 1:
             raise ValueError("file_limit must be greater than 0")
         all_files = []
@@ -193,6 +194,7 @@ class DatasetService(FileEnabledService):
             File.from_file_entry(
                 f,
                 project_id=project_id,
+                dataset=dataset,
                 domain=domain
             )
             for f in all_files
@@ -259,7 +261,12 @@ class DatasetService(FileEnabledService):
             access_context = first_file.access_context
         else:
             dataset = self.get(project_id, dataset_id)
-            access_context = FileAccessContext.download(project_id=project_id,
-                                                        base_url=dataset.s3)
+            if dataset.share:
+                access_context = FileAccessContext.download_shared_dataset(project_id=project_id,
+                                                                           dataset_id=dataset_id,
+                                                                           base_url=dataset.s3)
+            else:
+                access_context = FileAccessContext.download(project_id=project_id,
+                                                            base_url=dataset.s3)
 
         self._file_service.download_files(access_context, download_location, files)
