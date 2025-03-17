@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import PurePath, Path
 from typing import Dict, Optional, TypeVar, NamedTuple
 
-from cirro_api_client.v1.models import FileAccessRequest, AccessType, FileEntry
+from cirro_api_client.v1.models import ProjectFileAccessRequest, ProjectAccessType, FileEntry
 
 from cirro.models.s3_path import S3Path
 
@@ -24,7 +24,7 @@ class FileAccessContext:
     Prefer to use the class methods to instantiate.
     """
     def __init__(self,
-                 file_access_request: FileAccessRequest,
+                 file_access_request: ProjectFileAccessRequest,
                  project_id: str,
                  base_url: str):
         self.file_access_request = file_access_request
@@ -35,8 +35,8 @@ class FileAccessContext:
     @classmethod
     def download(cls, project_id: str, base_url: str, token_lifetime_override: int = None):
         return cls(
-            file_access_request=FileAccessRequest(
-                access_type=AccessType.PROJECT_DOWNLOAD,
+            file_access_request=ProjectFileAccessRequest(
+                access_type=ProjectAccessType.PROJECT_DOWNLOAD,
                 token_lifetime_hours=token_lifetime_override
             ),
             base_url=base_url,
@@ -46,8 +46,8 @@ class FileAccessContext:
     @classmethod
     def upload_dataset(cls, project_id: str, dataset_id: str, base_url: str, token_lifetime_override: int = None):
         return cls(
-            file_access_request=FileAccessRequest(
-                access_type=AccessType.DATASET_UPLOAD,
+            file_access_request=ProjectFileAccessRequest(
+                access_type=ProjectAccessType.DATASET_UPLOAD,
                 dataset_id=dataset_id,
                 token_lifetime_hours=token_lifetime_override
             ),
@@ -58,8 +58,8 @@ class FileAccessContext:
     @classmethod
     def upload_reference(cls, project_id: str, base_url: str):
         return cls(
-            file_access_request=FileAccessRequest(
-                access_type=AccessType.REFERENCE_UPLOAD
+            file_access_request=ProjectFileAccessRequest(
+                access_type=ProjectAccessType.REFERENCE_UPLOAD
             ),
             base_url=base_url,
             project_id=project_id
@@ -68,8 +68,8 @@ class FileAccessContext:
     @classmethod
     def upload_sample_sheet(cls, project_id: str, dataset_id: str, base_url: str):
         return cls(
-            file_access_request=FileAccessRequest(
-                access_type=AccessType.SAMPLESHEET_UPLOAD,
+            file_access_request=ProjectFileAccessRequest(
+                access_type=ProjectAccessType.SAMPLESHEET_UPLOAD,
                 dataset_id=dataset_id
             ),
             base_url=base_url,

@@ -43,6 +43,18 @@ class DatasetService(FileEnabledService):
             project_id (str): ID of the Project
             share_id (str): ID of the Share
             max_items (int): Maximum number of records to get (default 10,000)
+
+        Example:
+        ```python
+        from cirro_api_client.v1.models import ShareType
+        from cirro.cirro_client import CirroApi
+
+        cirro = CirroApi()
+
+        # List shares that are subscribed to
+        subscribed_shares = cirro.shares.list(project_id="project-id", share_type=ShareType.SUBSCRIBER)
+        cirro.datasets.list_shared("project-id", subscribed_shares[0].id)
+        ```
         """
         return get_all_records(
             records_getter=lambda page_args: get_shared_datasets.sync(

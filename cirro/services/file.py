@@ -5,7 +5,7 @@ from typing import List, Dict
 
 from cirro_api_client import CirroApiClient
 from cirro_api_client.v1.api.file import generate_project_file_access_token
-from cirro_api_client.v1.models import AWSCredentials, AccessType
+from cirro_api_client.v1.models import AWSCredentials, ProjectAccessType
 
 from cirro.clients.s3 import S3Client
 from cirro.file_utils import upload_directory, download_directory
@@ -39,7 +39,7 @@ class FileService(BaseService):
         """
         access_request = access_context.file_access_request
 
-        if access_request.access_type == AccessType.PROJECT_DOWNLOAD:
+        if access_request.access_type == ProjectAccessType.PROJECT_DOWNLOAD:
             return self._get_project_read_credentials(access_context)
 
         else:
