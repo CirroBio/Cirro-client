@@ -7,11 +7,16 @@ from cirro_api_client.v1.models import Dataset, Project
 from cirro.cli.interactive.common_args import ask_project
 from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError
 from cirro.cli.models import DownloadArguments
+from cirro.models.dataset import DatasetWithShare
 from cirro.models.file import File
 from cirro.utils import format_date
 
 
-def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
+def _format_share(dataset: DatasetWithShare) -> str:
+    return f'({dataset.share.name})' if dataset.share else ''
+
+
+def ask_dataset(datasets: List[DatasetWithShare], input_value: str) -> str:
     if len(datasets) == 0:
         raise InputError("No datasets available")
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
@@ -21,7 +26,7 @@ def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
         'message': 'What dataset would you like to download? (Press Tab to see all options)',
         'choices': [f'{dataset.name} - {dataset.id}' for dataset in sorted_datasets],
         'meta_information': {
-            f'{dataset.name} - {dataset.id}': f'{format_date(dataset.created_at)}'
+            f'{dataset.name} - {dataset.id}': f'{format_date(dataset.created_at)} {_format_share(dataset)}'
             for dataset in datasets
         },
         'ignore_case': True

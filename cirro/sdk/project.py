@@ -13,6 +13,7 @@ from cirro.sdk.helpers import parse_process_name_or_id
 from cirro.sdk.process import DataPortalProcess
 from cirro.sdk.reference import DataPortalReference, DataPortalReferences
 from cirro.sdk.reference_type import DataPortalReferenceType, DataPortalReferenceTypes
+from cirro.services.service_helpers import list_all_datasets
 
 
 class DataPortalProject(DataPortalAsset):
@@ -66,7 +67,8 @@ class DataPortalProject(DataPortalAsset):
 
     @cache
     def _get_datasets(self) -> List[Dataset]:
-        return self._client.datasets.list(self.id)
+        return list_all_datasets(project_id=self.id,
+                                 client=self._client)
 
     def list_datasets(self, force_refresh=False) -> DataPortalDatasets:
         """List all the datasets available in the project."""

@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
     update_dataset, delete_dataset, get_dataset_manifest
+from cirro_api_client.v1.api.sharing import get_shared_datasets
 from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest, Dataset, \
     DatasetDetail, CreateResponse, UploadDatasetCreateResponse
 
@@ -27,6 +28,38 @@ class DatasetService(FileEnabledService):
         return get_all_records(
             records_getter=lambda page_args: get_datasets.sync(
                 project_id=project_id,
+                client=self._api_client,
+                next_token=page_args.next_token,
+                limit=page_args.limit
+            ),
+            max_items=max_items
+        )
+
+    def list_shared(self, project_id: str, share_id: str, max_items: int = 10000) -> List[Dataset]:
+        """
+        Retrieves a list of shared datasets for a given project and share
+
+        Args:
+            project_id (str): ID of the Project
+            share_id (str): ID of the Share
+            max_items (int): Maximum number of records to get (default 10,000)
+
+        Example:
+        ```python
+        from cirro_api_client.v1.models import ShareType
+        from cirro.cirro_client import CirroApi
+
+        cirro = CirroApi()
+
+        # List shares that are subscribed to
+        subscribed_shares = cirro.shares.list(project_id="project-id", share_type=ShareType.SUBSCRIBER)
+        cirro.datasets.list_shared("project-id", subscribed_shares[0].id)
+        ```
+        """
+        return get_all_records(
+            records_getter=lambda page_args: get_shared_datasets.sync(
+                project_id=project_id,
+                share_id=share_id,
                 client=self._api_client,
                 next_token=page_args.next_token,
                 limit=page_args.limit
@@ -136,6 +169,7 @@ class DatasetService(FileEnabledService):
             dataset_id (str): ID of the Dataset
             file_limit (int): Maximum number of files to get (default 100,000)
         """
+        dataset = self.get(project_id, dataset_id)
         if file_limit < 1:
             raise ValueError("file_limit must be greater than 0")
         all_files = []
@@ -160,6 +194,7 @@ class DatasetService(FileEnabledService):
             File.from_file_entry(
                 f,
                 project_id=project_id,
+                dataset=dataset,
                 domain=domain
             )
             for f in all_files
@@ -226,7 +261,12 @@ class DatasetService(FileEnabledService):
             access_context = first_file.access_context
         else:
             dataset = self.get(project_id, dataset_id)
-            access_context = FileAccessContext.download(project_id=project_id,
-                                                        base_url=dataset.s3)
+            if dataset.share:
+                access_context = FileAccessContext.download_shared_dataset(project_id=project_id,
+                                                                           dataset_id=dataset_id,
+                                                                           base_url=dataset.s3)
+            else:
+                access_context = FileAccessContext.download(project_id=project_id,
+                                                            base_url=dataset.s3)
 
         self._file_service.download_files(access_context, download_location, files)

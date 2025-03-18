@@ -15,6 +15,7 @@ from cirro.cli.interactive.utils import get_id_from_name, get_item_from_name_or_
 from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
 from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.file_utils import get_files_in_directory
+from cirro.services.service_helpers import list_all_datasets
 
 NO_PROJECTS = "No projects available"
 # Log to STDOUT
@@ -125,7 +126,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
         input_params = gather_download_arguments(input_params, projects)
 
         input_params['project'] = get_id_from_name(projects, input_params['project'])
-        datasets = cirro.datasets.list(input_params['project'])
+        datasets = list_all_datasets(project_id=input_params['project'], client=cirro)
         # Filter out datasets that are not complete
         datasets = [d for d in datasets if d.status == Status.COMPLETED]
         input_params = gather_download_arguments_dataset(input_params, datasets)
@@ -193,5 +194,5 @@ def _check_configure():
 
 
 def handle_error(e: Exception):
-    logger.error(e)
+    logger.error(f"{e.__class__.__name__}: {e}")
     sys.exit(1)
