@@ -1,14 +1,15 @@
 import datetime
 from typing import Union, List, Optional
 
-from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, FileEntry, \
-    ProcessDetail, Status, DatasetDetailParams, RunAnalysisRequestParams, DatasetDetailInfo, \
-    Tag
+from cirro_api_client.v1.models import Dataset, DatasetDetail, RunAnalysisRequest, ProcessDetail, Status, \
+    DatasetDetailParams, RunAnalysisRequestParams, DatasetDetailInfo, \
+    Tag, ArtifactType
 
 from cirro.cirro_client import CirroApi
+from cirro.models.assets import DatasetAssets
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
-from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.exceptions import DataPortalAssetNotFound
+from cirro.sdk.exceptions import DataPortalInputError
 from cirro.sdk.file import DataPortalFile, DataPortalFiles
 from cirro.sdk.helpers import parse_process_name_or_id
 from cirro.sdk.process import DataPortalProcess
@@ -39,7 +40,7 @@ class DataPortalDataset(DataPortalAsset):
         """
         assert dataset.project_id is not None, "Must provide dataset with project_id attribute"
         self._data = dataset
-        self._files: Optional[List[FileEntry]] = None
+        self._assets: Optional[DatasetAssets] = None
         self._client = client
 
     @property
@@ -135,6 +136,14 @@ class DataPortalDataset(DataPortalAsset):
             self._data = self._client.datasets.get(project_id=self.project_id, dataset_id=self.id)
         return self._data
 
+    def _get_assets(self):
+        if not self._assets:
+            self._assets = self._client.datasets.get_assets_listing(
+                project_id=self.project_id,
+                dataset_id=self.id
+            )
+        return self._assets
+
     def __str__(self):
         return '\n'.join([
             f"{i.title()}: {self.__getattribute__(i)}"
@@ -173,17 +182,39 @@ class DataPortalDataset(DataPortalAsset):
         """
         Return the list of files which make up the dataset.
         """
-        if not self._files:
-            self._files = DataPortalFiles(
-                [
-                    DataPortalFile(file=file, client=self._client)
-                    for file in self._client.datasets.get_file_listing(
-                        project_id=self.project_id,
-                        dataset_id=self.id
-                    )
-                ]
-            )
-        return self._files
+        files = self._get_assets().files
+        return DataPortalFiles(
+            [
+                DataPortalFile(file=file, client=self._client)
+                for file in files
+            ]
+        )
+
+    def get_artifact(self, artifact_type: ArtifactType) -> DataPortalFile:
+        """
+        Get the artifact of a particular type from the dataset
+        """
+        artifacts = self._get_assets().artifacts
+        artifact = next((a for a in artifacts if a.artifact_type == artifact_type), None)
+        if artifact is None:
+            raise DataPortalAssetNotFound(f"No artifact found with type '{artifact_type}'")
+        return DataPortalFile(file=artifact.file, client=self._client)
+
+    def list_artifacts(self) -> List[DataPortalFile]:
+        """
+        Return the list of artifacts associated with the dataset
+
+        An artifact may be something generated as part of the analysis or other process.
+        See `cirro_api_client.v1.models.ArtifactType` for the list of possible artifact types.
+
+        """
+        artifacts = self._get_assets().artifacts
+        return DataPortalFiles(
+            [
+                DataPortalFile(file=artifact.file, client=self._client)
+                for artifact in artifacts
+            ]
+        )
 
     def download_files(self, download_location: str = None) -> None:
         """

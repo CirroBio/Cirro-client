@@ -4,8 +4,9 @@ from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_p
     update_dataset, delete_dataset, get_dataset_manifest
 from cirro_api_client.v1.api.sharing import get_shared_datasets
 from cirro_api_client.v1.models import ImportDataRequest, UploadDatasetRequest, UpdateDatasetRequest, Dataset, \
-    DatasetDetail, CreateResponse, UploadDatasetCreateResponse
+    DatasetDetail, CreateResponse, UploadDatasetCreateResponse, FileEntry
 
+from cirro.models.assets import DatasetAssets, Artifact
 from cirro.models.file import FileAccessContext, File, PathLike
 from cirro.services.base import get_all_records
 from cirro.services.file import FileEnabledService
@@ -160,7 +161,7 @@ class DatasetService(FileEnabledService):
         """
         delete_dataset.sync_detailed(project_id=project_id, dataset_id=dataset_id, client=self._api_client)
 
-    def get_file_listing(self, project_id: str, dataset_id: str, file_limit: int = 100000) -> List[File]:
+    def get_assets_listing(self, project_id: str, dataset_id: str, file_limit: int = 100000) -> DatasetAssets:
         """
         Gets a listing of files, charts, and other assets available for the dataset
 
@@ -175,6 +176,7 @@ class DatasetService(FileEnabledService):
         all_files = []
         file_offset = 0
         domain = None
+        artifacts = None
 
         while len(all_files) < file_limit:
             manifest = get_dataset_manifest.sync(
@@ -185,6 +187,9 @@ class DatasetService(FileEnabledService):
             )
             all_files.extend(manifest.files)
             file_offset += len(manifest.files)
+
+            if not artifacts:
+                artifacts = manifest.artifacts
 
             domain = manifest.domain
             if len(all_files) >= manifest.total_files or len(manifest.files) == 0:
@@ -199,7 +204,19 @@ class DatasetService(FileEnabledService):
             )
             for f in all_files
         ]
-        return files
+        artifacts = [
+            Artifact(
+                artifact_type=a.type,
+                file=File.from_file_entry(
+                    FileEntry(a.path),
+                    project_id=project_id,
+                    dataset=dataset,
+                    domain=domain
+                )
+            )
+            for a in artifacts
+        ]
+        return DatasetAssets(files=files, artifacts=artifacts)
 
     def upload_files(self,
                      project_id: str,
@@ -250,7 +267,7 @@ class DatasetService(FileEnabledService):
             files (typing.List[str]): Optional list of files to download
         """
         if files is None:
-            files = self.get_file_listing(project_id, dataset_id)
+            files = self.get_assets_listing(project_id, dataset_id).files
 
         if len(files) == 0:
             return
