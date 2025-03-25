@@ -456,13 +456,13 @@ files = [
 
 [[package]]
 name = "cirro-api-client"
-version = "0.3.1"
+version = "0.3.2"
 description = "A client library for accessing Cirro"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "cirro_api_client-0.3.1-py3-none-any.whl", hash = "sha256:0ad261c1b32cacdfef85bddd0a0358cd9f70ae292a137fc5458226850ae0e9bf"},
-    {file = "cirro_api_client-0.3.1.tar.gz", hash = "sha256:bb2f10263f12dc72f816f824aa6be520a72ac4b6371a5c78d1e823ecd194d760"},
+    {file = "cirro_api_client-0.3.2-py3-none-any.whl", hash = "sha256:be64ca3f967dc54ebb6ab0a642db381ad68ec546edb1f313fe040a345a04f858"},
+    {file = "cirro_api_client-0.3.2.tar.gz", hash = "sha256:b64ab7abf500bb89470d533c2fda38bf5d0130df5fd567d604253d8a740d4878"},
 ]
 
 [package.dependencies]
@@ -2213,4 +2213,4 @@ pyodide = ["requests-aws4auth"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "4d52cbed70ed7d4f56c3d686fccbd663b2debc8e600577455840e45ee041bb20"
+content-hash = "98dbebfb6cac00b8aefe754eb893efcfc2e4c398e76c0aa8dfe7ebe1ae7bfd3f"
