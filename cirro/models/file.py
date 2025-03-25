@@ -134,7 +134,7 @@ class File:
 
         return cls(
             relative_path=path,
-            metadata=file.metadata.additional_properties,
+            metadata=file.metadata.additional_properties if file.metadata else {},
             size=file.size,
             access_context=access_context
         )

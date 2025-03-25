@@ -130,7 +130,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
         # Filter out datasets that are not complete
         datasets = [d for d in datasets if d.status == Status.COMPLETED]
         input_params = gather_download_arguments_dataset(input_params, datasets)
-        files = cirro.datasets.get_file_listing(input_params['project'], input_params['dataset'])
+        files = cirro.datasets.get_assets_listing(input_params['project'], input_params['dataset']).files
 
         if len(files) == 0:
             raise InputError('There are no files in this dataset to download')
@@ -145,7 +145,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
         dataset_id = get_id_from_name(datasets, input_params['dataset'])
 
         if input_params['file']:
-            all_files = cirro.datasets.get_file_listing(project_id, dataset_id)
+            all_files = cirro.datasets.get_assets_listing(project_id, dataset_id).files
             files_to_download = []
 
             for filepath in input_params['file']:
