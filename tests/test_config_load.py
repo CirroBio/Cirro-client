@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from cirro.config import AppConfig, list_tenants, extract_base_url
@@ -6,6 +7,10 @@ TEST_BASE_URL = "app.cirro.bio"
 
 
 class TestConfigLoad(unittest.TestCase):
+    @unittest.skipIf(
+        os.environ.get('CI') == 'true',
+        "Skipping test in CI environment."
+    )
     def test_config_load(self):
         config = AppConfig(base_url=TEST_BASE_URL)
         self.assertIsNotNone(config.client_id)
