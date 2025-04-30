@@ -2,7 +2,7 @@ from functools import cache
 from time import sleep
 from typing import List, Union
 
-from cirro_api_client.v1.models import Project, UploadDatasetRequest, Dataset
+from cirro_api_client.v1.models import Project, UploadDatasetRequest, Dataset, Sample
 
 from cirro.cirro_client import CirroApi
 from cirro.file_utils import get_files_in_directory
@@ -212,7 +212,7 @@ class DataPortalProject(DataPortalAsset):
                 else:
                     sleep(2)
 
-    def samples(self, max_items: int = 10000):
+    def samples(self, max_items: int = 10000) -> List[Sample]:
         """
         Retrieves a list of samples associated with a project along with their metadata
 

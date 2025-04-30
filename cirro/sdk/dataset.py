@@ -233,8 +233,9 @@ class DataPortalDataset(DataPortalAsset):
             description: str = "",
             process: Union[DataPortalProcess, str] = None,
             params=None,
-            notifications_emails=None,
-            compute_environment=None
+            notifications_emails: List[str] =None,
+            compute_environment: str =None,
+            resume_dataset_id: str = None
     ) -> str:
         """
         Runs an analysis on a dataset, returns the ID of the newly created dataset.
@@ -250,6 +251,8 @@ class DataPortalDataset(DataPortalAsset):
             notifications_emails (List[str]): Notification email address(es)
             compute_environment (str): Name or ID of compute environment to use,
              if blank it will run in AWS
+            resume_dataset_id (str): ID of dataset to resume from, used for caching task execution.
+             It will attempt to re-use the previous output to minimize duplicate work
 
         Returns:
             dataset_id (str): ID of newly created dataset
@@ -287,6 +290,7 @@ class DataPortalDataset(DataPortalAsset):
                 source_dataset_ids=[self.id],
                 params=RunAnalysisRequestParams.from_dict(params),
                 notification_emails=notifications_emails,
+                resume_dataset_id=resume_dataset_id,
                 compute_environment_id=compute_environment.id if compute_environment else None
             )
         )

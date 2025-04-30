@@ -15,6 +15,7 @@ if __name__ == "__main__":
         "cirro.auth",
         "cirro.services",
         "cirro.models",
+        "cirro.config",
         "cirro_api_client",
         "cirro_api_client.cirro_client",
         "cirro_api_client.cirro_auth",

@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from cirro_api_client.v1.models import Process, Executor, ProcessDetail
+from cirro_api_client.v1.models import Process, Executor, ProcessDetail, CustomPipelineSettings, PipelineCode
 
 from cirro.cirro_client import CirroApi
 from cirro.models.form_specification import ParameterSpecification
@@ -69,12 +69,12 @@ class DataPortalProcess(DataPortalAsset):
         return self._data.file_requirements_message
 
     @property
-    def code(self):
+    def code(self) -> PipelineCode:
         """Pipeline code configuration"""
         return self._get_detail().pipeline_code
 
     @property
-    def custom_settings(self):
+    def custom_settings(self) -> CustomPipelineSettings:
         """Custom settings for the process"""
         return self._get_detail().custom_settings
 
