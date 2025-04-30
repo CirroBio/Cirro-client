@@ -233,8 +233,8 @@ class DataPortalDataset(DataPortalAsset):
             description: str = "",
             process: Union[DataPortalProcess, str] = None,
             params=None,
-            notifications_emails: List[str] =None,
-            compute_environment: str =None,
+            notifications_emails: List[str] = None,
+            compute_environment: str = None,
             resume_dataset_id: str = None
     ) -> str:
         """
