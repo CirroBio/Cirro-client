@@ -123,8 +123,8 @@ class ProcessService(BaseService):
         For pipelines, you must specify the pipeline code and configuration repository.
 
         This process will be available to all users in the system if `is_tenant_wide` is set to True.
-        If `is_tenant_wide` is set to False, the process will only be available the projects specified in `linked_projects_ids`.
-        Making it available tenant wide requires tenant admin privileges.
+        If `is_tenant_wide` is set to False, the process will only be available the projects
+         specified in `linked_projects_ids`. Making it available tenant wide requires tenant admin privileges.
 
         If the repository is private, you must complete the authorization flow on the UI.
 
@@ -133,7 +133,8 @@ class ProcessService(BaseService):
 
         Example:
         ```python
-        from cirro_api_client.v1.models import CustomProcessInput, Executor, PipelineCode, FileMappingRule, FileNamePattern, RepositoryType, CustomPipelineSettings
+        from cirro_api_client.v1.models import CustomProcessInput, Executor, \
+         PipelineCode, FileMappingRule, FileNamePattern, RepositoryType, CustomPipelineSettings
         from cirro.cirro_client import CirroApi
 
         cirro = CirroApi()
@@ -171,7 +172,7 @@ class ProcessService(BaseService):
                         FileNamePattern(
                             example_name="filtered_feature_bc_matrix.h5",
                             description="Matrix",
-                            sample_matching_pattern="(?P<sampleName>[\S ]*)\.jpg"
+                            sample_matching_pattern="(?P<sampleName>[\\S ]*)\\.jpg"
                         )
                     ]
                 )
@@ -198,7 +199,7 @@ class ProcessService(BaseService):
                         FileNamePattern(
                             example_name="image.jpg",
                             description="JPG Image",
-                            sample_matching_pattern="(?P<sampleName>[\S ]*)/outs/image\.jpg"
+                            sample_matching_pattern="(?P<sampleName>[\\S ]*)/outs/image\\.jpg"
                         )
                     ]
                 )
