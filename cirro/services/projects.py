@@ -2,8 +2,8 @@ from typing import List, Optional
 
 from cirro_api_client.v1.api.projects import get_projects, create_project, get_project, set_user_project_role, \
     update_project, update_project_tags, get_project_users, archive_project, unarchive_project
-from cirro_api_client.v1.models import ProjectRequest, SetUserProjectRoleRequest, Tag, ProjectRole, ProjectDetail, \
-    CreateResponse, ProjectUser
+from cirro_api_client.v1.models import SetUserProjectRoleRequest, Tag, ProjectRole, ProjectDetail, \
+    CreateResponse, ProjectUser, ProjectInput
 
 from cirro.services.base import BaseService
 
@@ -27,16 +27,16 @@ class ProjectService(BaseService):
         """
         return get_project.sync(project_id=project_id, client=self._api_client)
 
-    def create(self, request: ProjectRequest) -> CreateResponse:
+    def create(self, request: ProjectInput) -> CreateResponse:
         """
         Create a project
 
         Args:
-            request (`cirro_api_client.v1.models.ProjectRequest`): Detailed information about the project to create
+            request (`cirro_api_client.v1.models.ProjectInput`): Detailed information about the project to create
 
         Examples:
         ```python
-        from cirro_api_client.v1.models import ProjectRequest, ProjectSettings, Contact, BudgetPeriod, CloudAccount, \
+        from cirro_api_client.v1.models import ProjectInput, ProjectSettings, Contact, BudgetPeriod, CloudAccount, \
             CloudAccountType
         from cirro.cirro_client import CirroApi
 
@@ -45,7 +45,7 @@ class ProjectService(BaseService):
         # Bring your own account projects are hosted by the user
         # You must provide the account details and VPC information
         # Please view the ProjectSettings model for more information on the attributes required
-        byoa_project = ProjectRequest(
+        byoa_project = ProjectInput(
             name="New Project Name",
             description="Description of new project",
             billing_account_id="billing-account-id",
@@ -77,7 +77,7 @@ class ProjectService(BaseService):
         )
 
         # Hosted projects are managed by Cirro
-        hosted_project = ProjectRequest(
+        hosted_project = ProjectInput(
             name="New Project Name",
             description="Description of new project",
             billing_account_id="billing-account-id",
@@ -103,13 +103,13 @@ class ProjectService(BaseService):
         """
         return create_project.sync(client=self._api_client, body=request)
 
-    def update(self, project_id: str, request: ProjectRequest) -> ProjectDetail:
+    def update(self, project_id: str, request: ProjectInput) -> ProjectDetail:
         """
         Updates a project
 
         Args:
             project_id (str): ID of project to update
-            request (`cirro_api_client.v1.models.ProjectRequest`): New details for the project
+            request (`cirro_api_client.v1.models.ProjectInput`): New details for the project
         """
         return update_project.sync(project_id=project_id, body=request, client=self._api_client)
 
