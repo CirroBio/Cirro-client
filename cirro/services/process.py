@@ -128,6 +128,8 @@ class ProcessService(BaseService):
 
         If the repository is private, you must complete the authorization flow on the UI.
 
+        See https://docs.cirro.bio/pipelines/importing-custom-pipelines/ for more info.
+
         Args:
             process (Process): Process to create
 
