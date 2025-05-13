@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from functools import partial
 from typing import List, Dict
 
+from botocore.client import BaseClient
 from cirro_api_client import CirroApiClient
 from cirro_api_client.v1.api.file import generate_project_file_access_token
 from cirro_api_client.v1.models import AWSCredentials, ProjectAccessType
@@ -69,6 +70,17 @@ class FileService(BaseService):
 
         return self._read_token_cache[project_id]
 
+    def get_aws_s3_client(self, access_context: FileAccessContext) -> BaseClient:
+        """
+        Gets the underlying AWS S3 client to perform operations on files
+
+        This is seeded with refreshable credentials from the access_context parameter
+
+        This may be used to perform advanced operations, such as
+        """
+        s3_client = self._generate_s3_client(access_context)
+        return s3_client.get_aws_client()
+
     def get_file(self, file: File) -> bytes:
         """
         Gets the contents of a file
@@ -92,11 +104,7 @@ class FileService(BaseService):
         Returns:
             The raw bytes of the file
         """
-
-        s3_client = S3Client(
-            partial(self.get_access_credentials, access_context),
-            self.enable_additional_checksum
-        )
+        s3_client = self._generate_s3_client(access_context)
 
         full_path = f'{access_context.prefix}/{file_path}'.lstrip('/')
 
@@ -113,11 +121,7 @@ class FileService(BaseService):
             contents (str): Content of object
             content_type (str):
         """
-
-        s3_client = S3Client(
-            partial(self.get_access_credentials, access_context),
-            self.enable_additional_checksum
-        )
+        s3_client = self._generate_s3_client(access_context)
 
         s3_client.create_object(
             key=key,
@@ -139,11 +143,7 @@ class FileService(BaseService):
             files (typing.List[str|Path]): List of paths to files within the directory
                 must be the same type as directory.
         """
-
-        s3_client = S3Client(
-            partial(self.get_access_credentials, access_context),
-            self.enable_additional_checksum
-        )
+        s3_client = self._generate_s3_client(access_context)
 
         upload_directory(
             directory,
@@ -163,10 +163,7 @@ class FileService(BaseService):
             directory (str): download location
             files (List[str]): relative path of files to download
         """
-        s3_client = S3Client(
-            partial(self.get_access_credentials, access_context),
-            self.enable_additional_checksum
-        )
+        s3_client = self._generate_s3_client(access_context)
 
         download_directory(
             directory,
@@ -174,6 +171,15 @@ class FileService(BaseService):
             s3_client,
             access_context.bucket,
             access_context.prefix
+        )
+
+    def _generate_s3_client(self, access_context: FileAccessContext):
+        """
+        Generates the Cirro-S3 client to perform operations on files
+        """
+        return S3Client(
+            partial(self.get_access_credentials, access_context),
+            self.enable_additional_checksum
         )
 
 
