@@ -1,5 +1,7 @@
 import logging
+import importlib.metadata
 import os
+import requests
 import sys
 
 import pandas as pd
@@ -32,6 +34,7 @@ logger.addHandler(console_handler)
 def run_list_datasets(input_params: ListArguments, interactive=False):
     """List the datasets available in a particular project."""
     _check_configure()
+    _check_version()
     cirro = CirroApi()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
     projects = cirro.projects.list()
@@ -56,6 +59,7 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
 
 def run_ingest(input_params: UploadArguments, interactive=False):
     _check_configure()
+    _check_version()
     cirro = CirroApi()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
     processes = cirro.processes.list(process_type=Executor.INGEST)
@@ -112,6 +116,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
 
 def run_download(input_params: DownloadArguments, interactive=False):
     _check_configure()
+    _check_version()
     cirro = CirroApi()
     logger.info(f"Collecting data from {cirro.configuration.base_url}")
 
@@ -171,6 +176,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
 
 
 def run_configure():
+    _check_version()
     auth_method, base_url, auth_method_config, enable_additional_checksum = gather_auth_config()
     save_user_config(UserConfig(auth_method=auth_method,
                                 auth_method_config=auth_method_config,
@@ -191,6 +197,26 @@ def _check_configure():
     # Legacy check for old config
     if config.base_url == 'cirro.bio':
         run_configure()
+
+
+def _check_version():
+    """
+    Prompts the user to update their package version if needed
+    """
+    yellow_color = '\033[93m'
+    reset_color = '\033[0m'
+
+    try:
+        current_version = importlib.metadata.version('cirro')
+        response = requests.get(f"https://pypi.org/pypi/cirro/json")
+        response.raise_for_status()
+        latest_version = response.json()["info"]["version"]
+
+        if current_version != latest_version:
+            print(f"{yellow_color} Warning:{reset_color} Cirro version {current_version} is out of date. Update to {latest_version} with 'pip install cirro --upgrade'.")
+
+    except Exception as e:
+        return
 
 
 def handle_error(e: Exception):
