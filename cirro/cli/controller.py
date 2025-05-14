@@ -208,14 +208,15 @@ def _check_version():
 
     try:
         current_version = importlib.metadata.version('cirro')
-        response = requests.get(f"https://pypi.org/pypi/cirro/json")
+        response = requests.get("https://pypi.org/pypi/cirro/json")
         response.raise_for_status()
         latest_version = response.json()["info"]["version"]
 
         if current_version != latest_version:
-            print(f"{yellow_color}Warning:{reset_color} Cirro version {current_version} is out of date. Update to {latest_version} with 'pip install cirro --upgrade'.")
+            print(f"{yellow_color}Warning:{reset_color} Cirro version {current_version} "
+                  f"is out of date. Update to {latest_version} with 'pip install cirro --upgrade'.")
 
-    except Exception as e:
+    except Exception:
         return
 
 
