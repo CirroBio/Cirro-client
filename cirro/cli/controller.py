@@ -213,7 +213,7 @@ def _check_version():
         latest_version = response.json()["info"]["version"]
 
         if current_version != latest_version:
-            print(f"{yellow_color} Warning:{reset_color} Cirro version {current_version} is out of date. Update to {latest_version} with 'pip install cirro --upgrade'.")
+            print(f"{yellow_color}Warning:{reset_color} Cirro version {current_version} is out of date. Update to {latest_version} with 'pip install cirro --upgrade'.")
 
     except Exception as e:
         return
