@@ -133,7 +133,8 @@ class FileService(BaseService):
     def upload_files(self,
                      access_context: FileAccessContext,
                      directory: PathLike,
-                     files: List[PathLike]) -> None:
+                     files: List[PathLike],
+                     file_path_map: Dict[PathLike, PathLike]) -> None:
         """
         Uploads a list of files from the specified directory
 
@@ -142,15 +143,18 @@ class FileService(BaseService):
             directory (str|Path): Path to directory
             files (typing.List[str|Path]): List of paths to files within the directory
                 must be the same type as directory.
+            file_path_map (typing.Dict[str|Path, str|Path]): Optional mapping of file paths to upload
+             from source path to destination path, used to "re-write" paths within the dataset.
         """
         s3_client = self._generate_s3_client(access_context)
 
         upload_directory(
-            directory,
-            files,
-            s3_client,
-            access_context.bucket,
-            access_context.prefix,
+            directory=directory,
+            files=files,
+            file_path_map=file_path_map,
+            s3_client=s3_client,
+            bucket=access_context.bucket,
+            prefix=access_context.prefix,
             max_retries=self.transfer_retries
         )
 

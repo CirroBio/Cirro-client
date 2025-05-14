@@ -2,7 +2,7 @@ import os
 import random
 import time
 from pathlib import Path, PurePath
-from typing import List, Union
+from typing import List, Union, Dict
 
 from boto3.exceptions import S3UploadFailedError
 from botocore.exceptions import ConnectionError
@@ -105,6 +105,7 @@ def get_files_stats(files: List[PathLike]) -> DirectoryStatistics:
 
 def upload_directory(directory: PathLike,
                      files: List[PathLike],
+                     file_path_map: Dict[PathLike, PathLike],
                      s3_client: S3Client,
                      bucket: str,
                      prefix: str,
@@ -117,6 +118,7 @@ def upload_directory(directory: PathLike,
         directory (str|Path): Path to directory
         files (typing.List[str|Path]): List of paths to files within the directory
             must be the same type as directory.
+        file_path_map (typing.Dict[str|Path, str|Path]): Map of file paths from source to destination
         s3_client (cirro.clients.S3Client): S3 client
         bucket (str): S3 bucket
         prefix (str): S3 prefix
@@ -132,7 +134,13 @@ def upload_directory(directory: PathLike,
         else:
             file_path = file
 
-        file_relative = file_path.relative_to(directory).as_posix()
+        # Check if is present in the file_path_map
+        # if it is, use the mapped value as the destination path
+        if file in file_path_map:
+            file_relative = file_path_map[file]
+        else:
+            file_relative = file_path.relative_to(directory).as_posix()
+
         key = f'{prefix}/{file_relative}'
         success = False
 

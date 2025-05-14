@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
     update_dataset, delete_dataset, get_dataset_manifest
@@ -222,9 +222,14 @@ class DatasetService(FileEnabledService):
                      project_id: str,
                      dataset_id: str,
                      directory: PathLike,
-                     files: List[PathLike]) -> None:
+                     files: List[PathLike] = None,
+                     file_path_map=None) -> None:
         """
         Uploads files to a given dataset from the specified directory.
+
+        All files must be relative to the specified directory.
+        If files need to be flattened, or you are sourcing files from multiple directories,
+        please include `file_path_map` or call this method multiple times.
 
         Args:
             project_id (str): ID of the Project
@@ -232,7 +237,12 @@ class DatasetService(FileEnabledService):
             directory (str|Path): Path to directory
             files (typing.List[str|Path]): List of paths to files within the directory,
                 must be the same type as directory.
+            file_path_map (typing.Dict[str|Path, str|Path]): Optional mapping of file paths to upload
+             from source path to destination path, used to "re-write" paths within the dataset.
         """
+        if file_path_map is None:
+            file_path_map = {}
+
         dataset = self.get(project_id, dataset_id)
 
         access_context = FileAccessContext.upload_dataset(
@@ -244,7 +254,8 @@ class DatasetService(FileEnabledService):
         self._file_service.upload_files(
             access_context=access_context,
             directory=directory,
-            files=files
+            files=files,
+            file_path_map=file_path_map
         )
 
     def download_files(

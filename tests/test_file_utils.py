@@ -29,6 +29,7 @@ class TestFileUtils(unittest.TestCase):
         ]
         upload_directory(directory=test_path,
                          files=test_files,
+                         file_path_map={},
                          s3_client=self.mock_s3_client,
                          bucket=self.test_bucket,
                          prefix=self.test_prefix)
@@ -47,6 +48,7 @@ class TestFileUtils(unittest.TestCase):
         ]
         upload_directory(directory=test_path,
                          files=test_files,
+                         file_path_map={},
                          s3_client=self.mock_s3_client,
                          bucket=self.test_bucket,
                          prefix=self.test_prefix)
@@ -70,6 +72,36 @@ class TestFileUtils(unittest.TestCase):
         with self.assertRaises(ValueError):
             upload_directory(directory=test_path,
                              files=test_files,
+                             file_path_map={},
                              s3_client=self.mock_s3_client,
                              bucket=self.test_bucket,
                              prefix=self.test_prefix)
+
+    def test_upload_directory_file_map_included(self):
+        test_path = 'data'
+        test_files = [
+            'file1.txt',
+            'folder1/file2.txt'
+        ]
+
+        file_path_map = {
+            'file1.txt': 'mapped_file1.txt',
+            'folder1/file2.txt': 'mapped_file2.txt'
+        }
+
+        upload_directory(directory=test_path,
+                         files=test_files,
+                         file_path_map=file_path_map,
+                         s3_client=self.mock_s3_client,
+                         bucket=self.test_bucket,
+                         prefix=self.test_prefix)
+
+        # Check that upload file was called with the mapped key
+        self.mock_s3_client.upload_file.assert_has_calls([
+            call(file_path=Path(test_path, test_files[0]),
+                 bucket=self.test_bucket,
+                 key=f'{self.test_prefix}/mapped_file1.txt'),
+            call(file_path=Path(test_path, test_files[1]),
+                 bucket=self.test_bucket,
+                 key=f'{self.test_prefix}/mapped_file2.txt')
+        ], any_order=True)
