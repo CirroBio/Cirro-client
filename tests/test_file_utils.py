@@ -81,12 +81,14 @@ class TestFileUtils(unittest.TestCase):
         test_path = 'data'
         test_files = [
             'file1.txt',
-            'folder1/file2.txt'
+            'folder1/file2.txt',
+            'folder1/unmapped.txt'
         ]
 
         file_path_map = {
             'file1.txt': 'mapped_file1.txt',
             'folder1/file2.txt': 'mapped_file2.txt'
+            # unmapped file3
         }
 
         upload_directory(directory=test_path,
@@ -103,5 +105,8 @@ class TestFileUtils(unittest.TestCase):
                  key=f'{self.test_prefix}/mapped_file1.txt'),
             call(file_path=Path(test_path, test_files[1]),
                  bucket=self.test_bucket,
-                 key=f'{self.test_prefix}/mapped_file2.txt')
+                 key=f'{self.test_prefix}/mapped_file2.txt'),
+            call(file_path=Path(test_path, test_files[2]),
+                 bucket=self.test_bucket,
+                 key=f'{self.test_prefix}/folder1/unmapped.txt')
         ], any_order=True)
