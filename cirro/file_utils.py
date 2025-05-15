@@ -105,7 +105,7 @@ def get_files_stats(files: List[PathLike]) -> DirectoryStatistics:
 
 def upload_directory(directory: PathLike,
                      files: List[PathLike],
-                     file_path_map: Dict[PathLike, PathLike],
+                     file_path_map: Dict[PathLike, str],
                      s3_client: S3Client,
                      bucket: str,
                      prefix: str,
@@ -118,7 +118,7 @@ def upload_directory(directory: PathLike,
         directory (str|Path): Path to directory
         files (typing.List[str|Path]): List of paths to files within the directory
             must be the same type as directory.
-        file_path_map (typing.Dict[str|Path, str|Path]): Map of file paths from source to destination
+        file_path_map (typing.Dict[str|Path, str]): Map of file paths from source to destination
         s3_client (cirro.clients.S3Client): S3 client
         bucket (str): S3 bucket
         prefix (str): S3 prefix

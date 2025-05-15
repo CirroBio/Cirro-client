@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
     update_dataset, delete_dataset, get_dataset_manifest
@@ -223,7 +223,7 @@ class DatasetService(FileEnabledService):
                      dataset_id: str,
                      directory: PathLike,
                      files: List[PathLike] = None,
-                     file_path_map=None) -> None:
+                     file_path_map: Dict[PathLike, str]=None) -> None:
         """
         Uploads files to a given dataset from the specified directory.
 
@@ -239,6 +239,33 @@ class DatasetService(FileEnabledService):
                 must be the same type as directory.
             file_path_map (typing.Dict[str|Path, str|Path]): Optional mapping of file paths to upload
              from source path to destination path, used to "re-write" paths within the dataset.
+        ```python
+        from cirro.cirro_client import CirroApi
+
+        cirro = CirroApi()
+
+        directory = "~/Downloads"
+        # Re-write file paths
+        file_map = {
+            "data1/file1.fastq.gz": "file1.fastq.gz",
+            "data2/file2.fastq.gz": "file2.fastq.gz",
+            "file3.fastq.gz": "new_file3.txt"
+        }
+
+        # Or you could automate the flattening
+        files = ["data1/file1.fastq.gz"]
+        file_map = {
+          k : Path(k).name for k in files
+        }
+
+        cirro.datasets.upload_files(
+            project_id="project-id",
+            dataset_id="dataset-id",
+            directory=directory,
+            files=file_map.keys(),
+            file_path_map=file_map
+        )
+        ```
         """
         if file_path_map is None:
             file_path_map = {}
