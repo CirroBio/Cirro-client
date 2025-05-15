@@ -223,7 +223,7 @@ class DatasetService(FileEnabledService):
                      dataset_id: str,
                      directory: PathLike,
                      files: List[PathLike] = None,
-                     file_path_map: Dict[PathLike, str]=None) -> None:
+                     file_path_map: Dict[PathLike, str] = None) -> None:
         """
         Uploads files to a given dataset from the specified directory.
 
