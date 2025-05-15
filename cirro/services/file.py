@@ -76,7 +76,7 @@ class FileService(BaseService):
 
         This is seeded with refreshable credentials from the access_context parameter
 
-        This may be used to perform advanced operations, such as
+        This may be used to perform advanced operations, such as CopyObject, S3 Select, etc.
         """
         s3_client = self._generate_s3_client(access_context)
         return s3_client.get_aws_client()
