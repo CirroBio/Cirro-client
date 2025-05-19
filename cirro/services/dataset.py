@@ -241,6 +241,7 @@ class DatasetService(FileEnabledService):
              from source path to destination path, used to "re-write" paths within the dataset.
         ```python
         from cirro.cirro_client import CirroApi
+        from cirro.file_utils import generate_flattened_file_map
 
         cirro = CirroApi()
 
@@ -254,15 +255,13 @@ class DatasetService(FileEnabledService):
 
         # Or you could automate the flattening
         files = ["data1/file1.fastq.gz"]
-        file_map = {
-          k : Path(k).name for k in files
-        }
+        file_map = generate_flattened_file_map(files)
 
         cirro.datasets.upload_files(
             project_id="project-id",
             dataset_id="dataset-id",
             directory=directory,
-            files=file_map.keys(),
+            files=list(file_map.keys()),
             file_path_map=file_map
         )
         ```

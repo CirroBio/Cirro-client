@@ -35,6 +35,23 @@ def filter_files_by_pattern(files: Union[List[File], List[str]], pattern: str) -
     ]
 
 
+def generate_flattened_file_map(files: List[PathLike]) -> Dict[PathLike, str]:
+    """
+    Generates a mapping of file paths "flattened" to their base name.
+
+    Example:  data1/sample1.fastq.gz -> sample1.fastq.gz
+
+    Args:
+        files: List[PathLike]: List of file paths
+
+    Returns:
+        Dict[PathLike, str]: Mapping of file paths to their base name
+    """
+    return {
+        file : Path(file).name for file in files
+    }
+
+
 def _is_hidden_file(file_path: Path):
     # Remove hidden files from listing, desktop.ini .DS_Store, etc.
     if os.name == 'nt':
