@@ -38,6 +38,9 @@ class S3Client:
         self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict()
         self._download_args = dict(ChecksumMode='ENABLED') if enable_additional_checksum else dict()
 
+    def get_aws_client(self):
+        return self._client
+
     def upload_file(self, file_path: Path, bucket: str, key: str):
         file_size = file_path.stat().st_size
         file_name = file_path.name

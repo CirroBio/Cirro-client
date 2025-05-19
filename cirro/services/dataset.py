@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from cirro_api_client.v1.api.datasets import get_datasets, get_dataset, import_public_dataset, upload_dataset, \
     update_dataset, delete_dataset, get_dataset_manifest
@@ -222,9 +222,14 @@ class DatasetService(FileEnabledService):
                      project_id: str,
                      dataset_id: str,
                      directory: PathLike,
-                     files: List[PathLike]) -> None:
+                     files: List[PathLike] = None,
+                     file_path_map: Dict[PathLike, str] = None) -> None:
         """
         Uploads files to a given dataset from the specified directory.
+
+        All files must be relative to the specified directory.
+        If files need to be flattened, or you are sourcing files from multiple directories,
+        please include `file_path_map` or call this method multiple times.
 
         Args:
             project_id (str): ID of the Project
@@ -232,7 +237,38 @@ class DatasetService(FileEnabledService):
             directory (str|Path): Path to directory
             files (typing.List[str|Path]): List of paths to files within the directory,
                 must be the same type as directory.
+            file_path_map (typing.Dict[str|Path, str|Path]): Optional mapping of file paths to upload
+             from source path to destination path, used to "re-write" paths within the dataset.
+        ```python
+        from cirro.cirro_client import CirroApi
+        from cirro.file_utils import generate_flattened_file_map
+
+        cirro = CirroApi()
+
+        directory = "~/Downloads"
+        # Re-write file paths
+        file_map = {
+            "data1/file1.fastq.gz": "file1.fastq.gz",
+            "data2/file2.fastq.gz": "file2.fastq.gz",
+            "file3.fastq.gz": "new_file3.txt"
+        }
+
+        # Or you could automate the flattening
+        files = ["data1/file1.fastq.gz"]
+        file_map = generate_flattened_file_map(files)
+
+        cirro.datasets.upload_files(
+            project_id="project-id",
+            dataset_id="dataset-id",
+            directory=directory,
+            files=list(file_map.keys()),
+            file_path_map=file_map
+        )
+        ```
         """
+        if file_path_map is None:
+            file_path_map = {}
+
         dataset = self.get(project_id, dataset_id)
 
         access_context = FileAccessContext.upload_dataset(
@@ -244,7 +280,8 @@ class DatasetService(FileEnabledService):
         self._file_service.upload_files(
             access_context=access_context,
             directory=directory,
-            files=files
+            files=files,
+            file_path_map=file_path_map
         )
 
     def download_files(
