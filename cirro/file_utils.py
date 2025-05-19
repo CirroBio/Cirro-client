@@ -48,7 +48,7 @@ def generate_flattened_file_map(files: List[PathLike]) -> Dict[PathLike, str]:
         Dict[PathLike, str]: Mapping of file paths to their base name
     """
     return {
-        file : Path(file).name for file in files
+        file: Path(file).name for file in files
     }
 
 
