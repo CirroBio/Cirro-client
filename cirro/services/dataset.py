@@ -78,6 +78,20 @@ class DatasetService(FileEnabledService):
 
         Returns:
             ID of the created dataset
+
+        ```python
+        from cirro_api_client.v1.models import ImportDataRequest, Tag
+        from cirro.cirro_client import CirroApi
+
+        cirro = CirroApi()
+        request = ImportDataRequest(
+            name="Imported dataset",
+            description="Description of the dataset",
+            public_ids=["SRR123456", "SRR123457"],
+            tags=[Tag(value="tag1")]
+        )
+        cirro.datasets.create("project-id", request)
+        ```
         """
         return import_public_dataset.sync(project_id=project_id, client=self._api_client, body=import_request)
 
