@@ -90,7 +90,7 @@ class DatasetService(FileEnabledService):
             public_ids=["SRR123456", "SRR123457"],
             tags=[Tag(value="tag1")]
         )
-        cirro.datasets.create("project-id", request)
+        cirro.datasets.import_public("project-id", request)
         ```
         """
         return import_public_dataset.sync(project_id=project_id, client=self._api_client, body=import_request)

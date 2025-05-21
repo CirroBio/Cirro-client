@@ -2,7 +2,7 @@ from functools import cache
 from time import sleep
 from typing import List, Union
 
-from cirro_api_client.v1.models import Project, UploadDatasetRequest, Dataset, Sample
+from cirro_api_client.v1.models import Project, UploadDatasetRequest, Dataset, Sample, Tag
 
 from cirro.cirro_client import CirroApi
 from cirro.file_utils import get_files_in_directory
@@ -145,7 +145,8 @@ class DataPortalProject(DataPortalAsset):
         description='',
         process: Union[DataPortalProcess, str] = None,
         upload_folder: str = None,
-        files: list = None
+        files: List[str] = None,
+        tags: List[str] = None,
     ):
         """
         Upload a set of files to the Data Portal, creating a new dataset.
@@ -158,6 +159,7 @@ class DataPortalProject(DataPortalAsset):
             process (str | DataPortalProcess): Process to run may be referenced by name, ID, or object
             upload_folder (str): Folder containing files to upload
             files (List[str]): Optional subset of files to upload from the folder
+            tags (List[str]): Optional list of tags to apply to the dataset
         """
 
         if name is None:
@@ -178,6 +180,10 @@ class DataPortalProject(DataPortalAsset):
         if files is None or len(files) == 0:
             raise RuntimeWarning("No files to upload, exiting")
 
+        # Normalize into Tag object
+        if tags is not None:
+            tags = [Tag(value=value) for value in tags]
+
         # Make sure that the files match the expected pattern
         self._client.processes.check_dataset_files(files, process.id, upload_folder)
 
@@ -186,7 +192,8 @@ class DataPortalProject(DataPortalAsset):
             process_id=process.id,
             name=name,
             description=description,
-            expected_files=files
+            expected_files=files,
+            tags=tags,
         )
 
         # Get the response
