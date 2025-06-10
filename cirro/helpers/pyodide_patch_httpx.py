@@ -38,7 +38,19 @@ def _send_single_request(self: Client, request: Request) -> Response:
         headers=request.headers,
         data=request.content,
         auth=auth_patched,
+        stream=True
     )
+
+    # If the response is not successful, raise an HTTPError
+    if not resp.ok:
+        raise httpx.HTTPStatusError(
+            f"HTTP request failed with status code {resp.status_code}",
+            request=request,
+            response=resp
+        )
+
+    # Read the content of the response and decode it
+    content = resp.raw.read(decode_content=True)
 
     # Remove content-encoding header to prevent httpx from trying to decode the content
     # since requests already decodes the content
@@ -49,7 +61,7 @@ def _send_single_request(self: Client, request: Request) -> Response:
     response = Response(
         status_code=resp.status_code,
         headers=Headers(resp.headers),
-        content=resp.content,
+        content=content,
         request=httpx.Request(method=resp.request.method, url=str(resp.url)),
     )
 
