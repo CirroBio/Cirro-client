@@ -30,13 +30,16 @@ def _get_file_from_path(self: FileService, access_context: FileAccessContext, fi
     )
 
     # Make the request
-    response = requests.get(endpoint, auth=auth)
+    response = requests.get(endpoint, auth=auth, stream=True)
 
     # Raise an error if the exit code is not 400
     response.raise_for_status()
 
+    # Read the content of the response and decode it
+    content = response.raw.read(decode_content=True)
+
     # Return the contents of the response
-    return response.content
+    return content
 
 
 def pyodide_patch_file():
