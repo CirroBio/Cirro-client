@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import NamedTuple, Dict, Optional
 
 import requests
-from cirro.models.tenant import Tenant
 from requests import RequestException
 
 
