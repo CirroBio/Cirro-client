@@ -2,12 +2,10 @@ import configparser
 import os
 import re
 from pathlib import Path
-from typing import NamedTuple, Dict, Optional, List
+from typing import NamedTuple, Dict, Optional
 
 import requests
 from requests import RequestException
-
-from cirro.models.tenant import Tenant
 
 
 class Constants:
@@ -31,12 +29,6 @@ def extract_base_url(base_url: str):
     # remove anything after the first slash if it's there
     base_url = base_url.split('/')[0]
     return base_url
-
-
-def list_tenants() -> List[Tenant]:
-    resp = requests.get(f'https://nexus.{Constants.default_base_url}/info')
-    resp.raise_for_status()
-    return resp.json()['tenants']
 
 
 def save_user_config(user_config: UserConfig):

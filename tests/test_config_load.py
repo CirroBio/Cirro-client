@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from cirro.config import AppConfig, list_tenants, extract_base_url
+from cirro.config import AppConfig, extract_base_url
 
 TEST_BASE_URL = "app.cirro.bio"
 
@@ -15,10 +15,6 @@ class TestConfigLoad(unittest.TestCase):
         config = AppConfig(base_url=TEST_BASE_URL)
         self.assertIsNotNone(config.client_id)
         self.assertIsNotNone(config.auth_endpoint)
-
-    def test_list_tenants(self):
-        tenants = list_tenants()
-        self.assertGreater(len(tenants), 1)
 
     def test_extract_base(self):
         test_cases = [
