@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "urn:cirro-cli:tests:jsonschema:simple.json",
+    "description": "simple json schema for testing purposes",
+    "type": "object",
+    "properties": {
+        "file_param": {
+            "type": "string",
+            "wdlType": "File",
+            "description": "A string parameter that has a wdlType of File"
+        },
+        "directory_param": {
+            "type": "string",
+            "wdlType": "Directory",
+            "description": "A string parameter that has a wdlType of Directory"
+        },
+        "file_param_optional": {
+            "type": "string",
+            "wdlType": "File?",
+            "description": "A string parameter that has a wdlType of File?"
+        },
+        "directory_param_optional": {
+            "type": "string",
+            "wdlType": "Directory?",
+            "description": "A string parameter that has a wdlType of Directory?"
+        }
+    }
+}

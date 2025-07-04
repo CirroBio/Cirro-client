@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:cirro-cli:tests:jsonschema:references.json",
+    "description": "a json schema with references for testing purposes",
+    "type": "object",
+    "$defs": {
+        "section_1": {
+            "type": "object",
+            "description": "A parameter section",
+            "properties": {
+                "param_1": {
+                    "type": "string",
+                    "description": "A simple string parameter"
+                }
+            }
+        },
+        "param_2": {
+            "type": "integer",
+            "description": "An integer parameter",
+            "default": 42
+        }
+    },
+    "properties": {
+        "section_1": {
+            "$ref": "#/$defs/section_1"
+        },
+        "param_2": {
+            "$ref": "#/$defs/param_2"
+        },
+        "param_3": {
+            "type": "boolean",
+            "description": "A boolean parameter",
+            "default": true
+        }
+    }
+}
