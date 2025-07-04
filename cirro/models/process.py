@@ -3,6 +3,7 @@ from os import path
 from functools import cached_property
 import json
 from typing import Any, Iterable, Optional
+import logging
 
 from referencing import Resource, Registry
 import WDL
@@ -13,9 +14,21 @@ class PipelineDefinition:
     Represents a pipeline definition with a name and a list of steps.
     """
 
-    def __init__(self, root_dir: str, entrypoint: Optional[str] = None):
+    def __init__(self, root_dir: str, entrypoint: Optional[str] = None, logger: Optional[logging.Logger] = None):
         self.root_dir = path.expanduser(path.expandvars(root_dir))
         self.entrypoint = entrypoint
+
+        if logger:
+            self.logger = logger
+        else:
+            log_formatter = logging.Formatter(
+                '%(asctime)s %(levelname)-8s [PipelineDefinition] %(message)s'
+            )
+            self.logger = logging.getLogger()
+            self.logger.setLevel(logging.INFO)
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(log_formatter)
+            self.logger.addHandler(console_handler)
     
     @cached_property
     def parameter_schema(self) -> Resource:
@@ -27,7 +40,7 @@ class PipelineDefinition:
             # look for a nextflow_schema.json file at the root of the workflow directory
             if 'nextflow_schema.json' in filenames:
                 schema_path = path.join(dirpath, 'nextflow_schema.json')
-                print(f"Nextflow schema found at {schema_path}")
+                self.logger.info(f"Nextflow schema found at {schema_path}")
                 with open(schema_path, 'r') as f:
                     contents = json.load(f)
                 
