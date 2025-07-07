@@ -26,5 +26,6 @@ class ListArguments(TypedDict):
 
 class CreatePipelineConfigArguments(TypedDict):
     pipeline_dir: str
+    output_dir: str
     entrypoint: Optional[str]
     interactive: bool
