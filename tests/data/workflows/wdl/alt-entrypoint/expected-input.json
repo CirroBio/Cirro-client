@@ -1,0 +1,12 @@
+{
+    "alt_required_string": "$.dataset.params.alt_required_string",
+    "alt_required_bool": "$.dataset.params.alt_required_bool",
+    "alt_required_int": "$.dataset.params.alt_required_int",
+    "alt_required_float": "$.dataset.params.alt_required_float",
+    "alt_required_path": "$.inputs[*].dataPath",
+    "alt_optional_string": "$.dataset.params.alt_optional_string",
+    "alt_optional_bool": "$.dataset.params.alt_optional_bool",
+    "alt_optional_int": "$.dataset.params.alt_optional_int",
+    "alt_optional_float": "$.dataset.params.alt_optional_float",
+    "alt_optional_path": "$.inputs[*].dataPath"
+}

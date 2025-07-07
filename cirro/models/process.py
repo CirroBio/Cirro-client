@@ -49,15 +49,16 @@ class PipelineDefinition:
                 # generate schema from WDL workflow
                 wdl_file = None
                 if self.entrypoint:
+                    self.logger.info(f"Using entrypoint WDL file: {self.entrypoint}")
                     # if an entrypoint is specified, look for that specific WDL file
-                    wdl_file = next((f for f in filenames if f.endswith('.wdl') and f.startswith(self.entrypoint)), None)
+                    wdl_file = next((f for f in filenames if f.endswith(self.entrypoint)), None)
                     if not wdl_file:
                         raise FileNotFoundError(f"Entrypoint WDL file '{self.entrypoint}' not found in {dirpath}")
-                    doc = WDL.load(path.join(dirpath, wdl_file))
                 else:
                     # otherwise, just take the first WDL file found
-                    wdl_file = path.join(dirpath, next(f for f in filenames if f.endswith('.wdl')))
+                    wdl_file = next(f for f in filenames if f.endswith('.wdl'))
                 
+                wdl_file = path.join(dirpath, wdl_file)
                 doc = WDL.load(wdl_file)
                 contents = get_wdl_json_schema(doc)
                 break

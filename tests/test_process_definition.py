@@ -38,6 +38,21 @@ def test_pipeline_definition_wdl_simple():
     assert pipeline.form_configuration == expected_form_configuration
     assert pipeline.input_configuration == expected_input_configuration
 
+def test_pipeline_definition_wdl_alt_entrypoint():
+    root_dir = path.join(data_path, 'workflows', 'wdl', 'alt-entrypoint')
+    pipeline = process.PipelineDefinition(root_dir, entrypoint='main-alt.wdl')
+
+    with open(path.join(root_dir, 'expected-form.json'), 'r') as f:
+        expected_form_configuration = json.load(f)
+        expected_parameter_schema = Resource.from_contents(expected_form_configuration['form'])
+    
+    with open(path.join(root_dir, 'expected-input.json'), 'r') as f:
+        expected_input_configuration = json.load(f)
+    
+    assert pipeline.parameter_schema == expected_parameter_schema
+    assert pipeline.form_configuration == expected_form_configuration
+    assert pipeline.input_configuration == expected_input_configuration
+
 def test_get_input_params_simple():
     schema_path = path.join(data_path, 'jsonschemas', 'simple.json')
     with open(schema_path, 'r') as f:
