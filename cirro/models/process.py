@@ -11,7 +11,7 @@ import WDL
 
 class PipelineDefinition:
     """
-    Represents a pipeline definition with a name and a list of steps.
+    A pipeline definition on disk.
     """
 
     def __init__(self, root_dir: str, entrypoint: Optional[str] = None, logger: Optional[logging.Logger] = None):
