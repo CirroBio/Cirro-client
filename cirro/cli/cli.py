@@ -87,7 +87,9 @@ def configure():
               default='.',
               show_default=True)
 @click.option('-e', '--entrypoint',
-              help='Entrypoint WDL file (optional, if not specified, the first WDL file found will be used). Ignored for Nextflow pipelines.',
+              help=(
+                  'Entrypoint WDL file (optional, if not specified, the first WDL file found will be used).'
+                  ' Ignored for Nextflow pipelines.'),
               default='main.wdl')
 @click.option('-o', '--output-dir',
               help='Directory to store the generated configuration files (default: current directory)',

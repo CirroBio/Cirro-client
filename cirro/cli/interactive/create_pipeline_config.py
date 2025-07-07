@@ -1,10 +1,11 @@
 from pathlib import Path
-from typing import Optional, TypedDict
+from typing import Optional
 
 from prompt_toolkit.shortcuts import CompleteStyle
 from prompt_toolkit.validation import Validator, ValidationError
 
 from cirro.cli.interactive import utils
+
 
 class DirectoryValidator(Validator):
     def validate(self, document):

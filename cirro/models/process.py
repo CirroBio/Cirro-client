@@ -29,7 +29,7 @@ class PipelineDefinition:
             console_handler = logging.StreamHandler()
             console_handler.setFormatter(log_formatter)
             self.logger.addHandler(console_handler)
-    
+
     @cached_property
     def parameter_schema(self) -> Resource:
         """
@@ -43,7 +43,7 @@ class PipelineDefinition:
                 self.logger.info(f"Nextflow schema found at {schema_path}")
                 with open(schema_path, 'r') as f:
                     contents = json.load(f)
-                
+
                 break
             elif any(f.endswith('.wdl') for f in filenames):
                 # generate schema from WDL workflow
@@ -57,22 +57,22 @@ class PipelineDefinition:
                 else:
                     # otherwise, just take the first WDL file found
                     wdl_file = next(f for f in filenames if f.endswith('.wdl'))
-                
+
                 wdl_file = path.join(dirpath, wdl_file)
                 doc = WDL.load(wdl_file)
                 contents = get_wdl_json_schema(doc)
                 break
-            
+
         else:
             raise RuntimeError("Unrecognized workflow format. Please provide a valid Nextflow or WDL workflow.")
-        
+
         _all_of = {}
         if contents.get('allOf'):
             # this is typically a root attribute in nextflow_schema.json files and a list of $ref
             # convert this to an object
             _all_of = {item["$ref"].split('/')[-1]: item for item in contents['allOf']}
             del contents['allOf']
-        
+
         contents['properties'] = contents.get('properties', {}) | _all_of
         schema = Resource.from_contents(contents)
 
@@ -87,7 +87,7 @@ class PipelineDefinition:
             "form": self.parameter_schema.contents,
             "ui": {}
         }
-    
+
     @property
     def input_configuration(self) -> dict[str, str]:
         """
@@ -95,9 +95,9 @@ class PipelineDefinition:
         """
         schema = self.parameter_schema
         contents = schema.contents
-        
+
         parameters = {
-            p["name"]: p["jsonPath"] 
+            p["name"]: p["jsonPath"]
             for p in get_input_params('$.dataset.params', contents, schema)
         }
         return parameters
@@ -111,9 +111,9 @@ def get_input_params(property_path: str, definition: dict[str, Any], schema: Res
     if '$ref' in definition:
         registry = schema @ Registry()
         resolver = registry.resolver()
-    
+
         resolved = resolver.lookup(f"{schema.id()}{definition['$ref']}").contents
-    
+
     if resolved.get('type') == 'object':
         # recursively get input params for nested objects
         for p, d in resolved.get('properties', {}).items():
@@ -147,9 +147,9 @@ def get_wdl_json_schema(doc: WDL.Document) -> dict[str, Any]:  # type: ignore
     # only get declarations from top-level workflow inputs
     params = {
         child.name: {
-            'obj': child, 
-            'type': str(child.type), 
-            'default': child.expr.literal.value if child.expr and child.expr.literal else None, 
+            'obj': child,
+            'type': str(child.type),
+            'default': child.expr.literal.value if child.expr and child.expr.literal else None,
             'optional': child.type.optional}
         for child in (doc.workflow.inputs or []) if isinstance(child, WDL.Decl)  # type: ignore
     }
@@ -175,7 +175,7 @@ def get_wdl_json_schema(doc: WDL.Document) -> dict[str, Any]:  # type: ignore
         'Array[Boolean]': 'array',
         'Array[File]': 'array',
         'Array[Directory]': 'array',
-        
+
         # complex types
         'Pair': 'string',  # WDL Pair type, encode as JSON string
         'Map': 'string',  # WDL Map type, encode as JSON string
@@ -189,7 +189,7 @@ def get_wdl_json_schema(doc: WDL.Document) -> dict[str, Any]:  # type: ignore
     for name, param in params.items():
         if param['type'].replace('?', '') not in type_map:
             raise ValueError(f"Unsupported WDL type: {param['type']} for parameter {name}")
-        
+
         schema['properties'][name] = {
             "type": type_map[param['type'].replace('?', '')],  # remove optional marker
             "wdlType": param['type'],

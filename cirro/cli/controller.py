@@ -203,7 +203,7 @@ def run_create_pipeline_config(input_params: CreatePipelineConfigArguments, inte
             raise InputError("Root directory is required")
         if not os.path.isdir(input_params['pipeline_dir']):
             raise InputError(f"Root directory {input_params['pipeline_dir']} does not exist")
-    
+
     logger.debug(input_params)
     pipeline_definition = PipelineDefinition(
         root_dir=input_params['pipeline_dir'],
@@ -221,7 +221,7 @@ def run_create_pipeline_config(input_params: CreatePipelineConfigArguments, inte
     with open(output_paths['process-form.json'], 'w') as f:
         logger.info(f"Writing form configuration to {output_paths['process-form.json']}")
         json.dump(pipeline_definition.form_configuration, f, indent=2)
-    
+
     with open(output_paths['process-input.json'], 'w') as f:
         logger.info(f"Writing input configuration to {output_paths['process-input.json']}")
         json.dump(pipeline_definition.input_configuration, f, indent=2)
