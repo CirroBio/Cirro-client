@@ -93,7 +93,7 @@ def configure():
               default='main.wdl')
 @click.option('-o', '--output-dir',
               help='Directory to store the generated configuration files (default: current directory)',
-              default='.',
+              default='.cirro',
               show_default=True)
 @click.option('-i', '--interactive',
               help='Gather arguments interactively',
