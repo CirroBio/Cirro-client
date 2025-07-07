@@ -22,3 +22,9 @@ class UploadArguments(TypedDict):
 class ListArguments(TypedDict):
     project: str
     interactive: bool
+
+
+class CreatePipelineConfigArguments(TypedDict):
+    pipeline_dir: str
+    entrypoint: Optional[str]
+    interactive: bool

@@ -3,6 +3,7 @@ import importlib.metadata
 import os
 import requests
 import sys
+import json
 
 import pandas as pd
 from cirro_api_client.v1.models import UploadDatasetRequest, Status, Executor
@@ -13,11 +14,13 @@ from cirro.cli.interactive.download_args import gather_download_arguments, ask_d
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
 from cirro.cli.interactive.list_dataset_args import gather_list_arguments
 from cirro.cli.interactive.upload_args import gather_upload_arguments
+from cirro.cli.interactive.create_pipeline_config import gather_create_pipeline_config_arguments
 from cirro.cli.interactive.utils import get_id_from_name, get_item_from_name_or_id, InputError
-from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments
+from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments, CreatePipelineConfigArguments
 from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.file_utils import get_files_in_directory
 from cirro.services.service_helpers import list_all_datasets
+from cirro.models.process import PipelineDefinition
 
 NO_PROJECTS = "No projects available"
 # Log to STDOUT
@@ -183,6 +186,45 @@ def run_configure():
                                 base_url=base_url,
                                 transfer_max_retries=None,
                                 enable_additional_checksum=enable_additional_checksum))
+
+
+def run_create_pipeline_config(input_params: CreatePipelineConfigArguments, interactive=False):
+    """
+    Creates the pipeline configuration files for the CLI.
+    This is a placeholder function that can be expanded in the future.
+    """
+    _check_version()
+    logger.info("Creating pipeline configuration files...")
+
+    if interactive:
+        input_params = gather_create_pipeline_config_arguments(input_params)
+    else:
+        if not input_params['pipeline_dir']:
+            raise InputError("Root directory is required")
+        if not os.path.isdir(input_params['pipeline_dir']):
+            raise InputError(f"Root directory {input_params['pipeline_dir']} does not exist")
+    
+    logger.debug(input_params)
+    pipeline_definition = PipelineDefinition(
+        root_dir=input_params['pipeline_dir'],
+        entrypoint=input_params.get('entrypoint'),
+        logger=logger
+    )
+
+    output_dir = input_params.get('output_dir')
+    output_paths = {filename: os.path.join(output_dir, filename)  # type: ignore
+                    for filename in ['process-form.json', 'process-input.json']}
+
+    logger.info(f"Writing pipeline configuration files to {output_dir}")
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(output_paths['process-form.json'], 'w') as f:
+        logger.info(f"Writing form configuration to {output_paths['process-form.json']}")
+        json.dump(pipeline_definition.form_configuration, f, indent=2)
+    
+    with open(output_paths['process-input.json'], 'w') as f:
+        logger.info(f"Writing input configuration to {output_paths['process-input.json']}")
+        json.dump(pipeline_definition.input_configuration, f, indent=2)
 
 
 def _check_configure():
