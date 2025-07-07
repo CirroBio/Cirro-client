@@ -56,7 +56,7 @@ class PipelineDefinition:
                 else:
                     # otherwise, just take the first WDL file found
                     wdl_file = next(f for f in filenames if f.endswith('.wdl'))
-                
+
                 # lazy load wdl dependencies
                 import WDL
                 from cirro.models.process.wdl import get_wdl_json_schema
