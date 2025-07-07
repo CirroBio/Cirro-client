@@ -23,6 +23,7 @@ s3fs = "2025.3.2"
 pyjwt = "^2.10.0"
 msal-extensions = "^1.0.0"
 requests-aws4auth = {version="1.3.1", optional=true}
+miniwdl = "^1.13.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.1.3"
