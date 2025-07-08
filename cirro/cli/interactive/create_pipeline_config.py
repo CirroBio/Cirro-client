@@ -2,19 +2,8 @@ from pathlib import Path
 from typing import Optional
 
 from prompt_toolkit.shortcuts import CompleteStyle
-from prompt_toolkit.validation import Validator, ValidationError
 
 from cirro.cli.interactive import utils
-
-
-class DirectoryValidator(Validator):
-    def validate(self, document):
-        is_a_directory = Path(document.text).expanduser().is_dir()
-        if not is_a_directory or len(document.text.strip()) == 0:
-            raise ValidationError(
-                message='Please enter a valid directory',
-                cursor_position=len(document.text)
-            )
 
 
 def ask_pipeline_root_directory(input_value: str) -> str:
@@ -25,7 +14,7 @@ def ask_pipeline_root_directory(input_value: str) -> str:
         'type': 'path',
         'name': 'pipeline_dir',
         'message': 'Enter the root directory for the pipeline definition',
-        'validate': DirectoryValidator,
+        'validate': utils.DirectoryValidator,
         'default': input_value or '',
         'complete_style': CompleteStyle.READLINE_LIKE,
         'only_directories': True
@@ -57,7 +46,7 @@ def ask_output_directory(input_value: str) -> str:
         'type': 'path',
         'name': 'output_dir',
         'message': 'Enter the output directory for the pipeline configuration files',
-        'validate': DirectoryValidator,
+        'validate': utils.DirectoryValidator,
         'default': input_value or '',
         'complete_style': CompleteStyle.READLINE_LIKE,
         'only_directories': True

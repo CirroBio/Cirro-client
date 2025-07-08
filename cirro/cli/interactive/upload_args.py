@@ -5,10 +5,9 @@ from typing import List
 
 from cirro_api_client.v1.models import Process, Project
 from prompt_toolkit.shortcuts import CompleteStyle
-from prompt_toolkit.validation import Validator, ValidationError
 
 from cirro.cli.interactive.common_args import ask_project
-from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError
+from cirro.cli.interactive.utils import ask, prompt_wrapper, InputError, DirectoryValidator
 from cirro.cli.models import UploadArguments
 from cirro.file_utils import get_files_in_directory, get_files_stats
 
@@ -18,7 +17,7 @@ def ask_data_directory(input_value: str) -> str:
         'type': 'path',
         'name': 'data_directory',
         'message': 'Enter the full path of the data directory',
-        'validate': DataDirectoryValidator,
+        'validate': DirectoryValidator,
         'default': input_value or '',
         'complete_style': CompleteStyle.READLINE_LIKE,
         'only_directories': True
@@ -51,16 +50,6 @@ def ask_description(input_value: str) -> str:
 
     answers = prompt_wrapper(description_prompt)
     return answers['description']
-
-
-class DataDirectoryValidator(Validator):
-    def validate(self, document):
-        is_a_directory = Path(document.text).expanduser().is_dir()
-        if not is_a_directory or len(document.text.strip()) == 0:
-            raise ValidationError(
-                message='Please enter a valid directory',
-                cursor_position=len(document.text)
-            )
 
 
 def confirm_data_files(data_directory: str, files: List[str]):
