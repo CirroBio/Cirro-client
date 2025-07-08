@@ -35,7 +35,7 @@ def ask_pipeline_root_directory(input_value: str) -> str:
     return str(Path(answers['pipeline_dir']).expanduser())
 
 
-def ask_pipeline_entrypoint(input_value: str) -> Optional[str]:
+def ask_pipeline_entrypoint() -> Optional[str]:
     """
     Asks the user for the entrypoint script of the pipeline.
     """
@@ -72,6 +72,6 @@ def gather_create_pipeline_config_arguments(input_params):
     Gathers input parameters for creating pipeline configuration files interactively.
     """
     input_params['pipeline_dir'] = ask_pipeline_root_directory(input_params.get('pipeline_dir'))
-    input_params['entrypoint'] = ask_pipeline_entrypoint(input_params.get('entrypoint'))
+    input_params['entrypoint'] = ask_pipeline_entrypoint()
     input_params['output_dir'] = ask_output_directory(input_params.get('output_dir'))
     return input_params
