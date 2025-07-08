@@ -123,18 +123,18 @@ def get_input_params(property_path: str, definition: dict[str, Any], schema: Res
             nested_path = f"{property_path}.{p}"
             yield from get_input_params(nested_path, d, schema)
     else:
-        jsonPath = property_path
+        json_path = property_path
         param_is_path = (
             (resolved.get('wdlType') and resolved['wdlType'].replace('?', '') in ('File', 'Directory'))
             or (resolved.get('format') and resolved['format'] in ('file-path', 'directory-path'))
         )
         if param_is_path:
             # override the jsonPath to be '$.inputs[*].dataPath'
-            jsonPath = "$.inputs[*].dataPath"
+            json_path = "$.inputs[*].dataPath"
 
         yield {
             'name': property_path.split('.')[-1],
             'type': resolved.get('type', 'string'),
             'default': resolved.get('default', None),
-            'jsonPath': jsonPath,
+            'jsonPath': json_path,
         }
