@@ -33,7 +33,10 @@ def get_nextflow_json_schema(workflow_dir: str, logger: Optional[logging.Logger]
             try:
                 ps.get_schema_path(workflow_dir, local_only=True)
             except AssertionError:
-                pass  # if the schema path is not found, we will generate it
+                # if the schema path is not found, we will generate it
+                if logger:
+                    logger.info("Nextflow schema path not found, generating schema from workflow files.")
+
             ps.get_wf_params()
             ps.make_skeleton_schema()
             ps.remove_schema_notfound_configs()
