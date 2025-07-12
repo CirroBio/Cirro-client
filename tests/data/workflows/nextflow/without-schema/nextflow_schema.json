@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/without-schema//nextflow_schema.json",
+  "title": "without-schema pipeline parameters",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "required_string": {
+      "type": "string"
+    },
+    "required_bool": {
+      "type": "string"
+    },
+    "required_int": {
+      "type": "string"
+    },
+    "required_float": {
+      "type": "string"
+    },
+    "required_path": {
+      "type": "string"
+    },
+    "optional_string": {
+      "type": "string",
+      "default": "optional"
+    },
+    "optional_bool": {
+      "type": "boolean"
+    },
+    "optional_int": {
+      "type": "integer",
+      "default": 42
+    },
+    "optional_float": {
+      "type": "number",
+      "default": 3.14
+    },
+    "optional_path": {
+      "type": "string",
+      "default": "/dev/null"
+    }
+  }
+}

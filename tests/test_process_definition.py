@@ -10,8 +10,23 @@ DATA_PATH = path.join(path.dirname(__file__), 'data')
 
 
 class TestPipelineDefinition(unittest.TestCase):
-    def test_pipeline_definition_nextflow_simple(self):
-        root_dir = path.join(DATA_PATH, 'workflows', 'nextflow', 'simple')
+    def test_pipeline_definition_nextflow_with_schema(self):
+        root_dir = path.join(DATA_PATH, 'workflows', 'nextflow', 'with-schema')
+        pipeline = process.PipelineDefinition(root_dir)
+
+        with open(path.join(root_dir, 'expected-form.json'), 'r') as f:
+            expected_form_configuration = json.load(f)
+            expected_parameter_schema = Resource.from_contents(expected_form_configuration['form'])
+        
+        with open(path.join(root_dir, 'expected-input.json'), 'r') as f:
+            expected_input_configuration = json.load(f)
+        
+        self.assertEqual(pipeline.parameter_schema, expected_parameter_schema)
+        self.assertEqual(pipeline.form_configuration, expected_form_configuration)
+        self.assertEqual(pipeline.input_configuration, expected_input_configuration)
+
+    def test_pipeline_definition_nextflow_without_schema(self):
+        root_dir = path.join(DATA_PATH, 'workflows', 'nextflow', 'without-schema')
         pipeline = process.PipelineDefinition(root_dir)
 
         with open(path.join(root_dir, 'expected-form.json'), 'r') as f:

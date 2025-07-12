@@ -1,7 +1,6 @@
 import os
 from os import path
 from functools import cached_property
-import json
 from typing import Any, Iterable, Optional
 import logging
 
@@ -37,14 +36,16 @@ class PipelineDefinition:
         workflow_files = os.walk(self.root_dir, topdown=True)
         for dirpath, dirnames, filenames in workflow_files:
             # look for a nextflow_schema.json file at the root of the workflow directory
-            if 'nextflow_schema.json' in filenames:
-                schema_path = path.join(dirpath, 'nextflow_schema.json')
-                self.logger.info(f"Nextflow schema found at {schema_path}")
-                with open(schema_path, 'r') as f:
-                    contents = json.load(f)
-
+            is_nextflow = (
+                ('nextflow_schema.json' in filenames)
+                or ('main.nf' in filenames and 'nextflow.config' in filenames)
+            )
+            if is_nextflow:
+                # lazy load nextflow dependencies
+                from cirro.models.process.nextflow import get_nextflow_json_schema
+                contents = get_nextflow_json_schema(self.root_dir, self.logger)
                 break
-            elif any(f.endswith('.wdl') for f in filenames):
+            elif any(f.endswith('.wdl') for f in filenames):  # is WDL
                 # generate schema from WDL workflow
                 wdl_file = None
                 if self.entrypoint:
@@ -58,12 +59,10 @@ class PipelineDefinition:
                     wdl_file = next(f for f in filenames if f.endswith('.wdl'))
 
                 # lazy load wdl dependencies
-                import WDL
                 from cirro.models.process.wdl import get_wdl_json_schema
 
                 wdl_file = path.join(dirpath, wdl_file)
-                doc = WDL.load(wdl_file)
-                contents = get_wdl_json_schema(doc)
+                contents = get_wdl_json_schema(wdl_file, self.logger)
                 break
 
         else:

@@ -1,18 +1,30 @@
-from typing import Any
+from typing import Any, Optional
+import logging
 
 import WDL
 
 
-def get_wdl_json_schema(doc: WDL.Document) -> dict[str, Any]:  # type: ignore
+def get_wdl_json_schema(wdl_file: str, logger: Optional[logging.Logger] = None) -> dict[str, Any]:  # type: ignore
     """
-    Generate a JSON schema from a WDL Document.
+    Generate a JSON schema for parameters from a WDL workflow.
+
+    :param wdl_file: Path to the main WDL file.
     """
+    # Load the WDL document
+    doc = WDL.load(wdl_file)
+
     # strictly look for top level workflow inputs
     if not doc.workflow:
-        raise ValueError("WDL Document does not contain a workflow.")
+        msg = "WDL Document does not contain a workflow."
+        if logger:
+            logger.error(msg)
+        raise ValueError(msg)
 
     if not doc.workflow.inputs:
-        raise ValueError("WDL Document workflow does not contain inputs.")
+        msg = "WDL Document workflow does not contain inputs."
+        if logger:
+            logger.error(msg)
+        raise ValueError(msg)
 
     # only get declarations from top-level workflow inputs
     params = {
@@ -58,7 +70,10 @@ def get_wdl_json_schema(doc: WDL.Document) -> dict[str, Any]:  # type: ignore
     # convert params into JSON schema properties
     for name, param in params.items():
         if param['type'].replace('?', '') not in type_map:
-            raise ValueError(f"Unsupported WDL type: {param['type']} for parameter {name}")
+            msg = f"Unsupported WDL type: {param['type']} for parameter {name}"
+            if logger:
+                logger.error(msg)
+            raise ValueError(msg)
 
         schema['properties'][name] = {
             "type": type_map[param['type'].replace('?', '')],  # remove optional marker
