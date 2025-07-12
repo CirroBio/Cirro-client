@@ -3,8 +3,20 @@ from os import path
 from functools import cached_property
 from typing import Any, Iterable, Optional
 import logging
+from enum import Enum
 
 from referencing import Resource, Registry
+
+
+CONFIG_APP_URL = "https://app.cirro.bio/tools/pipeline-configurator"
+
+
+class ConfigAppStatus(Enum):
+    """
+    Enum to represent the status of the config app recommendation.
+    """
+    RECOMMENDED = "recommended"
+    OPTIONAL = "optional"
 
 
 class PipelineDefinition:
@@ -13,11 +25,12 @@ class PipelineDefinition:
     """
 
     def __init__(self, root_dir: str, entrypoint: Optional[str] = None, logger: Optional[logging.Logger] = None):
-        self.root_dir = path.expanduser(path.expandvars(root_dir))
-        self.entrypoint = entrypoint
+        self.root_dir: str = path.expanduser(path.expandvars(root_dir))
+        self.entrypoint: Optional[str] = entrypoint
+        self.config_app_status: ConfigAppStatus = ConfigAppStatus.RECOMMENDED
 
         if logger:
-            self.logger = logger
+            self.logger: logging.Logger = logger
         else:
             log_formatter = logging.Formatter(
                 '%(asctime)s %(levelname)-8s [PipelineDefinition] %(message)s'
@@ -44,6 +57,10 @@ class PipelineDefinition:
                 # lazy load nextflow dependencies
                 from cirro.models.process.nextflow import get_nextflow_json_schema
                 contents = get_nextflow_json_schema(self.root_dir, self.logger)
+
+                if 'nextflow_schema.json' in filenames:
+                    self.config_app_status = ConfigAppStatus.OPTIONAL
+
                 break
             elif any(f.endswith('.wdl') for f in filenames):  # is WDL
                 # generate schema from WDL workflow
@@ -68,16 +85,7 @@ class PipelineDefinition:
         else:
             raise RuntimeError("Unrecognized workflow format. Please provide a valid Nextflow or WDL workflow.")
 
-        _all_of = {}
-        if contents.get('allOf'):
-            # this is typically a root attribute in nextflow_schema.json files and a list of $ref
-            # convert this to an object
-            _all_of = {item["$ref"].split('/')[-1]: item for item in contents['allOf']}
-            del contents['allOf']
-
-        contents['properties'] = contents.get('properties', {}) | _all_of
         schema = Resource.from_contents(contents)
-
         return schema
 
     @property

@@ -24,6 +24,7 @@ class TestPipelineDefinition(unittest.TestCase):
         self.assertEqual(pipeline.parameter_schema, expected_parameter_schema)
         self.assertEqual(pipeline.form_configuration, expected_form_configuration)
         self.assertEqual(pipeline.input_configuration, expected_input_configuration)
+        self.assertEqual(pipeline.config_app_status, process.ConfigAppStatus.OPTIONAL)
 
     def test_pipeline_definition_nextflow_without_schema(self):
         root_dir = path.join(DATA_PATH, 'workflows', 'nextflow', 'without-schema')
@@ -39,6 +40,7 @@ class TestPipelineDefinition(unittest.TestCase):
         self.assertEqual(pipeline.parameter_schema, expected_parameter_schema)
         self.assertEqual(pipeline.form_configuration, expected_form_configuration)
         self.assertEqual(pipeline.input_configuration, expected_input_configuration)
+        self.assertEqual(pipeline.config_app_status, process.ConfigAppStatus.RECOMMENDED)
 
     def test_pipeline_definition_wdl_simple(self):
         root_dir = path.join(DATA_PATH, 'workflows', 'wdl', 'simple')
@@ -54,6 +56,7 @@ class TestPipelineDefinition(unittest.TestCase):
         self.assertEqual(pipeline.parameter_schema, expected_parameter_schema)
         self.assertEqual(pipeline.form_configuration, expected_form_configuration)
         self.assertEqual(pipeline.input_configuration, expected_input_configuration)
+        self.assertEqual(pipeline.config_app_status, process.ConfigAppStatus.RECOMMENDED)
 
     def test_pipeline_definition_wdl_alt_entrypoint(self):
         root_dir = path.join(DATA_PATH, 'workflows', 'wdl', 'alt-entrypoint')
@@ -69,6 +72,7 @@ class TestPipelineDefinition(unittest.TestCase):
         self.assertEqual(pipeline.parameter_schema, expected_parameter_schema)
         self.assertEqual(pipeline.form_configuration, expected_form_configuration)
         self.assertEqual(pipeline.input_configuration, expected_input_configuration)
+        self.assertEqual(pipeline.config_app_status, process.ConfigAppStatus.RECOMMENDED)
 
     def test_get_input_params_simple(self):
         schema_path = path.join(DATA_PATH, 'jsonschemas', 'simple.json')

@@ -20,7 +20,7 @@ from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments, 
 from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.file_utils import get_files_in_directory
 from cirro.services.service_helpers import list_all_datasets
-from cirro.models.process import PipelineDefinition
+from cirro.models.process import PipelineDefinition, ConfigAppStatus, CONFIG_APP_URL
 
 NO_PROJECTS = "No projects available"
 # Log to STDOUT
@@ -225,6 +225,15 @@ def run_create_pipeline_config(input_params: CreatePipelineConfigArguments, inte
     with open(output_paths['process-input.json'], 'w') as f:
         logger.info(f"Writing input configuration to {output_paths['process-input.json']}")
         json.dump(pipeline_definition.input_configuration, f, indent=2)
+
+    logger.info("Pipeline configuration files created successfully.")
+    print(pipeline_definition.config_app_status)
+
+    if pipeline_definition.config_app_status == ConfigAppStatus.RECOMMENDED:
+        logger.warning(
+            "It is recommended that you verify your pipeline configuration "
+            "using the Cirro Pipeline Configuration App for this pipeline:\n"
+            f"{CONFIG_APP_URL}")
 
 
 def _check_configure():

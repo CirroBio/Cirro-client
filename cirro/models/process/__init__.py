@@ -1,6 +1,8 @@
-from cirro.models.process.process import PipelineDefinition, get_input_params
+from cirro.models.process.process import PipelineDefinition, ConfigAppStatus, get_input_params, CONFIG_APP_URL
 
 __all__ = [
     'PipelineDefinition',
-    'get_input_params'
+    'ConfigAppStatus',
+    'get_input_params',
+    'CONFIG_APP_URL'
 ]

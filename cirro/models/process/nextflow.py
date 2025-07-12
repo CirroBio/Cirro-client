@@ -30,7 +30,10 @@ def get_nextflow_json_schema(workflow_dir: str, logger: Optional[logging.Logger]
 
             # since this is already filtered to a case where a nextflow_schema.json file is not found,
             # only use a subset of functionality from the build_schema method and use our logger if provided.
-            ps.get_schema_path(workflow_dir, local_only=True)
+            try:
+                ps.get_schema_path(workflow_dir, local_only=True)
+            except AssertionError:
+                pass  # if the schema path is not found, we will generate it
             ps.get_wf_params()
             ps.make_skeleton_schema()
             ps.remove_schema_notfound_configs()
@@ -51,5 +54,14 @@ def get_nextflow_json_schema(workflow_dir: str, logger: Optional[logging.Logger]
         if logger:
             logger.error(msg)
         raise FileNotFoundError(msg)
+
+    _all_of = {}
+    if contents.get('allOf'):
+        # this is typically a root attribute in nextflow_schema.json files and a list of $ref
+        # convert this to an object
+        _all_of = {item["$ref"].split('/')[-1]: item for item in contents['allOf']}
+        del contents['allOf']
+
+    contents['properties'] = contents.get('properties', {}) | _all_of
 
     return contents
