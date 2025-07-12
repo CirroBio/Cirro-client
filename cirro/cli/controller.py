@@ -227,7 +227,6 @@ def run_create_pipeline_config(input_params: CreatePipelineConfigArguments, inte
         json.dump(pipeline_definition.input_configuration, f, indent=2)
 
     logger.info("Pipeline configuration files created successfully.")
-    print(pipeline_definition.config_app_status)
 
     if pipeline_definition.config_app_status == ConfigAppStatus.RECOMMENDED:
         logger.warning(
