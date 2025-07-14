@@ -37,8 +37,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'corretto'
-          java-package: 'jre'
+          distribution: 'temurin'
       
       - name: Install Nextflow 25.04.2 (standalone)
         run: |
