@@ -1,7 +1,7 @@
 import click
 from cirro_api_client.v1.errors import CirroException
 
-from cirro.cli import run_ingest, run_download, run_configure, run_list_datasets
+from cirro.cli import run_ingest, run_download, run_configure, run_list_datasets, run_create_pipeline_config
 from cirro.cli.controller import handle_error
 from cirro.cli.interactive.utils import InputError
 
@@ -77,6 +77,30 @@ def upload(**kwargs):
 @run.command(help='Configure authentication')
 def configure():
     run_configure()
+
+
+@run.command(help='Create pipeline configuration files', no_args_is_help=True)
+@click.option('-p', '--pipeline-dir',
+              required=True,
+              metavar='DIRECTORY',
+              help='Directory containing the pipeline definition files (e.g., WDL or Nextflow)',
+              default='.',
+              show_default=True)
+@click.option('-e', '--entrypoint',
+              help=(
+                  'Entrypoint WDL file (optional, if not specified, the first WDL file found will be used).'
+                  ' Ignored for Nextflow pipelines.'),
+              default='main.wdl')
+@click.option('-o', '--output-dir',
+              help='Directory to store the generated configuration files (default: current directory)',
+              default='.cirro',
+              show_default=True)
+@click.option('-i', '--interactive',
+              help='Gather arguments interactively',
+              is_flag=True, default=False)
+def create_pipeline_config(**kwargs):
+    check_required_args(kwargs)
+    run_create_pipeline_config(kwargs, interactive=kwargs.get('interactive'))
 
 
 def main():

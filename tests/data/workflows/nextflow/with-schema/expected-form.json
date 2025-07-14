@@ -1,0 +1,63 @@
+{
+    "form": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "https://raw.githubusercontent.com///nextflow_schema.json",
+        "title": " pipeline parameters",
+        "description": "",
+        "type": "object",
+        "properties": {
+            "required_string": {
+                "type": "string",
+                "description": "a required string"
+            },
+            "required_bool": {
+                "type": "boolean",
+                "description": "a required boolean"
+            },
+            "required_int": {
+                "type": "integer",
+                "description": "a required integer"
+            },
+            "required_float": {
+                "type": "number",
+                "description": "a required float"
+            },
+            "required_path": {
+                "type": "string",
+                "description": "a required path"
+            },
+            "optional_string": {
+                "type": "string",
+                "default": "optional",
+                "description": "an optional string"
+            },
+            "optional_bool": {
+                "type": "boolean",
+                "description": "an optional boolean"
+            },
+            "optional_int": {
+                "type": "integer",
+                "default": 42,
+                "description": "an optional integer"
+            },
+            "optional_float": {
+                "type": "number",
+                "default": 3.14,
+                "description": "an optional float"
+            },
+            "optional_path": {
+                "type": "string",
+                "default": "/dev/null",
+                "description": "an optional path"
+            }
+        },
+        "required": [
+            "required_string",
+            "required_bool",
+            "required_int",
+            "required_float",
+            "required_path"
+        ]
+    },
+    "ui": {}
+}

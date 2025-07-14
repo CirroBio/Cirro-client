@@ -1,0 +1,77 @@
+{
+    "form": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": "urn:cirro:wdl:schema",
+        "type": "object",
+        "properties": {
+            "required_string": {
+                "type": "string",
+                "wdlType": "String",
+                "default": null,
+                "description": "Parameter required_string of type String"
+            },
+            "required_bool": {
+                "type": "boolean",
+                "wdlType": "Boolean",
+                "default": null,
+                "description": "Parameter required_bool of type Boolean"
+            },
+            "required_int": {
+                "type": "integer",
+                "wdlType": "Int",
+                "default": null,
+                "description": "Parameter required_int of type Int"
+            },
+            "required_float": {
+                "type": "number",
+                "wdlType": "Float",
+                "default": null,
+                "description": "Parameter required_float of type Float"
+            },
+            "required_path": {
+                "type": "string",
+                "wdlType": "File",
+                "default": null,
+                "description": "Parameter required_path of type File"
+            },
+            "optional_string": {
+                "type": "string",
+                "wdlType": "String?",
+                "default": "optional",
+                "description": "Parameter optional_string of type String?"
+            },
+            "optional_bool": {
+                "type": "boolean",
+                "wdlType": "Boolean?",
+                "default": false,
+                "description": "Parameter optional_bool of type Boolean?"
+            },
+            "optional_int": {
+                "type": "integer",
+                "wdlType": "Int?",
+                "default": 42,
+                "description": "Parameter optional_int of type Int?"
+            },
+            "optional_float": {
+                "type": "number",
+                "wdlType": "Float?",
+                "default": 3.14,
+                "description": "Parameter optional_float of type Float?"
+            },
+            "optional_path": {
+                "type": "string",
+                "wdlType": "File?",
+                "default": "/dev/null",
+                "description": "Parameter optional_path of type File?"
+            }
+        },
+        "required": [
+            "required_string",
+            "required_bool",
+            "required_int",
+            "required_float",
+            "required_path"
+        ]
+    },
+    "ui": {}
+}

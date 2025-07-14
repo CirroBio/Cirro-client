@@ -1,5 +1,7 @@
+from pathlib import Path
 from typing import List, Union, Callable, TypeVar, Optional
 
+from prompt_toolkit.validation import Validator, ValidationError
 import questionary
 from questionary import prompt
 
@@ -7,6 +9,16 @@ from questionary import prompt
 class InputError(Exception):
     """Errors detected from user input"""
     pass
+
+
+class DirectoryValidator(Validator):
+    def validate(self, document):
+        is_a_directory = Path(document.text).expanduser().is_dir()
+        if not is_a_directory or len(document.text.strip()) == 0:
+            raise ValidationError(
+                message='Please enter a valid directory',
+                cursor_position=len(document.text)
+            )
 
 
 def prompt_wrapper(questions):

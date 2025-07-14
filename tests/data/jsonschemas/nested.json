@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "urn:cirro-cli:tests:jsonschema:nested.json",
+    "description": "nested json schema for testing purposes",
+    "type": "object",
+    "properties": {
+        "section_1": {
+            "type": "object",
+            "description": "A parameter section",
+            "properties": {
+                "param_1": {
+                    "type": "string",
+                    "description": "A simple string parameter"
+                }
+            }
+        },
+        "param_2": {
+            "type": "integer",
+            "description": "An integer parameter",
+            "default": 42
+        },
+        "param_3": {
+            "type": "boolean",
+            "description": "A boolean parameter",
+            "default": true
+        }
+    }
+}
