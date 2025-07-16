@@ -46,8 +46,7 @@ def ask_output_directory(input_value: str) -> str:
         'type': 'path',
         'name': 'output_dir',
         'message': 'Enter the output directory for the pipeline configuration files',
-        'validate': utils.DirectoryValidator,
-        'default': input_value or '',
+        'default': input_value or str(Path.cwd()),
         'complete_style': CompleteStyle.READLINE_LIKE,
         'only_directories': True
     }
