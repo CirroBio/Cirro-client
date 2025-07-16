@@ -8,7 +8,7 @@ from enum import Enum
 from referencing import Resource, Registry
 
 
-CONFIG_APP_URL = "https://app.cirro.bio/tools/pipeline-configurator"
+CONFIG_APP_URL = "https://app.cirro.bio/tools/pipeline-configurator/"
 
 
 class ConfigAppStatus(Enum):
