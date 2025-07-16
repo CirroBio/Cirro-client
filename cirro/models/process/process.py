@@ -51,7 +51,7 @@ class PipelineDefinition:
             # look for a nextflow_schema.json file at the root of the workflow directory
             is_nextflow = (
                 ('nextflow_schema.json' in filenames)
-                or ('main.nf' in filenames and 'nextflow.config' in filenames)
+                or ('nextflow.config' in filenames)
             )
             if is_nextflow:
                 # lazy load nextflow dependencies
