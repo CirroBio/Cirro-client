@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import time
@@ -200,11 +201,24 @@ def download_directory(directory: str, files: List[str], s3_client: S3Client, bu
                                 key=key)
 
 
-def get_crc64_checksum(file: PathLike) -> str:
+def get_checksum(file: PathLike, remote_checksum_name: str, chunk_size = 1024 * 1024) -> str:
     from awscrt import checksums
-    import base64
+    checksum_func_map = {
+        'CRC32': checksums.crc32,
+        'CRC32C': checksums.crc32c,
+        'CRC64NVME': checksums.crc64nvme
+    }
 
-    b = Path(file).read_bytes()
-    checksum = checksums.crc64nvme(b)
-    checksum_bytes = checksum.to_bytes(8, byteorder='big')
+    checksum_func = checksum_func_map.get(remote_checksum_name)
+
+    crc = 0
+    with open(file, "rb") as f:
+        while True:
+            chunk = f.read(chunk_size)
+            if not chunk:
+                break
+            crc = checksum_func(chunk, crc)
+
+    byte_length = 8 if remote_checksum_name == 'CRC64NVME' else 4
+    checksum_bytes = crc.to_bytes(byte_length, byteorder='big')
     return base64.b64encode(checksum_bytes).decode('utf-8')

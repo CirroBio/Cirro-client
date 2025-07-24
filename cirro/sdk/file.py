@@ -188,9 +188,20 @@ class DataPortalFile(DataPortalAsset):
 
     def validate(self, local_path: PathLike):
         """
-        Validates that the local file matches the file in the dataset
+        Validates that the local file matches this file.
+        Throws ValueError if the file does not match.
         """
         self._client.file.validate_file(self._file, local_path)
+
+    def is_valid(self, local_path: PathLike) -> bool:
+        """
+        Returns True if the local file matches this file.
+        """
+        try:
+            self.validate(local_path)
+            return True
+        except ValueError:
+            return False
 
 
 class DataPortalFiles(DataPortalAssets[DataPortalFile]):

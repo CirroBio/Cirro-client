@@ -35,7 +35,7 @@ class S3Client:
     def __init__(self, creds_getter: Callable[[], AWSCredentials], enable_additional_checksum=False):
         self._creds_getter = creds_getter
         self._client = self._build_session_client()
-        self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict()
+        self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict(ChecksumAlgorithm='CRC64NVME')
         self._download_args = dict(ChecksumMode='ENABLED') if enable_additional_checksum else dict()
 
     def get_aws_client(self):

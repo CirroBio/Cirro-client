@@ -94,6 +94,10 @@ class AppConfig:
             if self.user_config else False
         self._init_config()
 
+    @property
+    def checksum_method(self):
+        return 'SHA-256' if self.enable_additional_checksum else 'CRC64'
+
     def _init_config(self):
         self.rest_endpoint = f'https://{self.base_url}/api'
         self.auth_endpoint = f'https://{self.base_url}/api/auth'

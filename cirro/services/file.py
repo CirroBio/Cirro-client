@@ -9,7 +9,7 @@ from cirro_api_client.v1.api.file import generate_project_file_access_token
 from cirro_api_client.v1.models import AWSCredentials, ProjectAccessType
 
 from cirro.clients.s3 import S3Client
-from cirro.file_utils import upload_directory, download_directory, get_crc64_checksum
+from cirro.file_utils import upload_directory, download_directory, get_checksum
 from cirro.models.file import FileAccessContext, File, PathLike
 from cirro.services.base import BaseService
 
@@ -179,18 +179,41 @@ class FileService(BaseService):
         )
 
     def validate_file(self, file: File, local_file: PathLike):
-        local_checksum = get_crc64_checksum(local_file)
-        stats = self.get_file_stats(file)
-        remote_checksum = stats.get('ChecksumCRC64NVME')
+        """
+        Validates the checksum of a file against a local file
+        This is used to ensure file integrity after download or upload
 
-        if remote_checksum is None:
-            raise ValueError(f"File {file.relative_path} does not have a checksum available for validation.")
+        Throws a ValueError if the checksums do not match and
+        a RuntimeWarning if the remote checksum is not available.
+
+        Checksums might not be available if the file was uploaded without checksum support
+
+        :param file: Remote file object to validate
+        :param local_file: Local file path to compare against
+        """
+        stats = self.get_file_stats(file)
+
+        remote_checksum_key = next((prop for prop in stats.keys() if 'Checksum' in prop and prop != 'ChecksumType'), None)
+
+        if 'ChecksumType' in stats and stats['ChecksumType'] != 'FULL_OBJECT':
+            raise RuntimeWarning(f"Only 'FULL_OBJECT' checksums are supported, not {stats['ChecksumType']}")
+
+        if remote_checksum_key is None:
+            raise RuntimeWarning(f"File {file.relative_path} does not have a checksum available for validation.")
+
+        remote_checksum = stats[remote_checksum_key]
+        remote_checksum_name = remote_checksum_key.replace('Checksum', '')
+        local_checksum = get_checksum(local_file, remote_checksum_name)
 
         if local_checksum != remote_checksum:
             raise ValueError(f"Checksum mismatch for file {file.relative_path}: "
                              f"local {local_checksum}, remote {remote_checksum}")
 
     def get_file_stats(self, file: File) -> dict:
+        """
+        Gets the file stats for a file, such as size, checksum, etc.
+        Equivalent to the `head_object` operation in S3
+        """
         s3_client = self._generate_s3_client(file.access_context)
 
         full_path = f'{file.access_context.prefix}/{file.relative_path}'
