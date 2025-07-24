@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 from cirro.models.s3_path import S3Path
 
+
 def _write_json(dat, local_path: str, indent=4):
     with Path(local_path).open(mode="wt") as handle:
         return json.dump(dat, handle, indent=indent)
