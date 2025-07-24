@@ -2,12 +2,14 @@ import json
 import logging
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import boto3
-import pandas as pd
+
+if TYPE_CHECKING:
+    from pandas import DataFrame
 
 from cirro.models.s3_path import S3Path
-
 
 def _write_json(dat, local_path: str, indent=4):
     with Path(local_path).open(mode="wt") as handle:
@@ -66,11 +68,12 @@ class PreprocessDataset:
         self.logger.info(f"Number of files in dataset: {self.files.shape[0]:,}")
         self.logger.info(f"Number of samples in dataset: {self.samplesheet.shape[0]:,}")
 
-    def _read_csv(self, suffix: str, required_columns=None) -> pd.DataFrame:
+    def _read_csv(self, suffix: str, required_columns=None) -> 'DataFrame':
         """Read a CSV from the dataset and check for any required columns."""
         if required_columns is None:
             required_columns = []
 
+        import pandas as pd
         df = pd.read_csv(f"{self.s3_dataset}/{suffix}")
         for col in required_columns:
             assert col in df.columns.values, f"Did not find expected columns {col} in {self.s3_dataset}/{suffix}"
