@@ -50,6 +50,26 @@ class ReferenceService(FileEnabledService):
             reference_files (list[PathLike]): Path to the reference file to upload
             project_id (str): ID of the project to upload the reference to
             ref_type (ReferenceType): Type of the reference
+
+        ```python
+        from pathlib import Path
+
+        from cirro import CirroApi
+
+        cirro = CirroApi()
+
+        crispr_library = cirro.references.get_type("CRISPR sgRNA Library")
+        files = [
+            Path("~/crispr_library.csv").expanduser()
+        ]
+
+        cirro.references.upload_reference(
+            name="Library Name",
+            project_id="project-id",
+            ref_type=crispr_library,
+            reference_files=files,
+        )
+        ```
         """
         # Validate name
         if ' ' in name:
