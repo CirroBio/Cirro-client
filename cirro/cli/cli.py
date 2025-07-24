@@ -82,7 +82,7 @@ def upload(**kwargs):
 @click.option('--project',
                 help='Name or ID of the project')
 @click.option('--reference-file',
-              help='Location of reference file to upload',
+              help='Location of reference file to upload (can specify multiple files)',
               multiple=True)
 @click.option('-i', '--interactive',
               help='Gather arguments interactively',
