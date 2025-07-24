@@ -56,7 +56,7 @@ class CirroApi:
         self._metrics_service = MetricsService(self._api_client)
         self._metadata_service = MetadataService(self._api_client)
         self._billing_service = BillingService(self._api_client)
-        self._references_service = ReferenceService(self._api_client)
+        self._references_service = ReferenceService(self._api_client, file_service=self._file_service)
         self._shares_service = ShareService(self._api_client)
         self._users_service = UserService(self._api_client)
 
