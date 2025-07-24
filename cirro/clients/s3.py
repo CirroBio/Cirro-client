@@ -88,7 +88,7 @@ class S3Client:
         """
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/head_object.html
         """
-        return self._client.head_object(Bucket=bucket, Key=key)
+        return self._client.head_object(Bucket=bucket, Key=key, ChecksumMode='ENABLED')
 
     def _build_session_client(self):
         creds = self._creds_getter()

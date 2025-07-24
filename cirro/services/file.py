@@ -9,7 +9,7 @@ from cirro_api_client.v1.api.file import generate_project_file_access_token
 from cirro_api_client.v1.models import AWSCredentials, ProjectAccessType
 
 from cirro.clients.s3 import S3Client
-from cirro.file_utils import upload_directory, download_directory
+from cirro.file_utils import upload_directory, download_directory, get_crc64_checksum
 from cirro.models.file import FileAccessContext, File, PathLike
 from cirro.services.base import BaseService
 
@@ -93,6 +93,7 @@ class FileService(BaseService):
         """
         return self.get_file_from_path(file.access_context, file.relative_path)
 
+
     def get_file_from_path(self, access_context: FileAccessContext, file_path: str) -> bytes:
         """
         Gets the contents of a file by providing the path, used internally
@@ -175,6 +176,28 @@ class FileService(BaseService):
             s3_client,
             access_context.bucket,
             access_context.prefix
+        )
+
+    def validate_file(self, file: File, local_file: PathLike):
+        local_checksum = get_crc64_checksum(local_file)
+        stats = self.get_file_stats(file)
+        remote_checksum = stats.get('ChecksumCRC64NVME')
+
+        if remote_checksum is None:
+            raise ValueError(f"File {file.relative_path} does not have a checksum available for validation.")
+
+        if local_checksum != remote_checksum:
+            raise ValueError(f"Checksum mismatch for file {file.relative_path}: "
+                             f"local {local_checksum}, remote {remote_checksum}")
+
+    def get_file_stats(self, file: File) -> dict:
+        s3_client = self._generate_s3_client(file.access_context)
+
+        full_path = f'{file.access_context.prefix}/{file.relative_path}'
+
+        return s3_client.get_file_stats(
+            bucket=file.access_context.bucket,
+            key=full_path
         )
 
     def _generate_s3_client(self, access_context: FileAccessContext):

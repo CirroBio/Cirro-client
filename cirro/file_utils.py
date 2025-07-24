@@ -198,3 +198,13 @@ def download_directory(directory: str, files: List[str], s3_client: S3Client, bu
         s3_client.download_file(local_path=local_path,
                                 bucket=bucket,
                                 key=key)
+
+
+def get_crc64_checksum(file: PathLike) -> str:
+    from awscrt import checksums
+    import base64
+
+    b = Path(file).read_bytes()
+    checksum = checksums.crc64nvme(b)
+    checksum_bytes = checksum.to_bytes(8, byteorder='big')
+    return base64.b64encode(checksum_bytes).decode('utf-8')

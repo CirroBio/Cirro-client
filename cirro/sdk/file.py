@@ -1,15 +1,15 @@
 import gzip
 from io import BytesIO, StringIO
 from typing import List
+from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import anndata
 
 from cirro.cirro_client import CirroApi
-from cirro.models.file import File
+from cirro.models.file import File, PathLike
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.utils import convert_size
@@ -185,6 +185,12 @@ class DataPortalFile(DataPortalAsset):
             download_location,
             [self.relative_path]
         )
+
+    def validate(self, local_path: PathLike):
+        """
+        Validates that the local file matches the file in the dataset
+        """
+        self._client.file.validate_file(self._file, local_path)
 
 
 class DataPortalFiles(DataPortalAssets[DataPortalFile]):
