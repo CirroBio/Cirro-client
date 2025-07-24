@@ -2,11 +2,10 @@ import gzip
 from io import BytesIO, StringIO
 from typing import List
 
-import pandas as pd
-
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     import anndata
+    from pandas import DataFrame
 
 from cirro.cirro_client import CirroApi
 from cirro.models.file import File
@@ -88,7 +87,7 @@ class DataPortalFile(DataPortalAsset):
 
         return self._client.file.get_file(self._file)
 
-    def read_csv(self, compression='infer', encoding='utf-8', **kwargs) -> pd.DataFrame:
+    def read_csv(self, compression='infer', encoding='utf-8', **kwargs) -> 'DataFrame':
         """
         Parse the file as a Pandas DataFrame.
 
@@ -100,6 +99,7 @@ class DataPortalFile(DataPortalAsset):
         All other keyword arguments are passed to pandas.read_csv
         https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html
         """
+        import pandas
 
         if compression == 'infer':
             # If the file appears to be compressed
@@ -119,7 +119,7 @@ class DataPortalFile(DataPortalAsset):
         else:
             handle = StringIO(self._get().decode(encoding))
 
-        df = pd.read_csv(
+        df = pandas.read_csv(
             handle,
             compression=compression,
             encoding=encoding,

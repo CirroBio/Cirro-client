@@ -5,7 +5,6 @@ import os
 import sys
 from pathlib import Path
 
-import pandas as pd
 import requests
 from cirro_api_client.v1.models import UploadDatasetRequest, Status, Executor
 
@@ -58,6 +57,8 @@ def run_list_datasets(input_params: ListArguments, interactive=False):
     datasets = cirro.datasets.list(input_params['project'])
 
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
+
+    import pandas as pd
     df = pd.DataFrame.from_records([d.to_dict() for d in sorted_datasets])
     df = df[['id', 'name', 'description', 'processId', 'status', 'createdBy', 'createdAt']]
     print(df.to_string())
