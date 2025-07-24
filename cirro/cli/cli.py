@@ -76,11 +76,11 @@ def upload(**kwargs):
 
 @run.command(help='Upload a reference to a project', no_args_is_help=True)
 @click.option('--name',
-                help='Name of the reference')
+              help='Name of the reference')
 @click.option('--reference-type',
-                help='Type of the reference (e.g., Reference Genome (FASTA))')
+              help='Type of the reference (e.g., Reference Genome (FASTA))')
 @click.option('--project',
-                help='Name or ID of the project')
+              help='Name or ID of the project')
 @click.option('--reference-file',
               help='Location of reference file to upload (can specify multiple files)',
               multiple=True)

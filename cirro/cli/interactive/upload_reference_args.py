@@ -28,6 +28,7 @@ class ReferenceFileValidator(Validator):
                 cursor_position=len(document.text)
             )
 
+
 def ask_reference_type(reference_types: list[ReferenceType], input_value: str = None) -> ReferenceType:
     reference_type_names = sorted([ref_type.name for ref_type in reference_types])
     reference_type_name = ask(
@@ -41,6 +42,7 @@ def ask_reference_type(reference_types: list[ReferenceType], input_value: str = 
         if ref_type.name == reference_type_name:
             return ref_type
     raise ValueError(f'Reference type "{reference_type_name}" not found')
+
 
 def ask_name(input_value: str = None) -> str:
     return ask(
@@ -68,7 +70,9 @@ def ask_reference_files(reference_type: ReferenceType) -> list[Path]:
     return reference_files
 
 
-def gather_reference_upload_arguments(input_params: UploadReferenceArguments, projects: list[Project], reference_types: list[ReferenceType]):
+def gather_reference_upload_arguments(input_params: UploadReferenceArguments,
+                                      projects: list[Project],
+                                      reference_types: list[ReferenceType]):
     input_params['project'] = ask_project(projects, input_params.get('project'))
     input_params['name'] = ask_name(input_params.get('name'))
 

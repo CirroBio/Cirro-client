@@ -9,13 +9,14 @@ from cirro.models.reference import ReferenceValidation
 
 def format_expected_file(validation: ReferenceTypeValidationItem):
     save_as = validation.additional_properties.get('saveAs')
-    if glob:= validation.additional_properties.get('glob'):
+    if glob := validation.additional_properties.get('glob'):
         return f'{glob} (e.g., {save_as})'
     file_type = validation.additional_properties.get('fileType')
     return f'.{file_type} (e.g., {save_as})'
 
 
-def get_matching_validation(file_name: str, validations: list[ReferenceTypeValidationItem]) -> Optional[ReferenceValidation]:
+def get_matching_validation(file_name: str,
+                            validations: list[ReferenceTypeValidationItem]) -> Optional[ReferenceValidation]:
     for validation in validations:
         validation_dict: ReferenceValidation = validation.to_dict()
         glob_pattern = validation_dict.get('glob')
