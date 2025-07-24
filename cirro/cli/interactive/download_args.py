@@ -12,11 +12,13 @@ from cirro.models.file import File
 from cirro.utils import format_date
 
 
-def _format_share(dataset: DatasetWithShare) -> str:
-    return f'({dataset.share.name})' if dataset.share else ''
+def _format_share(dataset: Dataset | DatasetWithShare) -> str:
+    if isinstance(dataset, DatasetWithShare) and dataset.share:
+        return f'({dataset.share.name})'
+    return ''
 
 
-def ask_dataset(datasets: List[DatasetWithShare], input_value: str) -> str:
+def ask_dataset(datasets: List[Dataset], input_value: str) -> str:
     if len(datasets) == 0:
         raise InputError("No datasets available")
     sorted_datasets = sorted(datasets, key=lambda d: d.created_at, reverse=True)
