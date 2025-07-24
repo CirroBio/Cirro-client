@@ -188,6 +188,8 @@ class FileService(BaseService):
 
         Checksums might not be available if the file was uploaded without checksum support
 
+        https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html
+
         :param file: Remote file object to validate
         :param local_file: Local file path to compare against
         """
