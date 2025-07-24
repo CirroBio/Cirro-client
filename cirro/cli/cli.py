@@ -2,7 +2,7 @@ import click
 from cirro_api_client.v1.errors import CirroException
 
 from cirro.cli import run_ingest, run_download, run_configure, run_list_datasets, run_create_pipeline_config
-from cirro.cli.controller import handle_error
+from cirro.cli.controller import handle_error, run_upload_reference
 from cirro.cli.interactive.utils import InputError
 
 
@@ -72,6 +72,24 @@ def download(**kwargs):
 def upload(**kwargs):
     check_required_args(kwargs)
     run_ingest(kwargs, interactive=kwargs.get('interactive'))
+
+
+@run.command(help='Upload a reference to a project', no_args_is_help=True)
+@click.option('--name',
+                help='Name of the reference')
+@click.option('--reference-type',
+                help='Type of the reference (e.g., Reference Genome (FASTA))')
+@click.option('--project',
+                help='Name or ID of the project')
+@click.option('--reference-file',
+              help='Location of reference file to upload',
+              multiple=True)
+@click.option('-i', '--interactive',
+              help='Gather arguments interactively',
+              is_flag=True, default=False)
+def upload_reference(**kwargs):
+    check_required_args(kwargs)
+    run_upload_reference(kwargs, interactive=kwargs.get('interactive'))
 
 
 @run.command(help='Configure authentication')

@@ -1,18 +1,21 @@
 from pathlib import Path
-from typing import TypedDict, Optional
+from typing import Optional
 
 from cirro_api_client.v1.models import ReferenceType, ReferenceTypeValidationItem
 
 from cirro.models.file import PathLike
+from cirro.models.reference import ReferenceValidation
 
 
-class ReferenceValidation(TypedDict):
-    fileType: str
-    saveAs: Optional[str]
-    glob: Optional[str]
+def format_expected_file(validation: ReferenceTypeValidationItem):
+    save_as = validation.additional_properties.get('saveAs')
+    if glob:= validation.additional_properties.get('glob'):
+        return f'{glob} (e.g., {save_as})'
+    file_type = validation.additional_properties.get('fileType')
+    return f'.{file_type} (e.g., {save_as})'
 
 
-def _get_matching_validation(file_name: str, validations: list[ReferenceTypeValidationItem]) -> Optional[ReferenceValidation]:
+def get_matching_validation(file_name: str, validations: list[ReferenceTypeValidationItem]) -> Optional[ReferenceValidation]:
     for validation in validations:
         validation_dict: ReferenceValidation = validation.to_dict()
         glob_pattern = validation_dict.get('glob')
@@ -23,8 +26,12 @@ def _get_matching_validation(file_name: str, validations: list[ReferenceTypeVali
     return None
 
 
-def _get_reference_upload_file_name(file_name: str, reference_type: ReferenceType) -> str:
-    matching_validation = _get_matching_validation(file_name=file_name, validations=reference_type.validation)
+def _get_reference_upload_file_name(file: PathLike, reference_type: ReferenceType) -> str:
+    if not isinstance(file, Path):
+        file = Path(file)
+    file_name = file.name
+
+    matching_validation = get_matching_validation(file_name=file_name, validations=reference_type.validation)
     return matching_validation.get('saveAs') \
         if matching_validation and matching_validation.get('saveAs') \
         else file_name

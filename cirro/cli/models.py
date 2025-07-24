@@ -29,3 +29,11 @@ class CreatePipelineConfigArguments(TypedDict):
     output_dir: str
     entrypoint: Optional[str]
     interactive: bool
+
+
+class UploadReferenceArguments(TypedDict):
+    name: str
+    reference_type: str
+    project: str
+    reference_file: list[str]
+    interactive: bool

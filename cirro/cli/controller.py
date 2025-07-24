@@ -1,26 +1,29 @@
-import logging
 import importlib.metadata
-import os
-import requests
-import sys
 import json
+import logging
+import os
+import sys
+from pathlib import Path
 
 import pandas as pd
+import requests
 from cirro_api_client.v1.models import UploadDatasetRequest, Status, Executor
 
 from cirro.cirro_client import CirroApi
 from cirro.cli.interactive.auth_args import gather_auth_config
+from cirro.cli.interactive.create_pipeline_config import gather_create_pipeline_config_arguments
 from cirro.cli.interactive.download_args import gather_download_arguments, ask_dataset_files
 from cirro.cli.interactive.download_args import gather_download_arguments_dataset
 from cirro.cli.interactive.list_dataset_args import gather_list_arguments
 from cirro.cli.interactive.upload_args import gather_upload_arguments
-from cirro.cli.interactive.create_pipeline_config import gather_create_pipeline_config_arguments
+from cirro.cli.interactive.upload_reference_args import gather_reference_upload_arguments
 from cirro.cli.interactive.utils import get_id_from_name, get_item_from_name_or_id, InputError
-from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments, CreatePipelineConfigArguments
+from cirro.cli.models import ListArguments, UploadArguments, DownloadArguments, CreatePipelineConfigArguments, \
+    UploadReferenceArguments
 from cirro.config import UserConfig, save_user_config, load_user_config
 from cirro.file_utils import get_files_in_directory
-from cirro.services.service_helpers import list_all_datasets
 from cirro.models.process import PipelineDefinition, ConfigAppStatus, CONFIG_APP_URL
+from cirro.services.service_helpers import list_all_datasets
 
 NO_PROJECTS = "No projects available"
 # Log to STDOUT
@@ -176,6 +179,32 @@ def run_download(input_params: DownloadArguments, interactive=False):
                                   dataset_id=dataset_id,
                                   download_location=input_params['data_directory'],
                                   files=files_to_download)
+
+
+def run_upload_reference(input_params: UploadReferenceArguments, interactive=False):
+    _check_configure()
+    _check_version()
+    cirro = CirroApi()
+    logger.info(f"Collecting data from {cirro.configuration.base_url}")
+
+    reference_types = cirro.references.get_types()
+    projects = cirro.projects.list()
+
+    if len(projects) == 0:
+        raise InputError(NO_PROJECTS)
+
+    if interactive:
+        input_params, files = gather_reference_upload_arguments(input_params, projects, reference_types)
+    else:
+        files = [Path(f) for f in input_params['reference_file']]
+
+    project_id = get_id_from_name(projects, input_params['project'])
+    reference_type = next((rt for rt in reference_types if rt.name == input_params['reference_type']), None)
+
+    cirro.references.upload_reference(project_id=project_id,
+                                      ref_type=reference_type,
+                                      name=input_params['name'],
+                                      reference_files=files)
 
 
 def run_configure():
