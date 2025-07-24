@@ -210,6 +210,8 @@ def get_checksum(file: PathLike, checksum_name: str, chunk_size = 1024 * 1024) -
     }
 
     checksum_func = checksum_func_map.get(checksum_name)
+    if checksum_func is None:
+        raise RuntimeWarning(f"Unsupported checksum type: {checksum_name}")
 
     crc = 0
     with open(file, "rb") as f:
