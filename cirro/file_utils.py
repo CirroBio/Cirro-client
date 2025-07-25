@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import time
@@ -62,8 +63,8 @@ def _is_hidden_file(file_path: Path):
 
 
 def get_files_in_directory(
-    directory: Union[str, Path],
-    include_hidden=False
+        directory: Union[str, Path],
+        include_hidden=False
 ) -> List[str]:
     """
     Returns a list of strings containing the relative path of
@@ -198,3 +199,28 @@ def download_directory(directory: str, files: List[str], s3_client: S3Client, bu
         s3_client.download_file(local_path=local_path,
                                 bucket=bucket,
                                 key=key)
+
+
+def get_checksum(file: PathLike, checksum_name: str, chunk_size=1024 * 1024) -> str:
+    from awscrt import checksums
+    checksum_func_map = {
+        'CRC32': checksums.crc32,
+        'CRC32C': checksums.crc32c,
+        'CRC64NVME': checksums.crc64nvme
+    }
+
+    checksum_func = checksum_func_map.get(checksum_name)
+    if checksum_func is None:
+        raise RuntimeWarning(f"Unsupported checksum type: {checksum_name}")
+
+    crc = 0
+    with open(file, "rb") as f:
+        while True:
+            chunk = f.read(chunk_size)
+            if not chunk:
+                break
+            crc = checksum_func(chunk, crc)
+
+    byte_length = 8 if checksum_name == 'CRC64NVME' else 4
+    checksum_bytes = crc.to_bytes(byte_length, byteorder='big')
+    return base64.b64encode(checksum_bytes).decode('utf-8')

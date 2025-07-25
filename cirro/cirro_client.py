@@ -46,7 +46,7 @@ class CirroApi:
 
         # Init services
         self._file_service = FileService(self._api_client,
-                                         enable_additional_checksum=self._configuration.enable_additional_checksum,
+                                         checksum_method=self._configuration.checksum_method,
                                          transfer_retries=self._configuration.transfer_max_retries)
         self._dataset_service = DatasetService(self._api_client, file_service=self._file_service)
         self._project_service = ProjectService(self._api_client)

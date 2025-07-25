@@ -1,3 +1,4 @@
+import logging
 import threading
 from datetime import datetime, timezone
 from functools import partial
@@ -9,26 +10,28 @@ from cirro_api_client.v1.api.file import generate_project_file_access_token
 from cirro_api_client.v1.models import AWSCredentials, ProjectAccessType
 
 from cirro.clients.s3 import S3Client
-from cirro.file_utils import upload_directory, download_directory
+from cirro.file_utils import upload_directory, download_directory, get_checksum
 from cirro.models.file import FileAccessContext, File, PathLike
 from cirro.services.base import BaseService
+
+logger = logging.getLogger(__name__)
 
 
 class FileService(BaseService):
     """
     Service for interacting with files
     """
-    enable_additional_checksum: bool
+    checksum_method: str
     transfer_retries: int
     _get_token_lock = threading.Lock()
     _read_token_cache: Dict[str, AWSCredentials] = {}
 
-    def __init__(self, api_client, enable_additional_checksum, transfer_retries):
+    def __init__(self, api_client, checksum_method, transfer_retries):
         """
         Instantiates the file service class
         """
         self._api_client = api_client
-        self.enable_additional_checksum = enable_additional_checksum
+        self.checksum_method = checksum_method
         self.transfer_retries = transfer_retries
 
     def get_access_credentials(self, access_context: FileAccessContext) -> AWSCredentials:
@@ -177,13 +180,67 @@ class FileService(BaseService):
             access_context.prefix
         )
 
+    def validate_file(self, file: File, local_file: PathLike):
+        """
+        Validates the checksum of a file against a local file
+        This is used to ensure file integrity after download or upload
+
+        Checksums might not be available if the file was uploaded without checksum support
+
+        https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html
+        Args:
+            file (File): Cirro file to validate
+            local_file (PathLike): Local file path to compare against
+
+        Raises:
+            ValueError: If checksums do not match
+            RuntimeWarning: If the remote checksum is not available or not supported
+        """
+        stats = self.get_file_stats(file)
+
+        remote_checksum_key = next((prop for prop in stats.keys()
+                                    if 'Checksum' in prop and prop != 'ChecksumType'), None)
+
+        if 'ChecksumType' in stats and stats['ChecksumType'] != 'FULL_OBJECT':
+            raise RuntimeWarning(f"Only 'FULL_OBJECT' checksums are supported, not {stats['ChecksumType']}")
+
+        if remote_checksum_key is None:
+            raise RuntimeWarning(f"File {file.relative_path} does not have a checksum available for validation.")
+
+        remote_checksum = stats[remote_checksum_key]
+        remote_checksum_name = remote_checksum_key.replace('Checksum', '')
+        logger.debug(f"Checksum for file {file.relative_path} is {remote_checksum} using {remote_checksum_name}")
+
+        local_checksum = get_checksum(local_file, remote_checksum_name)
+        logger.debug(f"Local checksum for file {local_file} is {local_checksum} using {remote_checksum_name}")
+
+        if local_checksum != remote_checksum:
+            raise ValueError(f"Checksum mismatch for file {file.relative_path}: "
+                             f"local {local_checksum}, remote {remote_checksum}")
+
+    def get_file_stats(self, file: File) -> dict:
+        """
+        Gets the file stats for a file, such as size, checksum, etc.
+        Equivalent to the `head_object` operation in S3
+        """
+        s3_client = self._generate_s3_client(file.access_context)
+
+        full_path = f'{file.access_context.prefix}/{file.relative_path}'
+
+        stats = s3_client.get_file_stats(
+            bucket=file.access_context.bucket,
+            key=full_path
+        )
+        logger.debug(f"File stats for file {file.relative_path} is {stats}")
+        return stats
+
     def _generate_s3_client(self, access_context: FileAccessContext):
         """
         Generates the Cirro-S3 client to perform operations on files
         """
         return S3Client(
             partial(self.get_access_credentials, access_context),
-            self.enable_additional_checksum
+            self.checksum_method
         )
 
 

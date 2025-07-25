@@ -22,7 +22,7 @@ def gather_auth_config() -> Tuple[str, str, Dict, bool]:
     enable_additional_checksum = ask(
         'select',
         'Upload / download file validation type (note: SHA-256 requires additional local compute)',
-        choices=['MD5 (default)', 'SHA-256']
+        choices=['CRC64 (default)', 'SHA-256']
     ) == 'SHA-256'
 
     return 'ClientAuth', base_url, auth_method_config, enable_additional_checksum

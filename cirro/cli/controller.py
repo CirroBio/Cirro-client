@@ -113,12 +113,7 @@ def run_ingest(input_params: UploadArguments, interactive=False):
                                 dataset_id=create_resp.id,
                                 directory=directory,
                                 files=files)
-
-    if cirro.configuration.enable_additional_checksum:
-        checksum_method = "SHA256"
-    else:
-        checksum_method = "MD5"
-    logger.info(f"File content validated by {checksum_method}")
+    logger.info(f"File content validated by {cirro.configuration.checksum_method_display}")
 
 
 def run_download(input_params: DownloadArguments, interactive=False):
@@ -170,11 +165,7 @@ def run_download(input_params: DownloadArguments, interactive=False):
                 files_to_download.append(file)
 
     logger.info("Downloading files")
-    if cirro.configuration.enable_additional_checksum:
-        checksum_method = "SHA256"
-    else:
-        checksum_method = "MD5"
-    logger.info(f"File content validated by {checksum_method}")
+    logger.info(f"File content validated by {cirro.configuration.checksum_method_display}")
 
     cirro.datasets.download_files(project_id=project_id,
                                   dataset_id=dataset_id,

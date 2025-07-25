@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from pandas import DataFrame
 
 from cirro.cirro_client import CirroApi
-from cirro.models.file import File
+from cirro.models.file import File, PathLike
 from cirro.sdk.asset import DataPortalAssets, DataPortalAsset
 from cirro.sdk.exceptions import DataPortalInputError
 from cirro.utils import convert_size
@@ -185,6 +185,38 @@ class DataPortalFile(DataPortalAsset):
             download_location,
             [self.relative_path]
         )
+
+    def validate(self, local_path: PathLike):
+        """
+        Validate that the local file matches the remote file by comparing checksums.
+
+        Args:
+            local_path (PathLike): Path to the local file to validate
+        Raises:
+            ValueError: If checksums do not match
+            RuntimeWarning: If the remote checksum is not available or not supported
+        """
+        self._client.file.validate_file(self._file, local_path)
+
+    def is_valid(self, local_path: PathLike) -> bool:
+        """
+        Check if the local file matches the remote file by comparing checksums.
+
+        Args:
+            local_path (PathLike): Path to the local file to validate
+        Returns:
+            bool: True if the local file matches the remote file, False otherwise
+        Raises:
+            RuntimeWarning: If the remote checksum is not available or not supported
+        """
+        if not local_path:
+            raise DataPortalInputError("Must provide local path to validate file")
+
+        try:
+            self.validate(local_path)
+            return True
+        except ValueError:
+            return False
 
 
 class DataPortalFiles(DataPortalAssets[DataPortalFile]):
