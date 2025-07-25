@@ -21,17 +21,17 @@ class FileService(BaseService):
     """
     Service for interacting with files
     """
-    enable_additional_checksum: bool
+    checksum_method: str
     transfer_retries: int
     _get_token_lock = threading.Lock()
     _read_token_cache: Dict[str, AWSCredentials] = {}
 
-    def __init__(self, api_client, enable_additional_checksum, transfer_retries):
+    def __init__(self, api_client, checksum_method, transfer_retries):
         """
         Instantiates the file service class
         """
         self._api_client = api_client
-        self.enable_additional_checksum = enable_additional_checksum
+        self.checksum_method = checksum_method
         self.transfer_retries = transfer_retries
 
     def get_access_credentials(self, access_context: FileAccessContext) -> AWSCredentials:
@@ -198,7 +198,8 @@ class FileService(BaseService):
         """
         stats = self.get_file_stats(file)
 
-        remote_checksum_key = next((prop for prop in stats.keys() if 'Checksum' in prop and prop != 'ChecksumType'), None)
+        remote_checksum_key = next((prop for prop in stats.keys()
+                                    if 'Checksum' in prop and prop != 'ChecksumType'), None)
 
         if 'ChecksumType' in stats and stats['ChecksumType'] != 'FULL_OBJECT':
             raise RuntimeWarning(f"Only 'FULL_OBJECT' checksums are supported, not {stats['ChecksumType']}")
@@ -239,7 +240,7 @@ class FileService(BaseService):
         """
         return S3Client(
             partial(self.get_access_credentials, access_context),
-            self.enable_additional_checksum
+            self.checksum_method
         )
 
 

@@ -63,8 +63,8 @@ def _is_hidden_file(file_path: Path):
 
 
 def get_files_in_directory(
-    directory: Union[str, Path],
-    include_hidden=False
+        directory: Union[str, Path],
+        include_hidden=False
 ) -> List[str]:
     """
     Returns a list of strings containing the relative path of
@@ -201,7 +201,7 @@ def download_directory(directory: str, files: List[str], s3_client: S3Client, bu
                                 key=key)
 
 
-def get_checksum(file: PathLike, checksum_name: str, chunk_size = 1024 * 1024) -> str:
+def get_checksum(file: PathLike, checksum_name: str, chunk_size=1024 * 1024) -> str:
     from awscrt import checksums
     checksum_func_map = {
         'CRC32': checksums.crc32,

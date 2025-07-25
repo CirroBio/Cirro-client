@@ -95,8 +95,12 @@ class AppConfig:
         self._init_config()
 
     @property
+    def checksum_method_display(self):
+        return self.checksum_method.replace('NVME', '')
+
+    @property
     def checksum_method(self):
-        return 'SHA-256' if self.enable_additional_checksum else 'CRC64'
+        return 'SHA-256' if self.enable_additional_checksum else 'CRC64NVME'
 
     def _init_config(self):
         self.rest_endpoint = f'https://{self.base_url}/api'
