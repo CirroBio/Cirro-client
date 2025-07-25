@@ -185,15 +185,16 @@ class FileService(BaseService):
         Validates the checksum of a file against a local file
         This is used to ensure file integrity after download or upload
 
-        Throws a ValueError if the checksums do not match and
-        a RuntimeWarning if the remote checksum is not available.
-
         Checksums might not be available if the file was uploaded without checksum support
 
         https://docs.aws.amazon.com/AmazonS3/latest/userguide/checking-object-integrity.html
+        Args:
+            file (File): Cirro file to validate
+            local_file (PathLike): Local file path to compare against
 
-        :param file: Remote file object to validate
-        :param local_file: Local file path to compare against
+        Raises:
+            ValueError: If checksums do not match
+            RuntimeWarning: If the remote checksum is not available or not supported
         """
         stats = self.get_file_stats(file)
 

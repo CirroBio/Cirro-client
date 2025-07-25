@@ -188,15 +188,30 @@ class DataPortalFile(DataPortalAsset):
 
     def validate(self, local_path: PathLike):
         """
-        Validates that the local file matches this file.
-        Throws ValueError if the file does not match.
+        Validate that the local file matches the remote file by comparing checksums.
+
+        Args:
+            local_path (PathLike): Path to the local file to validate
+        Raises:
+            ValueError: If checksums do not match
+            RuntimeWarning: If the remote checksum is not available or not supported
         """
         self._client.file.validate_file(self._file, local_path)
 
     def is_valid(self, local_path: PathLike) -> bool:
         """
-        Returns True if the local file matches this file.
+        Check if the local file matches the remote file by comparing checksums.
+
+        Args:
+            local_path (PathLike): Path to the local file to validate
+        Returns:
+            bool: True if the local file matches the remote file, False otherwise
+        Raises:
+            RuntimeWarning: If the remote checksum is not available or not supported
         """
+        if not local_path:
+            raise DataPortalInputError("Must provide local path to validate file")
+
         try:
             self.validate(local_path)
             return True
