@@ -93,7 +93,6 @@ class FileService(BaseService):
         """
         return self.get_file_from_path(file.access_context, file.relative_path)
 
-
     def get_file_from_path(self, access_context: FileAccessContext, file_path: str) -> bytes:
         """
         Gets the contents of a file by providing the path, used internally
