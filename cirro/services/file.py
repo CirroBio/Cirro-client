@@ -1,3 +1,4 @@
+import logging
 import threading
 from datetime import datetime, timezone
 from functools import partial
@@ -12,6 +13,8 @@ from cirro.clients.s3 import S3Client
 from cirro.file_utils import upload_directory, download_directory, get_checksum
 from cirro.models.file import FileAccessContext, File, PathLike
 from cirro.services.base import BaseService
+
+logger = logging.getLogger(__name__)
 
 
 class FileService(BaseService):
@@ -204,7 +207,10 @@ class FileService(BaseService):
 
         remote_checksum = stats[remote_checksum_key]
         remote_checksum_name = remote_checksum_key.replace('Checksum', '')
+        logger.debug(f"Checksum for file {file.relative_path} is {remote_checksum} using {remote_checksum_name}")
+
         local_checksum = get_checksum(local_file, remote_checksum_name)
+        logger.debug(f"Local checksum for file {local_file} is {local_checksum} using {remote_checksum_name}")
 
         if local_checksum != remote_checksum:
             raise ValueError(f"Checksum mismatch for file {file.relative_path}: "
@@ -219,10 +225,12 @@ class FileService(BaseService):
 
         full_path = f'{file.access_context.prefix}/{file.relative_path}'
 
-        return s3_client.get_file_stats(
+        stats = s3_client.get_file_stats(
             bucket=file.access_context.bucket,
             key=full_path
         )
+        logger.debug(f"File stats for file {file.relative_path} is {stats}")
+        return stats
 
     def _generate_s3_client(self, access_context: FileAccessContext):
         """
