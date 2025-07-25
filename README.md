@@ -59,6 +59,22 @@ Options:
   --help                  Show this message and exit.
 ```
 
+#### Uploading a reference
+```bash
+Usage: cirro upload-reference [OPTIONS]
+
+  Upload a reference to a project
+
+Options:
+  --name TEXT            Name of the reference
+  --reference-type TEXT  Type of the reference (e.g., Reference Genome (FASTA))
+  --project TEXT         Name or ID of the project
+  --reference-file TEXT  Location of reference file to upload (can specify multiple files)
+  -i, --interactive      Gather arguments interactively
+  --help                 Show this message and exit.
+
+```
+
 #### Listing datasets:
 ```bash
 Usage: cirro list-datasets [OPTIONS]
