@@ -28,6 +28,13 @@ class ParameterSpecification:
         self._form_spec_ui: Dict = form_schema.ui.additional_properties
         self.form_spec = _get_fields_in_schema(self._form_spec_raw.get('properties') or {})
 
+    @property
+    def form_spec_json(self) -> dict:
+        """
+        Returns the JSON schema of the form specification
+        """
+        return self._form_spec_raw
+
     def validate_params(self, params: Dict):
         """
         Validates that the given parameters conforms to the specification
