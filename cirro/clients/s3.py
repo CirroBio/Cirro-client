@@ -32,11 +32,11 @@ class ProgressPercentage:
 
 
 class S3Client:
-    def __init__(self, creds_getter: Callable[[], AWSCredentials], enable_additional_checksum=False):
+    def __init__(self, creds_getter: Callable[[], AWSCredentials], checksum_method: str = None):
         self._creds_getter = creds_getter
         self._client = self._build_session_client()
-        self._upload_args = dict(ChecksumAlgorithm='SHA256') if enable_additional_checksum else dict()
-        self._download_args = dict(ChecksumMode='ENABLED') if enable_additional_checksum else dict()
+        self._upload_args = dict(ChecksumAlgorithm=checksum_method)
+        self._download_args = dict(ChecksumMode='ENABLED') if checksum_method else dict()
 
     def get_aws_client(self):
         return self._client
@@ -88,7 +88,7 @@ class S3Client:
         """
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/head_object.html
         """
-        return self._client.head_object(Bucket=bucket, Key=key)
+        return self._client.head_object(Bucket=bucket, Key=key, ChecksumMode='ENABLED')
 
     def _build_session_client(self):
         creds = self._creds_getter()
