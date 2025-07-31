@@ -58,30 +58,30 @@ class PreprocessDataset:
     """
     A pandas DataFrame containing all of the metadata assigned to the samples present
     in the input datasets (at the time of analysis).
-    
+
     More info: https://docs.cirro.bio/pipelines/preprocess-script/#dssamplesheet
     """
     files: 'DataFrame'
     """
     A DataFrame containing information on the files contained in the input datasets,
     and the sample that each file is assigned to.
-    
+
     More info: https://docs.cirro.bio/pipelines/preprocess-script/#dsfiles
     """
     params: dict
     """
-    A dictionary with all of the parameter values populated by user input 
+    A dictionary with all of the parameter values populated by user input
     using the process-form.json and process-input.json configurations.
-    
+
     This is read-only, use `add_param` to add new parameters or `remove_param` to remove them.
-    
+
     More info: https://docs.cirro.bio/pipelines/preprocess-script/#dsparams
     """
     metadata: dict
     """
-    Detailed information about the dataset at the time of analysis, 
+    Detailed information about the dataset at the time of analysis,
     including the project, process, and input datasets.
-    
+
     More info: https://docs.cirro.bio/pipelines/preprocess-script/#dsmetadata
     """
 
@@ -89,8 +89,7 @@ class PreprocessDataset:
                  samplesheet: Union['DataFrame', str],
                  files: Union['DataFrame', str],
                  params: dict,
-                 metadata: dict
-    ):
+                 metadata: dict):
         import pandas as pd
         # Convert DataFrame to string if necessary
         if isinstance(samplesheet, str):

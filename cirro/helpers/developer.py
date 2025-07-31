@@ -42,8 +42,6 @@ class DeveloperHelper:
         With optional parameters to pass into the preprocess script.
         `metadata` is not available in this context, so it is mocked.
         """
-        import pandas as pd
-
         samplesheets = self._generate_samplesheets_for_datasets(project_id, input_dataset_ids)
         return PreprocessDataset(
             samplesheet=samplesheets.samples,
@@ -58,7 +56,10 @@ class DeveloperHelper:
             }
         )
 
-    def test_file_name_validation_for_dataset(self, project_id: str, dataset_id: str, file_name_patterns: list[str]) -> Matches:
+    def test_file_name_validation_for_dataset(self,
+                                              project_id: str,
+                                              dataset_id: str,
+                                              file_name_patterns: list[str]) -> Matches:
         """
         Tests the file name validation for a given dataset against specified regex patterns.
 
@@ -69,8 +70,9 @@ class DeveloperHelper:
         file_names = [file.relative_path for file in dataset_files]
         return self.test_file_name_validation(file_names, file_name_patterns)
 
-
-    def test_file_name_validation(self, file_names: list[str], file_name_patterns: list[str]) -> Matches:
+    def test_file_name_validation(self,
+                                  file_names: list[str],
+                                  file_name_patterns: list[str]) -> Matches:
         """
         Tests the file name validation for a list of file names against specified regex patterns.
         """
@@ -115,4 +117,3 @@ class DeveloperHelper:
             samples=samplesheets_df.to_csv(index=False),
             files=files_df.to_csv(index=False)
         )
-
