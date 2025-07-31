@@ -136,6 +136,8 @@ class PreprocessDataset:
         Creates an instance from the currently running dataset
         (expected to be called from inside a Cirro analysis process)
         """
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s %(levelname)-8s [PreprocessDataset] %(message)s')
         dataset_path = os.getenv("PW_S3_DATASET")
         return cls.from_path(dataset_path)
 
