@@ -1,6 +1,6 @@
 from io import StringIO
 
-from cirro_api_client.v1.api.datasets import get_sample_sheets
+from cirro_api_client.v1.api.datasets import get_sample_sheets, ingest_samples
 from cirro_api_client.v1.api.processes import validate_file_name_patterns
 from cirro_api_client.v1.models import SampleSheets, ValidateFileNamePatternsRequest, FileNameMatch
 
@@ -93,6 +93,17 @@ class DeveloperHelper:
         Generates Cirro samplesheets for a given dataset
         """
         return get_sample_sheets.sync(
+            project_id=project_id,
+            dataset_id=dataset_id,
+            client=self.client.api_client
+        )
+
+    def rerun_sample_ingest_for_dataset(self, project_id: str, dataset_id: str):
+        """
+        Reruns the sample ingest process for a given dataset.
+        You'll want to do this if you have updates the file name patterns in your pipeline (or data type)
+        """
+        ingest_samples.sync_detailed(
             project_id=project_id,
             dataset_id=dataset_id,
             client=self.client.api_client
