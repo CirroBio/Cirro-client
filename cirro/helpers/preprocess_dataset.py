@@ -237,6 +237,9 @@ class PreprocessDataset:
              defaults to all columns that are avaialble from the sample metadata.
              If your pipeline doesn't like extra columns, make sure to specify the allowed columns here.
             column_prefix: str, optional, prefix for the new columns, defaults to `fastq_`.
+
+        Returns:
+            DataFrame: A wide-format sample sheet with the specified columns pivoted.
         """
         import pandas as pd
 
@@ -258,11 +261,11 @@ class PreprocessDataset:
 
         return combined
 
-
-    def pivot_files(self,
-                    index: list[str] = None,
-                    pivot_columns: Union[str, list[str]] = 'read',
-                    column_prefix: str = "fastq_"
+    def pivot_files(
+            self,
+            index: list[str] = None,
+            pivot_columns: Union[str, list[str]] = 'read',
+            column_prefix: str = "fastq_"
     ):
         """
         Format the files table into a wide format with each sample on a row
@@ -339,7 +342,8 @@ class PreprocessDataset:
 
         This is a legacy method, please use `pivot_samplesheet` instead.
         """
-        warnings.warn("`wide_samplesheet` is deprecated, use `pivot_samplesheet` instead.", DeprecationWarning, stacklevel=2)
+        warnings.warn("`wide_samplesheet` is deprecated, use `pivot_samplesheet` instead.",
+                      DeprecationWarning, stacklevel=2)
         if values != "file":
             raise ValueError("The only supported value for `values` is 'file'")
         return self.pivot_files(index=index, pivot_columns=[columns], column_prefix=column_prefix)
