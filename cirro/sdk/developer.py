@@ -101,7 +101,7 @@ class DeveloperHelper:
     def rerun_sample_ingest_for_dataset(self, project_id: str, dataset_id: str):
         """
         Reruns the sample ingest process for a given dataset.
-        You'll want to do this if you have updates the file name patterns in your pipeline (or data type)
+        You'll want to do this if you have updated the file name patterns in your pipeline (or data type)
         """
         ingest_samples.sync_detailed(
             project_id=project_id,
