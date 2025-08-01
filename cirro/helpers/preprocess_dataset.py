@@ -235,7 +235,7 @@ class PreprocessDataset:
              If the column is not defined or not present, the pivot column will be generated
              from the file number index.
             metadata_columns: List[str], metadata columns to include in the output,
-             defaults to all columns that are avaialble from the sample metadata.
+             defaults to all columns that are available from the sample metadata.
              If your pipeline doesn't like extra columns, make sure to specify the allowed columns here.
             column_prefix: str, optional, prefix for the new columns, defaults to `fastq_`.
             file_filter_predicate: str, optional, a pandas query string to filter the files table.
