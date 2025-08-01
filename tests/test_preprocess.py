@@ -44,7 +44,7 @@ class TestPreprocess(unittest.TestCase):
 
                 self.assertEqual(
                     expected_df.sort_index(axis=1).to_csv(index=False),
-                    df.sort_index(axis=1).to_csv(index=None)
+                    df.sort_index(axis=1).to_csv(index=False)
                 )
 
     def test_pivot_samplesheet_selected_metadata(self):
@@ -55,6 +55,18 @@ class TestPreprocess(unittest.TestCase):
 
         self.assertEqual(['sample', 'file_1', 'file_2', 'status'],
                          df.columns.tolist())
+
+    def test_pivot_samplesheet_filter_reads(self):
+        test_case = PreprocessTestCase(path='example_data_4', name='with indexed reads')
+        ds = test_case.preprocess_instance()
+        df = ds.pivot_samplesheet(column_prefix=test_case.prefix,
+                                  file_filter_predicate='readType == "R"')
+
+        expected_df = test_case.expected_df()
+        self.assertEqual(
+            expected_df.sort_index(axis=1).to_csv(index=False),
+            df.sort_index(axis=1).to_csv(index=False)
+        )
 
     def test_wide_samplesheet_legacy(self):
         for test_case in self.test_cases:
@@ -70,7 +82,7 @@ class TestPreprocess(unittest.TestCase):
                 expected_df = expected_df.drop(columns=columns_to_remove, errors='ignore')
                 self.assertEqual(
                     expected_df.sort_index(axis=1).to_csv(index=False),
-                    df.sort_index(axis=1).to_csv(index=None)
+                    df.sort_index(axis=1).to_csv(index=False)
                 )
 
 

@@ -216,7 +216,8 @@ class PreprocessDataset:
             index=None,
             pivot_columns: Union[str, list[str]] = 'read',
             metadata_columns: list[str] = None,
-            column_prefix="fastq_"
+            column_prefix: str = "fastq_",
+            file_filter_predicate: str = None
     ):
         """
         Combines data from both the samples and files table into a wide format with
@@ -237,13 +238,18 @@ class PreprocessDataset:
              defaults to all columns that are avaialble from the sample metadata.
              If your pipeline doesn't like extra columns, make sure to specify the allowed columns here.
             column_prefix: str, optional, prefix for the new columns, defaults to `fastq_`.
+            file_filter_predicate: str, optional, a pandas query string to filter the files table.
+             A common use case would be to filter out indexed reads, e.g. `readType == "R"`.
 
         Returns:
             DataFrame: A wide-format sample sheet with the specified columns pivoted.
         """
         import pandas as pd
 
-        pivoted_files = self.pivot_files(index=index, pivot_columns=pivot_columns, column_prefix=column_prefix)
+        pivoted_files = self.pivot_files(index=index,
+                                         pivot_columns=pivot_columns,
+                                         column_prefix=column_prefix,
+                                         file_filter_predicate=file_filter_predicate)
         combined = pd.merge(pivoted_files, self.samplesheet, on='sample', how="inner", validate="many_to_many")
 
         # Default to keeping all columns
@@ -265,7 +271,8 @@ class PreprocessDataset:
             self,
             index: list[str] = None,
             pivot_columns: Union[str, list[str]] = 'read',
-            column_prefix: str = "fastq_"
+            column_prefix: str = "fastq_",
+            file_filter_predicate: str = None
     ):
         """
         Format the files table into a wide format with each sample on a row
@@ -279,6 +286,7 @@ class PreprocessDataset:
             pivot_columns: str or List[str], columns to pivot on and create the new column,
              defaults to 'read'. This effectively makes the column `<column_prefix><read>`
             column_prefix: str, optional, prefix for the new columns, defaults to `fastq_`.
+            file_filter_predicate: str, optional, a pandas query string to filter the files table.
 
         Returns:
             DataFrame: A wide-format sample sheet with the specified columns pivoted.
@@ -290,6 +298,11 @@ class PreprocessDataset:
         logger.info(self.files.head().to_csv(index=False))
 
         files = self.files
+
+        if file_filter_predicate is not None:
+            # Filter the files table based on the predicate
+            files = files.query(file_filter_predicate)
+
         # If we don't have access to the column defined, just use the file number
         # By default this is 'read' but the data might not be paired
         if pivot_columns not in files.columns.values:
